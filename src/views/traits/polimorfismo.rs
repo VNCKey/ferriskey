@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_polimorfismo(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_polimorfismo(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Despacho Estático (&impl Trait)".to_string(), code_static));
+                    state.ui.show_code_modal = Some(("Despacho Estático (&impl Trait)".to_string(), code_static));
                 }
                 ui.label("Monomorfización en tiempo de compilación. Cero sobrecosto de rendimiento en ejecución.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_polimorfismo(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Despacho Dinámico con dyn Trait".to_string(), code_dynamic));
+                    state.ui.show_code_modal = Some(("Despacho Dinámico con dyn Trait".to_string(), code_dynamic));
                 }
                 ui.label("Resolución de métodos en tiempo de ejecución mediante vtable. Permite vectores heterogéneos.");
                 ui.end_row();

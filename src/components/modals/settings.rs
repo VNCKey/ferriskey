@@ -1,9 +1,9 @@
-use eframe::egui;
-use crate::app::PortfolioState;
 use super::comandos::COMANDOS_TALLER;
+use crate::app::AppState;
+use eframe::egui;
 
-pub fn mostrar_modal_settings(ctx: &egui::Context, state: &mut PortfolioState) {
-    let mut abierto = state.show_settings_modal;
+pub fn mostrar_modal_settings(ctx: &egui::Context, state: &mut AppState) {
+    let mut abierto = state.ui.show_settings_modal;
     if !abierto {
         return;
     }
@@ -18,13 +18,13 @@ pub fn mostrar_modal_settings(ctx: &egui::Context, state: &mut PortfolioState) {
             // Header estilo VS Code / Zed Settings Hub
             ui.horizontal(|ui| {
                 ui.selectable_value(
-                    &mut state.settings_tab,
+                    &mut state.ui.settings_tab,
                     0,
                     egui::RichText::new("⌨️ Atajos de Teclado").strong().size(15.0),
                 );
                 ui.add_space(12.0);
                 ui.selectable_value(
-                    &mut state.settings_tab,
+                    &mut state.ui.settings_tab,
                     1,
                     egui::RichText::new("📦 Comandos de Cargo").strong().size(15.0),
                 );
@@ -34,7 +34,7 @@ pub fn mostrar_modal_settings(ctx: &egui::Context, state: &mut PortfolioState) {
             ui.separator();
             ui.add_space(10.0);
 
-            match state.settings_tab {
+            match state.ui.settings_tab {
                 0 => {
                     ui.label("Combinaciones de teclas globales habilitadas en toda la aplicación:");
                     ui.add_space(10.0);
@@ -58,7 +58,7 @@ pub fn mostrar_modal_settings(ctx: &egui::Context, state: &mut PortfolioState) {
                                 // Ctrl + T
                                 ui.label(egui::RichText::new("Ctrl + T").monospace().strong().color(egui::Color32::from_rgb(255, 160, 50)));
                                 ui.label(egui::RichText::new("💻 Terminal").strong().color(egui::Color32::from_rgb(100, 200, 255)));
-                                ui.label("Abrir / Cerrar la consola Linux flotante.");
+                                ui.label("Abrir / Cerrar la terminal flotante del sistema.");
                                 ui.end_row();
 
                                 // Ctrl + I
@@ -127,12 +127,12 @@ pub fn mostrar_modal_settings(ctx: &egui::Context, state: &mut PortfolioState) {
                     });
 
                     if let Some(cmd) = comando_elegido {
-                        state.term_input = cmd.to_owned();
-                        state.show_terminal_modal = true;
+                        state.terminal.term_input = cmd.to_owned();
+                        state.ui.show_terminal_modal = true;
                     }
                 }
             }
         });
 
-    state.show_settings_modal = abierto;
+    state.ui.show_settings_modal = abierto;
 }

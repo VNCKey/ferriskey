@@ -1,8 +1,8 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
-pub fn mostrar_modal_comparacion_compiladores(ctx: &egui::Context, state: &mut PortfolioState) {
-    if !state.show_rustc_compilador_modal {
+pub fn mostrar_modal_comparacion_compiladores(ctx: &egui::Context, state: &mut AppState) {
+    if !state.ui.show_rustc_compilador_modal {
         return;
     }
 
@@ -27,7 +27,7 @@ pub fn mostrar_modal_comparacion_compiladores(ctx: &egui::Context, state: &mut P
                 // Diagrama SVG con texto nativo estándar compatible con egui
                 // Proporción actual del viewBox de compilacion_rustc.svg.
                 let aspect_ratio = 444.0 / 2789.0;
-                let available_width = (ui.available_width() - 12.0).min(760.0).max(1.0);
+                let available_width = (ui.available_width() - 12.0).clamp(1.0, 760.0);
                 let image_height = available_width / aspect_ratio;
 
                 let img = egui::Image::from_bytes(
@@ -45,6 +45,6 @@ pub fn mostrar_modal_comparacion_compiladores(ctx: &egui::Context, state: &mut P
         });
 
     if !open {
-        state.show_rustc_compilador_modal = false;
+        state.ui.show_rustc_compilador_modal = false;
     }
 }

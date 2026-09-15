@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_structs(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_structs(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Struct Tradicional con Campos Nombrados".to_string(), code_struct));
+                    state.ui.show_code_modal = Some(("Struct Tradicional con Campos Nombrados".to_string(), code_struct));
                 }
                 ui.label("Agrupa datos con nombres explícitos para cada campo.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_structs(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Tuple Struct".to_string(), code_tuple_struct));
+                    state.ui.show_code_modal = Some(("Tuple Struct".to_string(), code_tuple_struct));
                 }
                 ui.label("Estructura compacta que accede a sus campos por posición numérica (.0, .1, .2).");
                 ui.end_row();
@@ -61,7 +61,7 @@ pub fn mostrar_tab_structs(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Bloque impl: Constructor y Métodos".to_string(), code_impl));
+                    state.ui.show_code_modal = Some(("Bloque impl: Constructor y Métodos".to_string(), code_impl));
                 }
                 ui.label("Agrega comportamiento. fn new() construye la instancia; &self accede a sus datos.");
                 ui.end_row();

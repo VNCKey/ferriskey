@@ -2,10 +2,26 @@ use eframe::egui;
 use std::sync::{Arc, Mutex};
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{Style, Theme};
-use syntect::parsing::SyntaxSet;
+use syntect::parsing::{SyntaxDefinition, SyntaxSet};
 use syntect::util::LinesWithEndings;
 
 use super::console_output::formatear_salida_consola;
+
+/// Carga la paleta de sintaxis de la aplicación y añade TOML a los lenguajes
+/// predeterminados de syntect, que no lo incluye en su dump estándar.
+pub fn cargar_syntax_set() -> SyntaxSet {
+    let mut builder = SyntaxSet::load_defaults_newlines().into_builder();
+
+    if let Ok(toml) = SyntaxDefinition::load_from_str(
+        include_str!("../../assets/syntaxes/TOML.sublime-syntax"),
+        true,
+        None,
+    ) {
+        builder.add(toml);
+    }
+
+    builder.build()
+}
 
 pub fn rust_layouter(
     ui: &egui::Ui,
@@ -14,10 +30,21 @@ pub fn rust_layouter(
     syntax_set: &SyntaxSet,
     theme: &Theme,
 ) -> std::sync::Arc<egui::Galley> {
+    syntax_layouter(ui, string, wrap_width, syntax_set, theme, "rs")
+}
+
+pub fn syntax_layouter(
+    ui: &egui::Ui,
+    string: &str,
+    wrap_width: f32,
+    syntax_set: &SyntaxSet,
+    theme: &Theme,
+    extension: &str,
+) -> std::sync::Arc<egui::Galley> {
     let mut job = egui::text::LayoutJob::default();
 
     let syntax = syntax_set
-        .find_syntax_by_extension("rs")
+        .find_syntax_by_extension(extension)
         .unwrap_or_else(|| syntax_set.find_syntax_plain_text());
     let mut h = HighlightLines::new(syntax, theme);
 
@@ -161,5 +188,44 @@ pub fn mostrar_editor_interactivo<F>(
                 }
             });
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn syntect_reconoce_toml_con_la_sintaxis_de_ferriskey() {
+        let syntax_set = cargar_syntax_set();
+        let syntax = syntax_set
+            .find_syntax_by_extension("toml")
+            .expect("FerrisKey debe incluir resaltado TOML");
+
+        assert_eq!(syntax.name, "TOML");
+    }
+
+    #[test]
+    fn toml_aplica_varios_colores_de_la_paleta_del_editor() {
+        use std::collections::HashSet;
+        use syntect::easy::HighlightLines;
+        use syntect::highlighting::ThemeSet;
+
+        let syntax_set = cargar_syntax_set();
+        let syntax = syntax_set
+            .find_syntax_by_extension("toml")
+            .expect("FerrisKey debe incluir resaltado TOML");
+        let theme_set = ThemeSet::load_defaults();
+        let theme = &theme_set.themes["base16-ocean.dark"];
+        let mut highlighter = HighlightLines::new(syntax, theme);
+        let ranges = highlighter
+            .highlight_line(
+                "[profile.release]\nopt-level = 3\nstrip = \"symbols\"\n",
+                &syntax_set,
+            )
+            .expect("el resaltado TOML debe ser válido");
+        let colores: HashSet<_> = ranges.iter().map(|(style, _)| style.foreground).collect();
+
+        assert!(colores.len() >= 3, "TOML debe mostrar colores semánticos");
     }
 }

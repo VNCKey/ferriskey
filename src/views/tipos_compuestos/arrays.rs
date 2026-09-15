@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_compuesto_array(
     ui: &mut egui::Ui,
-    _state: &mut PortfolioState,
+    _state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -23,43 +23,89 @@ pub fn mostrar_compuesto_array(
             .striped(true)
             .spacing([18.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Pieza").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Nota").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Pieza")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Nota")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 // Fila 1: Tipo
-                ui.label(egui::RichText::new("Tipo").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Tipo")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("[i32; 5]").monospace().color(cyan));
                 ui.label("T y N fijos; N es parte del tipo.");
                 ui.end_row();
 
                 // Fila 2: Acceso
-                ui.label(egui::RichText::new("Acceso").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Acceso")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("arr[i]").monospace().color(cyan));
                 ui.label("Fuera de rango produce panic en runtime.");
                 ui.end_row();
 
                 // Fila 3: Longitud
-                ui.label(egui::RichText::new("Longitud").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Longitud")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("arr.len()").monospace().color(cyan));
                 ui.label("Siempre N; no crece como un Vec.");
                 ui.end_row();
 
                 // Fila 4: Repetición
-                ui.label(egui::RichText::new("Repetición").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Repetición")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("[val; N]").monospace().color(cyan));
                 ui.label("Crea N elementos repetidos al instante.");
                 ui.end_row();
 
                 // Fila 5: Desestructuración
-                ui.label(egui::RichText::new("Desestructuración").monospace().strong().color(naranja));
-                ui.label(egui::RichText::new("let [a, b, ..] = arr;").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Desestructuración")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
+                ui.label(
+                    egui::RichText::new("let [a, b, ..] = arr;")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("Extrae elementos o sub-secuencias por patrón.");
                 ui.end_row();
 
                 // Fila 6: Slice
-                ui.label(egui::RichText::new("Slice").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Slice")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("&arr[..]").monospace().color(cyan));
                 ui.label("Obtiene una vista prestada del array completo.");
                 ui.end_row();
@@ -82,9 +128,21 @@ pub fn mostrar_compuesto_array(
             .striped(true)
             .spacing([18.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Operación").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Operación")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Descripción")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 ui.label(egui::RichText::new("Slice Parcial").strong().color(texto));
@@ -98,7 +156,11 @@ pub fn mostrar_compuesto_array(
                 ui.end_row();
 
                 ui.label(egui::RichText::new("Slice Mutable").strong().color(texto));
-                ui.label(egui::RichText::new("&mut arr[1..3]").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("&mut arr[1..3]")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("Vista prestada con permiso de modificación sobre el rango.");
                 ui.end_row();
             });
@@ -120,32 +182,68 @@ pub fn mostrar_compuesto_array(
             .striped(true)
             .spacing([18.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Caso de Uso").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Código en Rust").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Resultado en Memoria").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Caso de Uso")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Código en Rust")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Resultado en Memoria")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 // Ejemplo 1: Literal explícito
-                ui.label(egui::RichText::new("Literal explícito").strong().color(texto));
-                ui.label(egui::RichText::new("let nums = [10, 20, 30];").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Literal explícito")
+                        .strong()
+                        .color(texto),
+                );
+                ui.label(
+                    egui::RichText::new("let nums = [10, 20, 30];")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("[10, 20, 30] (Array de tipo [i32; 3])");
                 ui.end_row();
 
                 // Ejemplo 2: Repetición de ceros
-                ui.label(egui::RichText::new("Repetición de ceros").strong().color(texto));
-                ui.label(egui::RichText::new("let buffer = [0u8; 5];").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Repetición de ceros")
+                        .strong()
+                        .color(texto),
+                );
+                ui.label(
+                    egui::RichText::new("let buffer = [0u8; 5];")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("[0, 0, 0, 0, 0] (Array de tipo [u8; 5])");
                 ui.end_row();
 
                 // Ejemplo 3: Slice prestado
                 ui.label(egui::RichText::new("Slice prestado").strong().color(texto));
-                ui.label(egui::RichText::new("let s = &nums[1..3];").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("let s = &nums[1..3];")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("&[20, 30] (Slice de tipo &[i32])");
                 ui.end_row();
 
                 // Ejemplo 4: Tipo explícito
                 ui.label(egui::RichText::new("Tipo explícito").strong().color(texto));
-                ui.label(egui::RichText::new("let coords: [f64; 2] = [1.5, 2.5];").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("let coords: [f64; 2] = [1.5, 2.5];")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("[1.5, 2.5] (Array [f64; 2])");
                 ui.end_row();
             });

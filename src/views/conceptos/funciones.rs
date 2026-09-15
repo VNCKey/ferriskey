@@ -1,117 +1,117 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
-pub fn mostrar(ui: &mut egui::Ui, _state: &mut PortfolioState) {
-            ui.label(
+pub fn mostrar(ui: &mut egui::Ui, _state: &mut AppState) {
+    ui.label(
                 "En Rust, las funciones se declaran con 'fn' y utilizan la convención snake_case. Exigen declarar el tipo de cada parámetro obligatoriamente y devuelven el valor de su última expresión de forma implícita sin ';'.",
             );
-            ui.add_space(10.0);
+    ui.add_space(10.0);
 
-            // Tabla Comparativa: Funciones
-            let mut table_frame = egui::Frame::new();
-            table_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-            table_frame.inner_margin = egui::Margin::same(12);
-            table_frame.corner_radius = egui::CornerRadius::same(8);
-            table_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    // Tabla Comparativa: Funciones
+    let mut table_frame = egui::Frame::new();
+    table_frame.fill = egui::Color32::from_rgb(14, 18, 26);
+    table_frame.inner_margin = egui::Margin::same(12);
+    table_frame.corner_radius = egui::CornerRadius::same(8);
+    table_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
 
-            table_frame.show(ui, |ui| {
-                egui::Grid::new("tabla_funciones_rust")
-                    .striped(true)
-                    .spacing([20.0, 8.0])
-                    .show(ui, |ui| {
-                        ui.label(
-                            egui::RichText::new("Aspecto")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("Sintaxis")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("Tipado")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("Comportamiento")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("Uso Ideal")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.end_row();
+    table_frame.show(ui, |ui| {
+        egui::Grid::new("tabla_funciones_rust")
+            .striped(true)
+            .spacing([20.0, 8.0])
+            .show(ui, |ui| {
+                ui.label(
+                    egui::RichText::new("Aspecto")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Tipado")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Comportamiento")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Uso Ideal")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.end_row();
 
-                        // Fila 1: Parámetros
-                        ui.label(
-                            egui::RichText::new("Parámetros")
-                                .strong()
-                                .color(egui::Color32::from_rgb(255, 160, 50)),
-                        );
-                        ui.label(
-                            egui::RichText::new("fn sumar(a: i32, b: i32)")
-                                .monospace()
-                                .color(egui::Color32::from_rgb(100, 200, 255)),
-                        );
-                        ui.label(
-                            egui::RichText::new("Obligatorio")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label("Requiere tipo explícito en cada argumento.");
-                        ui.label("Paso de datos a la función.");
-                        ui.end_row();
+                // Fila 1: Parámetros
+                ui.label(
+                    egui::RichText::new("Parámetros")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("fn sumar(a: i32, b: i32)")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("Obligatorio")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label("Requiere tipo explícito en cada argumento.");
+                ui.label("Paso de datos a la función.");
+                ui.end_row();
 
-                        // Fila 2: Retorno Implícito
-                        ui.label(
-                            egui::RichText::new("Retorno Implícito")
-                                .strong()
-                                .color(egui::Color32::from_rgb(255, 160, 50)),
-                        );
-                        ui.label(
-                            egui::RichText::new("-> i32 { a + b }")
-                                .monospace()
-                                .color(egui::Color32::from_rgb(100, 200, 255)),
-                        );
-                        ui.label(
-                            egui::RichText::new("Sin ';' final")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label("Evalúa la última expresión y la devuelve.");
-                        ui.label("Forma idiomática estándar en Rust.");
-                        ui.end_row();
+                // Fila 2: Retorno Implícito
+                ui.label(
+                    egui::RichText::new("Retorno Implícito")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("-> i32 { a + b }")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("Sin ';' final")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label("Evalúa la última expresión y la devuelve.");
+                ui.label("Forma idiomática estándar en Rust.");
+                ui.end_row();
 
-                        // Fila 3: Retorno Explícito
-                        ui.label(
-                            egui::RichText::new("Salida Temprana")
-                                .strong()
-                                .color(egui::Color32::from_rgb(255, 160, 50)),
-                        );
-                        ui.label(
-                            egui::RichText::new("return valor;")
-                                .monospace()
-                                .color(egui::Color32::from_rgb(100, 200, 255)),
-                        );
-                        ui.label(
-                            egui::RichText::new("Con ';' final")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label("Termina la función de inmediato.");
-                        ui.label("Condiciones de guardia o errores.");
-                        ui.end_row();
-                    });
+                // Fila 3: Retorno Explícito
+                ui.label(
+                    egui::RichText::new("Salida Temprana")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("return valor;")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("Con ';' final")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label("Termina la función de inmediato.");
+                ui.label("Condiciones de guardia o errores.");
+                ui.end_row();
             });
+    });
 
-            ui.add_space(14.0);
+    ui.add_space(14.0);
 
-            // Dos Columnas: Parámetros & Retornos
-            ui.columns(2, |cols| {
+    // Dos Columnas: Parámetros & Retornos
+    ui.columns(2, |cols| {
                 // Columna Izquierda: Parámetros y Orden
                 let mut fn_frame = egui::Frame::new();
                 fn_frame.fill = egui::Color32::from_rgb(14, 18, 26);
@@ -195,5 +195,4 @@ pub fn mostrar(ui: &mut egui::Ui, _state: &mut PortfolioState) {
                     });
                 });
             });
-
 }

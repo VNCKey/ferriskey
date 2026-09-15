@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_iteradores_info(
     ui: &mut egui::Ui,
-    _state: &mut PortfolioState,
+    _state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -97,24 +97,50 @@ pub fn mostrar_iteradores_info(
             .striped(true)
             .spacing([18.0, 10.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Caso de Uso").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Método Recomendado").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Razón de Selección").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Caso de Uso")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Método Recomendado")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Razón de Selección")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 ui.label(egui::RichText::new("Solo Lectura").strong().color(texto));
                 ui.label(egui::RichText::new(".iter()").monospace().color(cyan));
-                ui.label("Lee elementos por &T manteniendo la colección intacta para usos futuros.");
+                ui.label(
+                    "Lee elementos por &T manteniendo la colección intacta para usos futuros.",
+                );
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Modificación In-Situ").strong().color(texto));
+                ui.label(
+                    egui::RichText::new("Modificación In-Situ")
+                        .strong()
+                        .color(texto),
+                );
                 ui.label(egui::RichText::new(".iter_mut()").monospace().color(cyan));
-                ui.label("Modifica elementos por &mut T directamente en el Heap sin realojar memoria.");
+                ui.label(
+                    "Modifica elementos por &mut T directamente en el Heap sin realojar memoria.",
+                );
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Transformación / Consumo").strong().color(texto));
+                ui.label(
+                    egui::RichText::new("Transformación / Consumo")
+                        .strong()
+                        .color(texto),
+                );
                 ui.label(egui::RichText::new(".into_iter()").monospace().color(cyan));
-                ui.label("Transfiere el Ownership T a una nueva estructura consumiendo la original.");
+                ui.label(
+                    "Transfiere el Ownership T a una nueva estructura consumiendo la original.",
+                );
                 ui.end_row();
             });
     });

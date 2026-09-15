@@ -1,5 +1,5 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
 #[derive(Clone, Copy)]
 struct EtapaCompilacion {
@@ -31,7 +31,6 @@ fn escalar_color(color: egui::Color32, factor: f32, alpha: f32) -> egui::Color32
 
 #[derive(Clone, Copy)]
 struct LosaIsometrica {
-
     ancho: f32,
     fondo: f32,
     grosor: f32,
@@ -248,8 +247,7 @@ fn dibujar_icono_etapa(
     }
 }
 
-
-pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut AppState) {
     const DURACION: f32 = 7.5;
     const ETAPAS: [EtapaCompilacion; 5] = [
         EtapaCompilacion {
@@ -289,14 +287,15 @@ pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioStat
         },
     ];
 
-    if state.anim_compilacion_activa {
+    if state.lessons.anim_compilacion_activa {
         let dt = ui.ctx().input(|i| i.stable_dt).min(0.1);
-        state.compilacion_progreso = (state.compilacion_progreso + dt / DURACION).min(1.0);
-        if state.compilacion_progreso >= 1.0 {
-            state.anim_compilacion_activa = false;
-            state.compilacion_etapa_seleccionada = ETAPAS.len() - 1;
+        state.lessons.compilacion_progreso =
+            (state.lessons.compilacion_progreso + dt / DURACION).min(1.0);
+        if state.lessons.compilacion_progreso >= 1.0 {
+            state.lessons.anim_compilacion_activa = false;
+            state.lessons.compilacion_etapa_seleccionada = ETAPAS.len() - 1;
         } else {
-            state.compilacion_etapa_seleccionada = (state.compilacion_progreso
+            state.lessons.compilacion_etapa_seleccionada = (state.lessons.compilacion_progreso
                 * ETAPAS.len() as f32)
                 .floor()
                 .min(4.0) as usize;
@@ -327,30 +326,30 @@ pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioStat
         .inner_margin(egui::Margin::symmetric(14, 10))
         .show(ui, |ui| {
             ui.horizontal(|ui| {
-                let texto_boton = if state.anim_compilacion_activa {
+                let texto_boton = if state.lessons.anim_compilacion_activa {
                     "⏸  Pausar"
-                } else if state.compilacion_progreso >= 1.0 {
+                } else if state.lessons.compilacion_progreso >= 1.0 {
                     "▶  Reproducir"
                 } else {
                     "▶  Continuar"
                 };
                 if ui.button(texto_boton).clicked() {
-                    if state.compilacion_progreso >= 1.0 {
-                        state.compilacion_progreso = 0.0;
-                        state.compilacion_etapa_seleccionada = 0;
+                    if state.lessons.compilacion_progreso >= 1.0 {
+                        state.lessons.compilacion_progreso = 0.0;
+                        state.lessons.compilacion_etapa_seleccionada = 0;
                     }
-                    state.anim_compilacion_activa = !state.anim_compilacion_activa;
+                    state.lessons.anim_compilacion_activa = !state.lessons.anim_compilacion_activa;
                 }
                 if ui.button("↺  Reiniciar").clicked() {
-                    state.compilacion_progreso = 0.0;
-                    state.compilacion_etapa_seleccionada = 0;
-                    state.anim_compilacion_activa = true;
+                    state.lessons.compilacion_progreso = 0.0;
+                    state.lessons.compilacion_etapa_seleccionada = 0;
+                    state.lessons.anim_compilacion_activa = true;
                 }
 
                 ui.add_space(10.0);
-                let porcentaje = (state.compilacion_progreso * 100.0).round() as u32;
+                let porcentaje = (state.lessons.compilacion_progreso * 100.0).round() as u32;
                 ui.add(
-                    egui::ProgressBar::new(state.compilacion_progreso)
+                    egui::ProgressBar::new(state.lessons.compilacion_progreso)
                         .desired_width((ui.available_width() - 70.0).max(100.0))
                         .text(format!("Compilación  {porcentaje}%")),
                 );
@@ -406,8 +405,8 @@ pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioStat
     let inicio_y = rect.top() + 92.0;
     let separacion = 72.0;
     let puntero = respuesta.hover_pos();
-    let tiempo = state.tutorial_time as f32;
-    let completadas = (state.compilacion_progreso * ETAPAS.len() as f32).clamp(0.0, 5.0);
+    let tiempo = state.ui.tutorial_time as f32;
+    let completadas = (state.lessons.compilacion_progreso * ETAPAS.len() as f32).clamp(0.0, 5.0);
     let mut etapa_hover = None;
 
     for indice in 0..ETAPAS.len() {
@@ -423,9 +422,9 @@ pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioStat
     if respuesta.clicked()
         && let Some(indice) = etapa_hover
     {
-        state.compilacion_etapa_seleccionada = indice;
+        state.lessons.compilacion_etapa_seleccionada = indice;
     }
-    let etapa_visible = etapa_hover.unwrap_or(state.compilacion_etapa_seleccionada);
+    let etapa_visible = etapa_hover.unwrap_or(state.lessons.compilacion_etapa_seleccionada);
 
     // Sombra común de la pila.
     let sombra_centro = egui::pos2(centro_x + 12.0, inicio_y + 4.0 * separacion + 38.0);
@@ -444,7 +443,7 @@ pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioStat
     for indice in (0..ETAPAS.len()).rev() {
         let etapa = ETAPAS[indice];
         let fraccion = (completadas - indice as f32).clamp(0.0, 1.0);
-        let disponible = fraccion > 0.0 || state.compilacion_progreso >= 1.0;
+        let disponible = fraccion > 0.0 || state.lessons.compilacion_progreso >= 1.0;
         let activa = indice == etapa_visible;
         let hover_offset = if activa { -7.0 } else { 0.0 };
         let entrada = if disponible {
@@ -501,8 +500,8 @@ pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioStat
     }
 
     // Pulso que recorre el pipeline durante la reproducción.
-    if state.anim_compilacion_activa {
-        let tramo = (state.compilacion_progreso * 5.0).min(4.999);
+    if state.lessons.anim_compilacion_activa {
+        let tramo = (state.lessons.compilacion_progreso * 5.0).min(4.999);
         let indice = tramo.floor() as usize;
         let local = tramo.fract();
         let y0 = inicio_y + indice as f32 * separacion;
@@ -548,7 +547,6 @@ pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut PortfolioStat
             .color(egui::Color32::from_rgb(124, 137, 160)),
     );
 }
-
 
 fn dibujar_panel_etapa(
     painter: &egui::Painter,
@@ -619,4 +617,3 @@ fn dibujar_panel_etapa(
         egui::Color32::from_rgb(112, 124, 146),
     );
 }
-

@@ -1,97 +1,97 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
-pub fn mostrar(ui: &mut egui::Ui, _state: &mut PortfolioState) {
-            ui.label(
+pub fn mostrar(ui: &mut egui::Ui, _state: &mut AppState) {
+    ui.label(
                 "Rust es un lenguaje basado en expresiones (expression-oriented). La diferencia entre realizar una acción (Statement) y producir un valor evaluado (Expression) es fundamental para estructurar funciones y bloques.",
             );
-            ui.add_space(10.0);
+    ui.add_space(10.0);
 
-            // Tabla Comparativa: Statements vs Expressions
-            let mut table_frame = egui::Frame::new();
-            table_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-            table_frame.inner_margin = egui::Margin::same(12);
-            table_frame.corner_radius = egui::CornerRadius::same(8);
-            table_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    // Tabla Comparativa: Statements vs Expressions
+    let mut table_frame = egui::Frame::new();
+    table_frame.fill = egui::Color32::from_rgb(14, 18, 26);
+    table_frame.inner_margin = egui::Margin::same(12);
+    table_frame.corner_radius = egui::CornerRadius::same(8);
+    table_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
 
-            table_frame.show(ui, |ui| {
-                egui::Grid::new("tabla_statements_expressions")
-                    .striped(true)
-                    .spacing([20.0, 8.0])
-                    .show(ui, |ui| {
-                        ui.label(
-                            egui::RichText::new("Concepto")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("Sintaxis de Ejemplo")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("¿Produce Valor?")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("';' ?")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label(
-                            egui::RichText::new("Propósito Principal")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.end_row();
+    table_frame.show(ui, |ui| {
+        egui::Grid::new("tabla_statements_expressions")
+            .striped(true)
+            .spacing([20.0, 8.0])
+            .show(ui, |ui| {
+                ui.label(
+                    egui::RichText::new("Concepto")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis de Ejemplo")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("¿Produce Valor?")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("';' ?")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Propósito Principal")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.end_row();
 
-                        // Fila 1: Statement (Sentencia)
-                        ui.label(
-                            egui::RichText::new("Statement")
-                                .strong()
-                                .color(egui::Color32::from_rgb(255, 160, 50)),
-                        );
-                        ui.label(
-                            egui::RichText::new("let x = 6;\nfn suma() { }")
-                                .monospace()
-                                .color(egui::Color32::from_rgb(100, 200, 255)),
-                        );
-                        ui.label(
-                            egui::RichText::new("No")
-                                .strong()
-                                .color(egui::Color32::from_rgb(180, 190, 205)),
-                        );
-                        ui.label("Obligatorio");
-                        ui.label("Declara bindings, tipos o funciones.");
-                        ui.end_row();
+                // Fila 1: Statement (Sentencia)
+                ui.label(
+                    egui::RichText::new("Statement")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("let x = 6;\nfn suma() { }")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("No")
+                        .strong()
+                        .color(egui::Color32::from_rgb(180, 190, 205)),
+                );
+                ui.label("Obligatorio");
+                ui.label("Declara bindings, tipos o funciones.");
+                ui.end_row();
 
-                        // Fila 2: Expression (Expresión)
-                        ui.label(
-                            egui::RichText::new("Expression")
-                                .strong()
-                                .color(egui::Color32::from_rgb(255, 160, 50)),
-                        );
-                        ui.label(
-                            egui::RichText::new("5 + 6\n{ let a = 1; a + 2 }")
-                                .monospace()
-                                .color(egui::Color32::from_rgb(100, 200, 255)),
-                        );
-                        ui.label(
-                            egui::RichText::new("Sí")
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
-                        ui.label("Sin ';' al retornar");
-                        ui.label("Cálculos, bloques con retorno implícito.");
-                        ui.end_row();
-                    });
+                // Fila 2: Expression (Expresión)
+                ui.label(
+                    egui::RichText::new("Expression")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("5 + 6\n{ let a = 1; a + 2 }")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("Sí")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label("Sin ';' al retornar");
+                ui.label("Cálculos, bloques con retorno implícito.");
+                ui.end_row();
             });
+    });
 
-            ui.add_space(14.0);
+    ui.add_space(14.0);
 
-            // Dos Columnas: Statements vs Expressions en profundidad
-            ui.columns(2, |cols| {
+    // Dos Columnas: Statements vs Expressions en profundidad
+    ui.columns(2, |cols| {
                 // Columna Izquierda: Statements
                 let mut stmts_frame = egui::Frame::new();
                 stmts_frame.fill = egui::Color32::from_rgb(14, 18, 26);
@@ -173,5 +173,4 @@ pub fn mostrar(ui: &mut egui::Ui, _state: &mut PortfolioState) {
                     });
                 });
             });
-
 }

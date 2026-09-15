@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_errores_info(
     ui: &mut egui::Ui,
-    _state: &mut PortfolioState,
+    _state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,

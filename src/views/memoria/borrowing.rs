@@ -18,32 +18,76 @@ pub fn mostrar_tab_borrowing(ui: &mut egui::Ui) {
             .striped(true)
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Tipo de Préstamo").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Permisos").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Cantidad Simultánea").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Regla de Seguridad").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Tipo de Préstamo")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Permisos")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Cantidad Simultánea")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Regla de Seguridad")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 // Fila 1: Inmutable
-                ui.label(egui::RichText::new("Inmutable (&T)").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.label(egui::RichText::new("let r = &s;").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("Inmutable (&T)")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("let r = &s;")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("Solo Lectura");
                 ui.label("Ilimitadas referencias");
                 ui.label("Múltiples lectores pueden observar los datos a la vez.");
                 ui.end_row();
 
                 // Fila 2: Mutable
-                ui.label(egui::RichText::new("Mutable (&mut T)").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.label(egui::RichText::new("let r = &mut s;").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("Mutable (&mut T)")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("let r = &mut s;")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("Lectura y Escritura");
                 ui.label("Exactamente UNA sola");
                 ui.label("Acceso exclusivo mientras vive el préstamo.");
                 ui.end_row();
 
                 // Fila 3: Concurrencia segura
-                ui.label(egui::RichText::new("Exclusividad").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.label(egui::RichText::new("& y &mut a la vez").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("Exclusividad")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("& y &mut a la vez")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("Conflicto prohibido");
                 ui.label("0 referencias mutables si hay lectores");
                 ui.label("Previene lecturas inconsistentes y data races.");
@@ -70,9 +114,7 @@ pub fn mostrar_tab_borrowing(ui: &mut egui::Ui) {
                     .color(egui::Color32::from_rgb(255, 160, 50)),
             );
             ui.add_space(6.0);
-            ui.label(
-                "Pasa datos a funciones o inspecciona estructuras sin ceder la propiedad:",
-            );
+            ui.label("Pasa datos a funciones o inspecciona estructuras sin ceder la propiedad:");
             ui.add_space(4.0);
             ui.label("• El valor original sigue perteneciendo a su variable declarada.");
             ui.label("• Puedes crear tantas referencias de solo lectura como desees.");
@@ -88,11 +130,26 @@ pub fn mostrar_tab_borrowing(ui: &mut egui::Ui) {
 
             code_box.show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 2.0;
-                ui.label(egui::RichText::new("fn calcular_len(s: &String) -> usize {").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("fn calcular_len(s: &String) -> usize {")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.indent("imm_code_inner", |ui| {
-                    ui.label(egui::RichText::new("s.len() // Lectura del valor sin moverlo").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+                    ui.label(
+                        egui::RichText::new("s.len() // Lectura del valor sin moverlo")
+                            .monospace()
+                            .size(12.0)
+                            .color(egui::Color32::from_rgb(100, 200, 255)),
+                    );
                 });
-                ui.label(egui::RichText::new("}").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("}")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
             });
         });
 
@@ -111,9 +168,7 @@ pub fn mostrar_tab_borrowing(ui: &mut egui::Ui) {
                     .color(egui::Color32::from_rgb(255, 160, 50)),
             );
             ui.add_space(6.0);
-            ui.label(
-                "Permite modificar un valor ajeno de forma controlada y segura:",
-            );
+            ui.label("Permite modificar un valor ajeno de forma controlada y segura:");
             ui.add_space(4.0);
             ui.label("• La variable base debe haberse declarado con 'mut'.");
             ui.label("• Solo puede haber UNA referencia mutable activa a la vez.");
@@ -129,10 +184,30 @@ pub fn mostrar_tab_borrowing(ui: &mut egui::Ui) {
 
             code_box.show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 2.0;
-                ui.label(egui::RichText::new("let mut texto = String::from(\"Hola\");").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("let ref_mut = &mut texto;").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("ref_mut.push_str(\" Mundo\"); // Modificacion exclusiva").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("println!(\"{texto}\"); // Imprime: Hola Mundo").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("let mut texto = String::from(\"Hola\");")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("let ref_mut = &mut texto;")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("ref_mut.push_str(\" Mundo\"); // Modificacion exclusiva")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("println!(\"{texto}\"); // Imprime: Hola Mundo")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
             });
         });
     });

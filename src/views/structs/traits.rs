@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_traits_custom(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -56,7 +56,7 @@ pub fn mostrar_tab_traits_custom(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Declaración de Trait".to_string(), code_decl));
+                    state.ui.show_code_modal = Some(("Declaración de Trait".to_string(), code_decl));
                 }
                 ui.label("Define las firmas de métodos sin cuerpo que deben cumplir los tipos.");
                 ui.end_row();
@@ -69,7 +69,7 @@ pub fn mostrar_tab_traits_custom(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Implementar Trait en un Tipo".to_string(), code_impl));
+                    state.ui.show_code_modal = Some(("Implementar Trait en un Tipo".to_string(), code_impl));
                 }
                 ui.label("Conecta el contrato de la interfaz con los datos concretos de una Struct o Enum.");
                 ui.end_row();
@@ -82,7 +82,7 @@ pub fn mostrar_tab_traits_custom(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Método con Implementación por Defecto".to_string(), code_default));
+                    state.ui.show_code_modal = Some(("Método con Implementación por Defecto".to_string(), code_default));
                 }
                 ui.label("Permite proveer una implementación base que los tipos pueden usar o sobrescribir.");
                 ui.end_row();
@@ -118,7 +118,7 @@ pub fn mostrar_tab_traits_custom(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("impl Trait para Structs".to_string(), code_t_struct));
+                    state.ui.show_code_modal = Some(("impl Trait para Structs".to_string(), code_t_struct));
                 }
                 ui.label("El uso más habitual: agregar contratos a estructuras de datos con campos.");
                 ui.end_row();
@@ -131,7 +131,7 @@ pub fn mostrar_tab_traits_custom(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("impl Trait para Enums".to_string(), code_t_enum));
+                    state.ui.show_code_modal = Some(("impl Trait para Enums".to_string(), code_t_enum));
                 }
                 ui.label("Muy común para imprimir estados o desempaquetar variantes de enumerados.");
                 ui.end_row();
@@ -144,7 +144,7 @@ pub fn mostrar_tab_traits_custom(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("impl Trait para Tipos Primitivos (i32)".to_string(), code_t_prim));
+                    state.ui.show_code_modal = Some(("impl Trait para Tipos Primitivos (i32)".to_string(), code_t_prim));
                 }
                 ui.label("Extiende tipos nativos del lenguaje como i32, f64 o bool agregándoles métodos propios.");
                 ui.end_row();

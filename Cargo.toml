@@ -9,18 +9,28 @@ description = "Plataforma educativa interactiva para aprender Rust de forma visu
 egui = "0.35.0"
 egui_extras = { version = "0.35.0", features = ["all_loaders", "svg", "image"] }
 egui_plot = "0.36.0"
-env_logger = "0.11.11"
 image = { version = "0.25", features = ["png"] }
-log = "0.4.33"
 rand = "0.8"
 eframe = "0.35.0"
 serde_json = "1"
+serde = { version = "1", features = ["derive"] }
 syntect = "5.3.0"
 railroad = "0.3"
 macro_railroad = "0.1"
 usvg = "0.48"
 resvg = "0.48"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+directories = "6"
+object = "0.39"
+ureq = { version = "3", features = ["json"] }
 
 # Optimiza dependencias en desarrollo sin penalizar demasiado la compilación del código propio.
 [profile.dev.package."*"]
 opt-level = 3
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

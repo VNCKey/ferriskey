@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_funciones(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_funciones(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Función Genérica Básica <T>".to_string(), code_fn_gen));
+                    state.ui.show_code_modal = Some(("Función Genérica Básica <T>".to_string(), code_fn_gen));
                 }
                 ui.label("Define un parámetro de tipo abstracto <T> que se deduce automáticamente al llamar la función.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_funciones(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Múltiples Parámetros Genéricos <T, U>".to_string(), code_fn_multi));
+                    state.ui.show_code_modal = Some(("Múltiples Parámetros Genéricos <T, U>".to_string(), code_fn_multi));
                 }
                 ui.label("Permite combinar diferentes tipos independientes en la misma firma de función.");
                 ui.end_row();

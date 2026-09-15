@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_structs(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_structs(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Struct Genérica <T>".to_string(), code_struct_gen));
+                    state.ui.show_code_modal = Some(("Struct Genérica <T>".to_string(), code_struct_gen));
                 }
                 ui.label("Define campos cuyos tipos se adaptan automáticamente según los datos inicializados.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_structs(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Enum Genérico <T>".to_string(), code_enum_gen));
+                    state.ui.show_code_modal = Some(("Enum Genérico <T>".to_string(), code_enum_gen));
                 }
                 ui.label("Permite guardar cualquier tipo de datos T dentro de las variantes del enum.");
                 ui.end_row();

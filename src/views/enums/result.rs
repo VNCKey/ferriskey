@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_result(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_result(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Result<T, E>: Ok vs Err".to_string(), code_result_basic));
+                    state.ui.show_code_modal = Some(("Result<T, E>: Ok vs Err".to_string(), code_result_basic));
                 }
                 ui.label("Ok(val) contiene el resultado exitoso; Err(err) contiene la causa del fallo.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_result(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Comprobación: .is_ok() y .is_err()".to_string(), code_is_ok));
+                    state.ui.show_code_modal = Some(("Comprobación: .is_ok() y .is_err()".to_string(), code_is_ok));
                 }
                 ui.label("Verifica el estado del resultado mediante un valor booleano sin consumir el contenido.");
                 ui.end_row();

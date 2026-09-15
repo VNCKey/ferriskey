@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_closures(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_closures(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Closure Básica: |x| x + 1".to_string(), code_basic));
+                    state.ui.show_code_modal = Some(("Closure Básica: |x| x + 1".to_string(), code_basic));
                 }
                 ui.label("Función anónima concisa. Los tipos de datos pueden inferirse automáticamente.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_closures(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Captura por Préstamo (&)".to_string(), code_borrow));
+                    state.ui.show_code_modal = Some(("Captura por Préstamo (&)".to_string(), code_borrow));
                 }
                 ui.label("Accede a variables declaradas fuera de la closure mediante lectura prestada.");
                 ui.end_row();
@@ -61,7 +61,7 @@ pub fn mostrar_tab_closures(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Captura por Movimiento (move)".to_string(), code_move));
+                    state.ui.show_code_modal = Some(("Captura por Movimiento (move)".to_string(), code_move));
                 }
                 ui.label("La palabra clave 'move' fuerza a la closure a tomar la propiedad (Ownership) de las variables capturadas.");
                 ui.end_row();

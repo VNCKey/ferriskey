@@ -1,8 +1,8 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
-pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let texto = egui::Color32::from_rgb(200, 210, 225);
@@ -42,7 +42,7 @@ pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: loop con retorno".to_string(), code_loop));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: loop con retorno".to_string(), code_loop));
                 }
                 ui.label("Ciclo infinito explícito. Permite devolver un valor mediante 'break valor;'.");
                 ui.end_row();
@@ -55,7 +55,7 @@ pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: while".to_string(), code_while));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: while".to_string(), code_while));
                 }
                 ui.label("Se ejecuta repetidamente mientras la condición booleana sea 'true'.");
                 ui.end_row();
@@ -68,7 +68,7 @@ pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: for básico".to_string(), code_for));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: for básico".to_string(), code_for));
                 }
                 ui.label("Itera sobre rangos o colecciones sin riesgo de salirse de los límites de memoria.");
                 ui.end_row();
@@ -81,7 +81,7 @@ pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: Etiquetas de Bucles ('label)".to_string(), code_break));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: Etiquetas de Bucles ('label)".to_string(), code_break));
                 }
                 ui.label("Controlan la ejecución. Las etiquetas ('nombre) permiten romper o continuar bucles anidados específicos.");
                 ui.end_row();
@@ -116,7 +116,7 @@ pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .button(egui::RichText::new("Ver Código").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Uso de Rangos: Exclusivos vs Inclusivos".to_string(), code_v1));
+                    state.ui.show_code_modal = Some(("Uso de Rangos: Exclusivos vs Inclusivos".to_string(), code_v1));
                 }
                 ui.label("1..5 excluye el número 5 final; 1..=5 incluye el número 5 final.");
                 ui.end_row();
@@ -128,7 +128,7 @@ pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .button(egui::RichText::new("Ver Código").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Iterar Colecciones con for".to_string(), code_v2));
+                    state.ui.show_code_modal = Some(("Iterar Colecciones con for".to_string(), code_v2));
                 }
                 ui.label("Recorre directamente cada elemento del arreglo sin necesidad de manejar índices numéricos manuales.");
                 ui.end_row();
@@ -140,7 +140,7 @@ pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .button(egui::RichText::new("Ver Código").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Control con break y continue".to_string(), code_v3));
+                    state.ui.show_code_modal = Some(("Control con break y continue".to_string(), code_v3));
                 }
                 ui.label("'continue' salta inmediatamente a la siguiente vuelta; 'break' aborta el bucle por completo.");
                 ui.end_row();

@@ -1,8 +1,8 @@
+use crate::app::AppState;
 use eframe::egui;
 use egui_plot::{Bar, BarChart, Corner, HLine, Legend, Line, Plot, PlotPoints, VLine};
-use crate::app::PortfolioState;
 
-pub fn mostrar_graficos(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_graficos(ui: &mut egui::Ui, state: &mut AppState) {
     ui.add_space(10.0);
     ui.vertical_centered(|ui| {
         ui.heading(
@@ -23,19 +23,19 @@ pub fn mostrar_graficos(ui: &mut egui::Ui, state: &mut PortfolioState) {
 
     // Barra de Navegación de Pestañas (Tabs)
     ui.horizontal(|ui| {
-        ui.selectable_value(&mut state.dash_tab, 0, "Power BI Overview");
-        ui.selectable_value(&mut state.dash_tab, 1, "Bar Chart Race");
-        ui.selectable_value(&mut state.dash_tab, 2, "Pie & Donut Chart");
-        ui.selectable_value(&mut state.dash_tab, 3, "Index Chart");
-        ui.selectable_value(&mut state.dash_tab, 4, "Sankey Diagram");
-        ui.selectable_value(&mut state.dash_tab, 5, "Time Series Subplots");
+        ui.selectable_value(&mut state.dashboard.dash_tab, 0, "Power BI Overview");
+        ui.selectable_value(&mut state.dashboard.dash_tab, 1, "Bar Chart Race");
+        ui.selectable_value(&mut state.dashboard.dash_tab, 2, "Pie & Donut Chart");
+        ui.selectable_value(&mut state.dashboard.dash_tab, 3, "Index Chart");
+        ui.selectable_value(&mut state.dashboard.dash_tab, 4, "Sankey Diagram");
+        ui.selectable_value(&mut state.dashboard.dash_tab, 5, "Time Series Subplots");
     });
 
     ui.add_space(15.0);
     ui.separator();
     ui.add_space(15.0);
 
-    match state.dash_tab {
+    match state.dashboard.dash_tab {
         0 => mostrar_dashboard_power_bi(ui, state),
         1 => mostrar_bar_chart_race(ui, state),
         2 => mostrar_pie_donut_chart(ui, state),
@@ -45,8 +45,7 @@ pub fn mostrar_graficos(ui: &mut egui::Ui, state: &mut PortfolioState) {
     }
 }
 
-
-pub fn mostrar_dashboard_power_bi(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_dashboard_power_bi(ui: &mut egui::Ui, state: &mut AppState) {
     let avail_w = ui.available_width();
 
     // 1. KPI Cards Row (Arriba)
@@ -128,15 +127,15 @@ pub fn mostrar_dashboard_power_bi(ui: &mut egui::Ui, state: &mut PortfolioState)
             );
             ui.add_space(15.0);
 
-            ui.checkbox(&mut state.show_ingresos, "Ingresos");
+            ui.checkbox(&mut state.dashboard.show_ingresos, "Ingresos");
             ui.add_space(10.0);
-            ui.checkbox(&mut state.show_gastos, "Gastos");
+            ui.checkbox(&mut state.dashboard.show_gastos, "Gastos");
             ui.add_space(10.0);
-            ui.checkbox(&mut state.show_beneficios, "Beneficios");
+            ui.checkbox(&mut state.dashboard.show_beneficios, "Beneficios");
             ui.add_space(25.0);
 
             ui.label(egui::RichText::new("Año Fiscal:").strong());
-            ui.add(egui::Slider::new(&mut state.year, 2020..=2026));
+            ui.add(egui::Slider::new(&mut state.dashboard.year, 2020..=2026));
         });
     });
 
@@ -149,7 +148,7 @@ pub fn mostrar_dashboard_power_bi(ui: &mut egui::Ui, state: &mut PortfolioState)
     plot_frame.corner_radius = egui::CornerRadius::same(8);
     plot_frame.show(ui, |ui| {
         ui.set_width(avail_w - 24.0);
-        let base_multiplier = (state.year - 2020) as f64 * 80.0;
+        let base_multiplier = (state.dashboard.year - 2020) as f64 * 80.0;
 
         let mut ingresos_bars = vec![];
         let mut gastos_bars = vec![];
@@ -179,13 +178,13 @@ pub fn mostrar_dashboard_power_bi(ui: &mut egui::Ui, state: &mut PortfolioState)
             .height(380.0)
             .show_grid([true, true])
             .show(ui, |plot_ui| {
-                if state.show_ingresos {
+                if state.dashboard.show_ingresos {
                     plot_ui.bar_chart(BarChart::new("Ingresos", ingresos_bars));
                 }
-                if state.show_gastos {
+                if state.dashboard.show_gastos {
                     plot_ui.bar_chart(BarChart::new("Gastos", gastos_bars));
                 }
-                if state.show_beneficios {
+                if state.dashboard.show_beneficios {
                     plot_ui.line(
                         Line::new("Tendencia Beneficios", PlotPoints::new(beneficios_points))
                             .color(egui::Color32::from_rgb(160, 100, 250))
@@ -196,38 +195,37 @@ pub fn mostrar_dashboard_power_bi(ui: &mut egui::Ui, state: &mut PortfolioState)
     });
 }
 
-
-pub fn mostrar_bar_chart_race(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_bar_chart_race(ui: &mut egui::Ui, state: &mut AppState) {
     ui.horizontal(|ui| {
         if ui
-            .button(if state.bcr_playing {
+            .button(if state.dashboard.bcr_playing {
                 "Pausar"
             } else {
                 "Iniciar Carrera"
             })
             .clicked()
         {
-            state.bcr_playing = !state.bcr_playing;
+            state.dashboard.bcr_playing = !state.dashboard.bcr_playing;
         }
         if ui.button("Reiniciar (2015)").clicked() {
-            state.bcr_year = 2015.0;
+            state.dashboard.bcr_year = 2015.0;
         }
         ui.add_space(10.0);
         ui.label("Velocidad:");
-        ui.selectable_value(&mut state.bcr_speed, 0.5, "0.5x");
-        ui.selectable_value(&mut state.bcr_speed, 1.0, "1x");
-        ui.selectable_value(&mut state.bcr_speed, 2.0, "2x");
-        ui.selectable_value(&mut state.bcr_speed, 4.0, "4x");
+        ui.selectable_value(&mut state.dashboard.bcr_speed, 0.5, "0.5x");
+        ui.selectable_value(&mut state.dashboard.bcr_speed, 1.0, "1x");
+        ui.selectable_value(&mut state.dashboard.bcr_speed, 2.0, "2x");
+        ui.selectable_value(&mut state.dashboard.bcr_speed, 4.0, "4x");
 
         ui.add_space(20.0);
-        ui.add(egui::Slider::new(&mut state.bcr_year, 2015.0..=2026.0).text("Año"));
+        ui.add(egui::Slider::new(&mut state.dashboard.bcr_year, 2015.0..=2026.0).text("Año"));
     });
 
-    if state.bcr_playing {
+    if state.dashboard.bcr_playing {
         let dt = ui.input(|i| i.stable_dt);
-        state.bcr_year += dt * state.bcr_speed * 1.5;
-        if state.bcr_year > 2026.0 {
-            state.bcr_year = 2015.0;
+        state.dashboard.bcr_year += dt * state.dashboard.bcr_speed * 1.5;
+        if state.dashboard.bcr_year > 2026.0 {
+            state.dashboard.bcr_year = 2015.0;
         }
         ui.ctx().request_repaint();
     }
@@ -314,7 +312,7 @@ pub fn mostrar_bar_chart_race(ui: &mut egui::Ui, state: &mut PortfolioState) {
         ),
     ];
 
-    let yr = state.bcr_year;
+    let yr = state.dashboard.bcr_year;
 
     let mut current_data: Vec<(&str, egui::Color32, f32)> = languages
         .iter()
@@ -390,14 +388,13 @@ pub fn mostrar_bar_chart_race(ui: &mut egui::Ui, state: &mut PortfolioState) {
     }
 }
 
-
-pub fn mostrar_pie_donut_chart(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_pie_donut_chart(ui: &mut egui::Ui, state: &mut AppState) {
     ui.horizontal(|ui| {
         ui.label(egui::RichText::new("Radio Rosquilla (Donut):").strong());
-        ui.add(egui::Slider::new(&mut state.pie_donut_hole, 0.0..=0.7).text("Hole"));
+        ui.add(egui::Slider::new(&mut state.dashboard.pie_donut_hole, 0.0..=0.7).text("Hole"));
         ui.add_space(20.0);
         ui.checkbox(
-            &mut state.pie_exploded,
+            &mut state.dashboard.pie_exploded,
             "Explotar Rebanadas al Pasar el Mouse",
         );
     });
@@ -442,7 +439,7 @@ pub fn mostrar_pie_donut_chart(ui: &mut egui::Ui, state: &mut PortfolioState) {
 
         let center = rect.center();
         let r_out = 140.0;
-        let r_in = r_out * state.pie_donut_hole;
+        let r_in = r_out * state.dashboard.pie_donut_hole;
 
         let pointer_pos = ui.input(|i| i.pointer.hover_pos());
         let mut current_angle: f32 = -std::f32::consts::FRAC_PI_2;
@@ -473,7 +470,7 @@ pub fn mostrar_pie_donut_chart(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 hovered_slice = Some(idx);
             }
 
-            let explode_offset = if is_hovered && state.pie_exploded {
+            let explode_offset = if is_hovered && state.dashboard.pie_exploded {
                 18.0
             } else {
                 0.0
@@ -615,11 +612,13 @@ pub fn mostrar_pie_donut_chart(ui: &mut egui::Ui, state: &mut PortfolioState) {
     });
 }
 
-
-pub fn mostrar_index_chart(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_index_chart(ui: &mut egui::Ui, state: &mut AppState) {
     ui.horizontal(|ui| {
         ui.label(egui::RichText::new("Año Base (Punto 100%):").strong());
-        ui.add(egui::Slider::new(&mut state.index_baseline_year, 2015.0..=2025.0).text("Año Base"));
+        ui.add(
+            egui::Slider::new(&mut state.dashboard.index_baseline_year, 2015.0..=2025.0)
+                .text("Año Base"),
+        );
         ui.label(
             egui::RichText::new("*(Todos los gráficos se re-escalan a 100% en esta fecha)*")
                 .italics()
@@ -629,7 +628,7 @@ pub fn mostrar_index_chart(ui: &mut egui::Ui, state: &mut PortfolioState) {
 
     ui.add_space(15.0);
 
-    let baseline = state.index_baseline_year;
+    let baseline = state.dashboard.index_baseline_year;
 
     let series_raw = [
         (
@@ -735,8 +734,7 @@ pub fn mostrar_index_chart(ui: &mut egui::Ui, state: &mut PortfolioState) {
         });
 }
 
-
-pub fn mostrar_sankey_diagram(ui: &mut egui::Ui, _state: &mut PortfolioState) {
+pub fn mostrar_sankey_diagram(ui: &mut egui::Ui, _state: &mut AppState) {
     ui.label(
         egui::RichText::new("Diagrama de Flujo de Recursos y Asignación Financiera")
             .size(15.0)
@@ -927,12 +925,14 @@ pub fn mostrar_sankey_diagram(ui: &mut egui::Ui, _state: &mut PortfolioState) {
     }
 }
 
-
-pub fn mostrar_time_series_subplots(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_time_series_subplots(ui: &mut egui::Ui, state: &mut AppState) {
     ui.horizontal(|ui| {
-        ui.checkbox(&mut state.ts_show_ma, "Medias Móviles (SMA 20/50)");
-        ui.checkbox(&mut state.ts_show_volume, "Volumen");
-        ui.checkbox(&mut state.ts_show_rsi, "RSI Indicator");
+        ui.checkbox(
+            &mut state.dashboard.ts_show_ma,
+            "Medias Móviles (SMA 20/50)",
+        );
+        ui.checkbox(&mut state.dashboard.ts_show_volume, "Volumen");
+        ui.checkbox(&mut state.dashboard.ts_show_rsi, "RSI Indicator");
     });
 
     ui.add_space(10.0);
@@ -987,7 +987,7 @@ pub fn mostrar_time_series_subplots(ui: &mut egui::Ui, state: &mut PortfolioStat
                     .color(egui::Color32::WHITE)
                     .width(2.0),
             );
-            if state.ts_show_ma {
+            if state.dashboard.ts_show_ma {
                 plot_ui.line(
                     Line::new("SMA 20", PlotPoints::new(sma20_pts))
                         .color(egui::Color32::from_rgb(240, 180, 50))
@@ -1013,7 +1013,7 @@ pub fn mostrar_time_series_subplots(ui: &mut egui::Ui, state: &mut PortfolioStat
 
     ui.add_space(10.0);
 
-    if state.ts_show_volume {
+    if state.dashboard.ts_show_volume {
         ui.label(egui::RichText::new("Panel 2: Volumen Operado Diario").strong());
         Plot::new("subplot_volume")
             .height(100.0)
@@ -1023,7 +1023,7 @@ pub fn mostrar_time_series_subplots(ui: &mut egui::Ui, state: &mut PortfolioStat
         ui.add_space(10.0);
     }
 
-    if state.ts_show_rsi {
+    if state.dashboard.ts_show_rsi {
         ui.label(egui::RichText::new("Panel 3: Índice de Fuerza Relativa (RSI)").strong());
         Plot::new("subplot_rsi").height(100.0).show(ui, |plot_ui| {
             plot_ui.hline(

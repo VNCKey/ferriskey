@@ -1,10 +1,10 @@
-use eframe::egui;
-use std::sync::Arc;
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::components::code_editor::mostrar_editor_interactivo;
 use crate::execution::ejecutar_codigo_rust;
+use eframe::egui;
+use std::sync::Arc;
 
-pub fn mostrar_tutorial_errores(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tutorial_errores(ui: &mut egui::Ui, state: &mut AppState) {
     ui.add_space(20.0);
     ui.vertical_centered(|ui| {
         ui.heading(
@@ -42,7 +42,7 @@ pub fn mostrar_tutorial_errores(ui: &mut egui::Ui, state: &mut PortfolioState) {
     ui.add_space(10.0);
 
     ui.checkbox(
-        &mut state.err_pipeline_fail,
+        &mut state.lessons.err_pipeline_fail,
         "Simular fallo en la función interna (dividir por cero)",
     );
 
@@ -95,7 +95,7 @@ pub fn mostrar_tutorial_errores(ui: &mut egui::Ui, state: &mut PortfolioState) {
         egui::Color32::WHITE,
     );
 
-    if state.err_pipeline_fail {
+    if state.lessons.err_pipeline_fail {
         ui.painter().line_segment(
             [f1_rect.right_center(), f2_rect.left_center()],
             egui::Stroke::new(3.0, egui::Color32::RED),
@@ -131,15 +131,14 @@ pub fn mostrar_tutorial_errores(ui: &mut egui::Ui, state: &mut PortfolioState) {
 
     ui.add_space(20.0);
 
-    let theme = &state.theme_set.themes["base16-ocean.dark"];
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     mostrar_editor_interactivo(
         ui,
-        &mut state.errores_code,
-        Arc::clone(&state.errores_output),
+        &mut state.lessons.errores_code,
+        Arc::clone(&state.lessons.errores_output),
         "▶ Ejecutar Manejo de Errores",
         ejecutar_codigo_rust,
-        &state.syntax_set,
+        &state.editor.syntax_set,
         theme,
     );
 }
-

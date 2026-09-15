@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_consumidores(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -43,7 +43,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidor .collect()".to_string(), code_collect));
+                    state.ui.show_code_modal = Some(("Consumidor .collect()".to_string(), code_collect));
                 }
                 ui.label("Transforma el iterador en una nueva colección en memoria (como Vec<T> o HashMap).");
                 ui.end_row();
@@ -78,7 +78,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidores .sum() y .product()".to_string(), code_sum));
+                    state.ui.show_code_modal = Some(("Consumidores .sum() y .product()".to_string(), code_sum));
                 }
                 ui.label(".sum() suma todos los elementos; .product() los multiplica todos.");
                 ui.end_row();
@@ -90,7 +90,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidor .count()".to_string(), code_count));
+                    state.ui.show_code_modal = Some(("Consumidor .count()".to_string(), code_count));
                 }
                 ui.label("Cuenta el número total de elementos contenidos en el iterador.");
                 ui.end_row();
@@ -102,7 +102,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidores .fold() y .reduce()".to_string(), code_fold));
+                    state.ui.show_code_modal = Some(("Consumidores .fold() y .reduce()".to_string(), code_fold));
                 }
                 ui.label(".fold(init, f) realiza una acumulación con valor inicial; .reduce(f) sin valor inicial.");
                 ui.end_row();
@@ -137,7 +137,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidores .find() y .position()".to_string(), code_find));
+                    state.ui.show_code_modal = Some(("Consumidores .find() y .position()".to_string(), code_find));
                 }
                 ui.label(".find(pred) busca el primer elemento que satisface el predicado; .position(pred) devuelve su índice.");
                 ui.end_row();
@@ -149,7 +149,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidores .any() y .all()".to_string(), code_any_all));
+                    state.ui.show_code_modal = Some(("Consumidores .any() y .all()".to_string(), code_any_all));
                 }
                 ui.label(".any(pred) verifica si al menos un elemento cumple; .all(pred) si todos cumplen.");
                 ui.end_row();
@@ -161,7 +161,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidores .max() y .min()".to_string(), code_max_min));
+                    state.ui.show_code_modal = Some(("Consumidores .max() y .min()".to_string(), code_max_min));
                 }
                 ui.label("Devuelve el valor máximo o mínimo contenido en el iterador.");
                 ui.end_row();
@@ -196,7 +196,7 @@ pub fn mostrar_tab_consumidores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Consumidor .for_each()".to_string(), code_foreach));
+                    state.ui.show_code_modal = Some(("Consumidor .for_each()".to_string(), code_foreach));
                 }
                 ui.label("Ejecuta una closure con efectos secundarios sobre cada elemento consumiendo el iterador.");
                 ui.end_row();

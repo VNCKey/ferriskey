@@ -6,12 +6,12 @@ flowchart TD
 
     SRC["<b>Código Fuente (.rs)</b>"]
 
-    C1["<b>Frontend & Macros</b><br/>Parser (AST) + macro_rules! / derives"]
-    C2["<b>Sistema de Tipos</b><br/>Inferencia Estática + Monomorfización"]
-    C3["<b>Borrow Checker</b><br/>Lifetimes + Ownership + Mutabilidad Única"]
-    C4["<b>Backend LLVM</b><br/>Optimizador -O3 (SIMD / Inlining) + Linker"]
+    C1["<b>Análisis del código</b><br/>Parser (AST)<br/>Organiza la estructura del programa"]
+    C2["<b>Sistema de Tipos</b><br/>Inferencia de tipos<br/>Comprueba datos compatibles"]
+    C3["<b>Reglas de seguridad de Rust</b><br/>Detecta errores en el código<br/>Antes de ejecutar el programa"]
+    C4["<b>Backend LLVM</b><br/>Optimiza el código generado<br/>+ Linker (ld / lld con libstd)"]
 
-    BIN(["<b>100% Seguro & Nativo</b>"]):::targetNode
+    BIN(["<b>Binario nativo listo</b>"]):::targetNode
 
     SRC --> C1 --> C2 --> C3 --> C4 --> BIN
 

@@ -1,18 +1,21 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use eframe::egui;
 
 #[allow(dead_code)]
-pub fn mostrar_simulador_pipeline(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_simulador_pipeline(ui: &mut egui::Ui, state: &mut AppState) {
     ui.heading("📊 Simulador de Pipeline Perezoso de Iteradores");
     ui.add_space(10.0);
 
     ui.horizontal(|ui| {
         ui.label(egui::RichText::new("Modo de Iteración:").strong());
-        ui.selectable_value(&mut state.iter_mode, 0, "1. .iter() (&T)");
-        ui.selectable_value(&mut state.iter_mode, 1, "2. .iter_mut() (&mut T)");
-        ui.selectable_value(&mut state.iter_mode, 2, "3. .into_iter() (T)");
+        ui.selectable_value(&mut state.lessons.iter_mode, 0, "1. .iter() (&T)");
+        ui.selectable_value(&mut state.lessons.iter_mode, 1, "2. .iter_mut() (&mut T)");
+        ui.selectable_value(&mut state.lessons.iter_mode, 2, "3. .into_iter() (T)");
         ui.add_space(20.0);
-        ui.checkbox(&mut state.iter_filter_even, "Filtrar solo Pares (.filter)");
+        ui.checkbox(
+            &mut state.lessons.iter_filter_even,
+            "Filtrar solo Pares (.filter)",
+        );
     });
 
     ui.add_space(10.0);
@@ -76,7 +79,7 @@ pub fn mostrar_simulador_pipeline(ui: &mut egui::Ui, state: &mut PortfolioState)
 
     let res_nums: Vec<i32> = input_nums
         .into_iter()
-        .filter(|&x| !state.iter_filter_even || x % 2 == 0)
+        .filter(|&x| !state.lessons.iter_filter_even || x % 2 == 0)
         .map(|x| x * x)
         .collect();
     ui.painter().text(

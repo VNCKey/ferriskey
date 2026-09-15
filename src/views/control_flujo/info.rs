@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_control_flujo_info(
     ui: &mut egui::Ui,
-    _state: &mut PortfolioState,
+    _state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -31,23 +31,59 @@ pub fn mostrar_control_flujo_info(
             .striped(true)
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Concepto").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo Sintáctico").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Concepto")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ejemplo Sintáctico")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Descripción")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Expresiones vs Sentencias").strong().color(texto));
-                ui.label(egui::RichText::new("let x = if c { 5 } else { 10 };").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Expresiones vs Sentencias")
+                        .strong()
+                        .color(texto),
+                );
+                ui.label(
+                    egui::RichText::new("let x = if c { 5 } else { 10 };")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("En Rust 'if' y 'match' son expresiones que retornan un valor asignable.");
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Retorno desde loop").strong().color(texto));
-                ui.label(egui::RichText::new("let res = loop { break 42; };").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Retorno desde loop")
+                        .strong()
+                        .color(texto),
+                );
+                ui.label(
+                    egui::RichText::new("let res = loop { break 42; };")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("El comando break puede devolver un valor desde un bucle loop.");
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Exhaustividad en match").strong().color(texto));
-                ui.label(egui::RichText::new("match val { ... _ => () }").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Exhaustividad en match")
+                        .strong()
+                        .color(texto),
+                );
+                ui.label(
+                    egui::RichText::new("match val { ... _ => () }")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("El compilador exige evaluar absolutamente todas las variantes posibles.");
                 ui.end_row();
             });
@@ -69,10 +105,26 @@ pub fn mostrar_control_flujo_info(
             .striped(true)
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Construcción").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Evaluación").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Retorno de Valor").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Caso de Uso Principal").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Construcción")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Evaluación")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Retorno de Valor")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Caso de Uso Principal")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 ui.label(egui::RichText::new("if / else").strong().color(naranja));

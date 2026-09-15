@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_adaptadores(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -43,7 +43,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .map()".to_string(), code_map));
+                    state.ui.show_code_modal = Some(("Adaptador .map()".to_string(), code_map));
                 }
                 ui.label("Transforma cada elemento del iterador aplicando una closure.");
                 ui.end_row();
@@ -55,7 +55,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .flatten()".to_string(), code_flatten));
+                    state.ui.show_code_modal = Some(("Adaptador .flatten()".to_string(), code_flatten));
                 }
                 ui.label("Aplana colecciones anidadas (ej. Vec<Vec<T>>) en un único iterador plano.");
                 ui.end_row();
@@ -67,7 +67,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptadores .cloned() y .copied()".to_string(), code_cloned));
+                    state.ui.show_code_modal = Some(("Adaptadores .cloned() y .copied()".to_string(), code_cloned));
                 }
                 ui.label("Convierte un iterador de referencias &T en valores T mediante clonación o copia.");
                 ui.end_row();
@@ -102,7 +102,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .filter()".to_string(), code_filter));
+                    state.ui.show_code_modal = Some(("Adaptador .filter()".to_string(), code_filter));
                 }
                 ui.label("Filtra los elementos evaluando una condición booleana.");
                 ui.end_row();
@@ -114,7 +114,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .take()".to_string(), code_take));
+                    state.ui.show_code_modal = Some(("Adaptador .take()".to_string(), code_take));
                 }
                 ui.label("Toma únicamente los primeros n elementos del iterador.");
                 ui.end_row();
@@ -126,7 +126,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .skip()".to_string(), code_skip));
+                    state.ui.show_code_modal = Some(("Adaptador .skip()".to_string(), code_skip));
                 }
                 ui.label("Omite los primeros n elementos del iterador.");
                 ui.end_row();
@@ -161,7 +161,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .zip()".to_string(), code_zip));
+                    state.ui.show_code_modal = Some(("Adaptador .zip()".to_string(), code_zip));
                 }
                 ui.label("Combina dos iteradores distintos en un único iterador de tuplas pares.");
                 ui.end_row();
@@ -173,7 +173,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .chain()".to_string(), code_chain));
+                    state.ui.show_code_modal = Some(("Adaptador .chain()".to_string(), code_chain));
                 }
                 ui.label("Encadena dos iteradores secuencialmente uno tras otro.");
                 ui.end_row();
@@ -185,7 +185,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .enumerate()".to_string(), code_enum));
+                    state.ui.show_code_modal = Some(("Adaptador .enumerate()".to_string(), code_enum));
                 }
                 ui.label("Empareja cada elemento con su índice de posición (0, 1, 2...).");
                 ui.end_row();
@@ -197,7 +197,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .rev()".to_string(), code_rev));
+                    state.ui.show_code_modal = Some(("Adaptador .rev()".to_string(), code_rev));
                 }
                 ui.label("Invierte el sentido de recorrido de la secuencia.");
                 ui.end_row();
@@ -209,7 +209,7 @@ pub fn mostrar_tab_adaptadores(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Adaptador .step_by()".to_string(), code_step));
+                    state.ui.show_code_modal = Some(("Adaptador .step_by()".to_string(), code_step));
                 }
                 ui.label("Avanza la iteración dando saltos de tamaño n.");
                 ui.end_row();

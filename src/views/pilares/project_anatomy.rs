@@ -1,9 +1,9 @@
 use eframe::egui;
 
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::components::educational_table::mostrar_tabla_educativa;
 
-pub fn mostrar_project_anatomy(ui: &mut egui::Ui, _state: &mut PortfolioState) {
+pub fn mostrar_project_anatomy(ui: &mut egui::Ui, _state: &mut AppState) {
     let orange = egui::Color32::from_rgb(255, 180, 80);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let text = egui::Color32::from_rgb(205, 215, 230);

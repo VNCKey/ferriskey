@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_structs_info(
     ui: &mut egui::Ui,
-    _state: &mut PortfolioState,
+    _state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -47,21 +47,29 @@ pub fn mostrar_structs_info(
                 ui.end_row();
 
                 let influencias = [
-                    ("C y C++", "Rendimiento, referencias, movimiento y control cercano al hardware."),
-                    ("SML y OCaml", "Enums, pattern matching e inferencia de tipos."),
+                    (
+                        "C y C++",
+                        "Rendimiento, referencias, movimiento y control cercano al hardware.",
+                    ),
+                    (
+                        "SML y OCaml",
+                        "Enums, pattern matching e inferencia de tipos.",
+                    ),
                     ("Haskell", "Traits y abstracciones de tipos."),
-                    ("Cyclone y ML Kit", "Ideas relacionadas con la gestión segura de memoria."),
+                    (
+                        "Cyclone y ML Kit",
+                        "Ideas relacionadas con la gestión segura de memoria.",
+                    ),
                     ("Erlang", "Concurrencia y comunicación entre procesos."),
                     ("Scheme", "Macros higiénicas."),
-                    ("C# y Ruby", "Atributos y una sintaxis cómoda para closures."),
+                    (
+                        "C# y Ruby",
+                        "Atributos y una sintaxis cómoda para closures.",
+                    ),
                 ];
 
                 for (fuente, ideas) in influencias {
-                    ui.label(
-                        egui::RichText::new(fuente)
-                            .strong()
-                            .color(cyan),
-                    );
+                    ui.label(egui::RichText::new(fuente).strong().color(cyan));
                     ui.label(ideas);
                     ui.end_row();
                 }
@@ -125,9 +133,21 @@ pub fn mostrar_structs_info(
             .striped(true)
             .spacing([18.0, 10.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Tipo").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Nombre Formal").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Lógica de Composición").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Tipo")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Nombre Formal")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Lógica de Composición")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 ui.label(egui::RichText::new("Struct").strong().color(texto));

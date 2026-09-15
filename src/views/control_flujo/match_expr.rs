@@ -1,8 +1,8 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
-pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let texto = egui::Color32::from_rgb(200, 210, 225);
@@ -42,7 +42,7 @@ pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: match con literales".to_string(), code_literal));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: match con literales".to_string(), code_literal));
                 }
                 ui.label("Coincidencia exacta con un valor explícito (números, caracteres, strings).");
                 ui.end_row();
@@ -55,7 +55,7 @@ pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: match con rangos".to_string(), code_rango));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: match con rangos".to_string(), code_rango));
                 }
                 ui.label("Coincidencia inclusiva con cualquier valor dentro del rango numérico.");
                 ui.end_row();
@@ -68,7 +68,7 @@ pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: Comodín _ en match".to_string(), code_comodin));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: Comodín _ en match".to_string(), code_comodin));
                 }
                 ui.label("Captura cualquier otro caso no listado previamente para cumplir la exhaustividad exigida por Rust.");
                 ui.end_row();
@@ -81,7 +81,7 @@ pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: Match Guards (if)".to_string(), code_guard));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: Match Guards (if)".to_string(), code_guard));
                 }
                 ui.label("Añade una condición booleana adicional (Match Guard) al patrón.");
                 ui.end_row();
@@ -115,7 +115,7 @@ pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .button(egui::RichText::new("Ver Ejemplo").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo: Asignación con match".to_string(), ex1));
+                    state.ui.show_code_modal = Some(("Ejemplo: Asignación con match".to_string(), ex1));
                 }
                 ui.label("Como 'match' es una expresión, evalúa el rango correspondiente y asigna 'B' directamente a la variable 'letra'.");
                 ui.end_row();
@@ -126,7 +126,7 @@ pub fn mostrar_tab_match(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     .button(egui::RichText::new("Ver Ejemplo").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo: Coincidencia con Tuplas".to_string(), ex2));
+                    state.ui.show_code_modal = Some(("Ejemplo: Coincidencia con Tuplas".to_string(), ex2));
                 }
                 ui.label("Permite desestructurar tuplas directamente extrayendo sus componentes en patrones específicos.");
                 ui.end_row();

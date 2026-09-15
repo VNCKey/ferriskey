@@ -52,12 +52,11 @@ pub(crate) fn expandir_macros_rust(codigo: &str) -> String {
             .arg("expand")
             .current_dir(&run.directory)
             .output()
+            && output.status.success()
         {
-            if output.status.success() {
-                let stdout = String::from_utf8_lossy(&output.stdout);
-                if !stdout.trim().is_empty() {
-                    return format!("[Expansión de Macros vía cargo expand]:\n\n{}", stdout);
-                }
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            if !stdout.trim().is_empty() {
+                return format!("[Expansión de Macros vía cargo expand]:\n\n{}", stdout);
             }
         }
     }
@@ -68,30 +67,12 @@ pub(crate) fn expandir_macros_rust(codigo: &str) -> String {
         "edition": "2021"
     });
 
-    if let Ok(output) = Command::new("curl")
-        .args([
-            "--fail-with-body",
-            "--silent",
-            "--show-error",
-            "--request",
-            "POST",
-            "https://play.rust-lang.org/macro-expansion",
-            "--header",
-            "Content-Type: application/json",
-            "--data-binary",
-        ])
-        .arg(payload.to_string())
-        .output()
+    if let Ok(response) = post_json("https://play.rust-lang.org/macro-expansion", &payload)
+        && let Ok(parsed) = serde_json::from_str::<Value>(&response)
+        && let Some(expanded) = parsed["stdout"].as_str()
+        && !expanded.trim().is_empty()
     {
-        if output.status.success() {
-            if let Ok(parsed) = serde_json::from_slice::<Value>(&output.stdout) {
-                if let Some(expanded) = parsed["stdout"].as_str() {
-                    if !expanded.trim().is_empty() {
-                        return format!("[Expansión de Macros vía Rust Playground]:\n\n{}", expanded);
-                    }
-                }
-            }
-        }
+        return format!("[Expansión de Macros vía Rust Playground]:\n\n{}", expanded);
     }
 
     // 3. Fallback didáctico offline
@@ -127,33 +108,40 @@ fn expandir_macros_didactico(codigo: &str) -> String {
 }
 
 #[allow(dead_code)]
-pub(crate) fn ejecutar_codigo_cargo_run(codigo: &str, project_dir: Option<&std::path::Path>) -> String {
-    if let Some(dir) = project_dir {
-        if dir.exists() {
-            let main_rs = dir.join("src/main.rs");
-            let lib_rs = dir.join("src/lib.rs");
-            let target_file = if main_rs.exists() {
-                main_rs
-            } else if lib_rs.exists() {
-                lib_rs
-            } else {
-                main_rs
-            };
+pub(crate) fn ejecutar_codigo_cargo_run(
+    codigo: &str,
+    project_dir: Option<&std::path::Path>,
+) -> String {
+    if let Some(dir) = project_dir
+        && dir.exists()
+    {
+        let main_rs = dir.join("src/main.rs");
+        let lib_rs = dir.join("src/lib.rs");
+        let target_file = if main_rs.exists() {
+            main_rs
+        } else if lib_rs.exists() {
+            lib_rs
+        } else {
+            main_rs
+        };
 
-            if let Some(parent) = target_file.parent() {
-                let _ = std::fs::create_dir_all(parent);
-            }
-            if let Err(e) = std::fs::write(&target_file, codigo) {
-                return format!("Error guardando cambios en disco: {e}");
-            }
-
-            let output = match Command::new("cargo").arg("run").current_dir(dir).output() {
-                Ok(out) => out,
-                Err(e) => return format!("Error ejecutando 'cargo run': {e}"),
-            };
-
-            return format_process_output(&output.stdout, &output.stderr);
+        if let Some(parent) = target_file.parent() {
+            let _ = std::fs::create_dir_all(parent);
         }
+        if let Err(e) = std::fs::write(&target_file, codigo) {
+            return format!("Error guardando cambios en disco: {e}");
+        }
+
+        let output = match Command::new("cargo").arg("run").current_dir(dir).output() {
+            Ok(out) => out,
+            Err(e) => return format!("Error ejecutando 'cargo run': {e}"),
+        };
+
+        return format_cargo_process_output(
+            &output.stdout,
+            &output.stderr,
+            output.status.success(),
+        );
     }
 
     // Fallback: Si no hay directorio físico válido seleccionado, crear plantilla Cargo temp y ejecutar `cargo run`
@@ -185,13 +173,44 @@ pub(crate) fn ejecutar_codigo_cargo_run(codigo: &str, project_dir: Option<&std::
         Err(e) => return format!("Error ejecutando 'cargo run': {e}"),
     };
 
-    format_process_output(&output.stdout, &output.stderr)
+    format_cargo_process_output(&output.stdout, &output.stderr, output.status.success())
+}
+
+fn format_cargo_process_output(stdout: &[u8], stderr: &[u8], success: bool) -> String {
+    let stdout_str = String::from_utf8_lossy(stdout);
+    let stderr_str = String::from_utf8_lossy(stderr);
+    let mut result = String::new();
+
+    if !stderr_str.is_empty() {
+        result.push_str(&stderr_str);
+        if !result.ends_with('\n') {
+            result.push('\n');
+        }
+    }
+
+    if !stdout_str.is_empty() {
+        result.push_str(&stdout_str);
+    }
+
+    if result.trim().is_empty() {
+        if success {
+            "El programa terminó exitosamente sin salidas.".to_owned()
+        } else {
+            "El proceso terminó con error sin salidas adicionales.".to_owned()
+        }
+    } else {
+        result
+    }
 }
 
 fn ejecutar_codigo_rust_inner(codigo: &str) -> std::io::Result<String> {
     let run = TemporaryRun::create()?;
     let source_path = run.path("main.rs");
-    let executable_path = run.path("programa");
+    let executable_path = run.path(if cfg!(target_os = "windows") {
+        "programa.exe"
+    } else {
+        "programa"
+    });
     std::fs::write(&source_path, codigo)?;
 
     let compilation = Command::new("rustc")
@@ -241,29 +260,21 @@ pub(crate) fn ejecutar_codigo_api(codigo: &str) -> String {
         "backtrace": false,
     });
 
-    let response = Command::new("curl")
-        .args([
-            "--fail-with-body",
-            "--silent",
-            "--show-error",
-            "--request",
-            "POST",
-            "https://play.rust-lang.org/execute",
-            "--header",
-            "Content-Type: application/json",
-            "--data-binary",
-        ])
-        .arg(payload.to_string())
-        .output();
-
-    match response {
-        Ok(output) if output.status.success() => parse_playground_response(&output.stdout),
-        Ok(output) => format!(
-            "Error del servidor de Rust Playground:\n{}",
-            String::from_utf8_lossy(&output.stderr)
-        ),
-        Err(error) => format!("Error invocando curl: {error}"),
+    match post_json("https://play.rust-lang.org/execute", &payload) {
+        Ok(response) => parse_playground_response(response.as_bytes()),
+        Err(error) => format!("Error comunicando con Rust Playground: {error}"),
     }
+}
+
+fn post_json(endpoint: &str, payload: &Value) -> Result<String, String> {
+    let mut response = ureq::post(endpoint)
+        .send_json(payload)
+        .map_err(|error| error.to_string())?;
+
+    response
+        .body_mut()
+        .read_to_string()
+        .map_err(|error| error.to_string())
 }
 
 fn parse_playground_response(response: &[u8]) -> String {

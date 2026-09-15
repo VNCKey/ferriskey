@@ -1,46 +1,60 @@
 mod app;
+mod application;
+mod binary_analysis;
 mod components;
+mod content;
+mod domain;
+mod errors;
 mod execution;
+mod infrastructure;
+mod platform;
 mod routes;
+mod state;
 mod svg_loader;
 mod views;
 
-use app::PortfolioState;
+use app::AppState;
 use eframe::egui;
+use tracing_subscriber::EnvFilter;
 
 fn main() -> eframe::Result {
-    // 1. Inicializar logger para mostrar información, advertencias y errores en la terminal
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
-    log::info!("🦀 Iniciando FerrisKey Desktop...");
+    // Configura el registro de información, advertencias y errores.
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .compact()
+        .init();
 
-    // 2. Configurar captura de panics amigable en la terminal
+    tracing::info!("Iniciando FerrisKey Desktop");
+
+    // Muestra los errores críticos en la terminal antes de delegarlos al hook original.
     let default_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |panic_info| {
-        eprintln!("\n========================================================");
-        eprintln!("🚨 [ERROR CRÍTICO / PANIC EN FERRISKEY]");
+        eprintln!("\nError crítico en FerrisKey:");
         eprintln!("{panic_info}");
-        eprintln!("Tip: Ejecuta con RUST_BACKTRACE=1 para ver la traza completa.");
-        eprintln!("========================================================\n");
+        eprintln!("Usa RUST_BACKTRACE=1 para ver la traza completa.\n");
         default_hook(panic_info);
     }));
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_fullscreen(true)
-            .with_title("FerrisKey 🦀🔑 - El Ecosistema Interactivo de Rust"),
+            .with_title("FerrisKey - El Ecosistema Interactivo de Rust"),
         ..Default::default()
     };
 
     eframe::run_native(
-        "FerrisKey 🦀🔑 - El Ecosistema Interactivo de Rust (Luis Alexander / Alekay)",
+        "FerrisKey - El Ecosistema Interactivo de Rust",
         options,
         Box::new(|cc| {
-            // 1. Instalar loaders estándar de imágenes (png, jpg, etc.)
+            // Instala los loaders estándar de imágenes.
             egui_extras::install_image_loaders(&cc.egui_ctx);
-            // 2. Instalar loader SVG con soporte completo para fuentes del sistema Linux
+            // Instala el loader SVG con soporte para fuentes del sistema.
             svg_loader::SystemFontSvgLoader::install(&cc.egui_ctx);
-            log::info!("Loaders de imágenes y SVG con fuentes de Linux cargados exitosamente.");
-            Ok(Box::new(PortfolioState::default()))
+            tracing::info!("Loaders de imágenes y SVG instalados");
+            let mut app = AppState::default();
+            app.restaurar_sesion();
+            Ok(Box::new(app))
         }),
     )
 }

@@ -1,10 +1,80 @@
-use eframe::egui;
-use std::sync::Arc;
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::components::code_editor::mostrar_editor_interactivo;
 use crate::execution::ejecutar_codigo_rust;
 use crate::views::conceptos::mostrar_selector_proyectos_estandar_con_archivos;
 use crate::views::control_flujo::card_frame_tutorial;
+use eframe::egui;
+use std::sync::Arc;
+
+#[derive(Clone, Copy)]
+struct IntegerTypeInfo {
+    name: &'static str,
+    bits: &'static str,
+    range: &'static str,
+}
+
+const INTEGER_TYPES: [IntegerTypeInfo; 12] = [
+    IntegerTypeInfo {
+        name: "i8",
+        bits: "8",
+        range: "-128 .. 127",
+    },
+    IntegerTypeInfo {
+        name: "i16",
+        bits: "16",
+        range: "-32_768 .. 32_767",
+    },
+    IntegerTypeInfo {
+        name: "i32",
+        bits: "32",
+        range: "-2_147_483_648 .. 2_147_483_647",
+    },
+    IntegerTypeInfo {
+        name: "i64",
+        bits: "64",
+        range: "-9.22 × 10¹⁸ .. 9.22 × 10¹⁸",
+    },
+    IntegerTypeInfo {
+        name: "i128",
+        bits: "128",
+        range: "≈ -1.70 × 10³⁸ .. 1.70 × 10³⁸",
+    },
+    IntegerTypeInfo {
+        name: "isize",
+        bits: "32 o 64",
+        range: "Depende de la arquitectura",
+    },
+    IntegerTypeInfo {
+        name: "u8",
+        bits: "8",
+        range: "0 .. 255",
+    },
+    IntegerTypeInfo {
+        name: "u16",
+        bits: "16",
+        range: "0 .. 65_535",
+    },
+    IntegerTypeInfo {
+        name: "u32",
+        bits: "32",
+        range: "0 .. 4_294_967_295",
+    },
+    IntegerTypeInfo {
+        name: "u64",
+        bits: "64",
+        range: "0 .. 1.84 × 10¹⁹",
+    },
+    IntegerTypeInfo {
+        name: "u128",
+        bits: "128",
+        range: "0 .. 3.40 × 10³⁸",
+    },
+    IntegerTypeInfo {
+        name: "usize",
+        bits: "32 o 64",
+        range: "0 .. usize::MAX",
+    },
+];
 
 fn mostrar_tabla_metodos(
     ui: &mut egui::Ui,
@@ -61,11 +131,7 @@ fn mostrar_tabla_metodos(
     });
 }
 
-fn mostrar_tabla_constantes(
-    ui: &mut egui::Ui,
-    id: &str,
-    filas: &[(&str, &str, &str)],
-) {
+fn mostrar_tabla_constantes(ui: &mut egui::Ui, id: &str, filas: &[(&str, &str, &str)]) {
     let mut frame = egui::Frame::new();
     frame.fill = egui::Color32::from_rgb(14, 18, 26);
     frame.inner_margin = egui::Margin::same(12);
@@ -103,6 +169,161 @@ fn mostrar_tabla_constantes(
                 }
             });
     });
+}
+
+pub fn mostrar_categoria_enteros_interactiva(ui: &mut egui::Ui, state: &mut AppState) {
+    mostrar_enteros_interactivo(ui, state, true);
+}
+
+pub(crate) fn mostrar_enteros_interactivo(
+    ui: &mut egui::Ui,
+    state: &mut AppState,
+    mostrar_encabezado: bool,
+) {
+    let naranja = egui::Color32::from_rgb(255, 160, 50);
+    let cyan = egui::Color32::from_rgb(100, 200, 255);
+    let text = egui::Color32::from_rgb(205, 215, 230);
+    let muted = egui::Color32::from_rgb(160, 175, 195);
+
+    if mostrar_encabezado {
+        ui.heading(
+            egui::RichText::new("Enteros: i32, u32 y sus tamaños")
+                .size(19.0)
+                .strong()
+                .color(egui::Color32::WHITE),
+        );
+        ui.add_space(8.0);
+    }
+    ui.label(
+        egui::RichText::new(
+            "Un entero no tiene parte decimal. Cuando escribes un número directamente, como 5, sin indicar un tipo, Rust suele interpretarlo como i32 si nada más determina el tipo.",
+        )
+        .size(13.0)
+        .color(text)
+        .line_height(Some(19.0)),
+    );
+    ui.add_space(7.0);
+    ui.horizontal_wrapped(|ui| {
+        ui.label(
+            egui::RichText::new("La primera letra indica la familia:")
+                .size(13.0)
+                .color(text),
+        );
+        ui.label(egui::RichText::new("i").monospace().strong().color(naranja));
+        ui.label(
+            egui::RichText::new("admite negativos;")
+                .size(13.0)
+                .color(text),
+        );
+        ui.label(egui::RichText::new("u").monospace().strong().color(cyan));
+        ui.label(
+            egui::RichText::new("solo admite cero y positivos.")
+                .size(13.0)
+                .color(text),
+        );
+    });
+    ui.add_space(14.0);
+
+    let selected_family = state.lessons.conceptos_enteros_familia.min(1);
+    state.lessons.conceptos_enteros_familia = selected_family;
+
+    egui::Frame::new()
+        .fill(egui::Color32::from_rgb(14, 18, 26))
+        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90)))
+        .corner_radius(egui::CornerRadius::same(7))
+        .inner_margin(egui::Margin::symmetric(10, 7))
+        .show(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new("Familia:")
+                        .size(12.0)
+                        .strong()
+                        .color(muted),
+                );
+                for (index, label) in [(0, "Con signo · i"), (1, "Sin signo · u")] {
+                    let is_selected = selected_family == index;
+                    if ui
+                        .selectable_label(
+                            is_selected,
+                            egui::RichText::new(label)
+                                .size(12.0)
+                                .strong()
+                                .color(if is_selected { naranja } else { cyan }),
+                        )
+                        .clicked()
+                    {
+                        state.lessons.conceptos_enteros_familia = index;
+                        state.lessons.tipo_entero_seleccionado = 2;
+                    }
+                }
+            });
+        });
+    ui.add_space(10.0);
+
+    let selected = state.lessons.tipo_entero_seleccionado.min(5);
+    state.lessons.tipo_entero_seleccionado = selected;
+    let family_offset = selected_family * 6;
+
+    egui::Frame::new()
+        .fill(egui::Color32::from_rgb(14, 18, 26))
+        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90)))
+        .corner_radius(egui::CornerRadius::same(7))
+        .inner_margin(egui::Margin::same(10))
+        .show(ui, |ui| {
+            ui.label(
+                egui::RichText::new("Selecciona un tipo para inspeccionarlo")
+                    .size(11.5)
+                    .strong()
+                    .color(muted),
+            );
+            ui.add_space(6.0);
+
+            egui::Grid::new("grid_tipos_enteros_interactivo")
+                .striped(true)
+                .spacing([18.0, 6.0])
+                .show(ui, |ui| {
+                    for encabezado in ["Tipo", "Bits", "Rango"] {
+                        ui.label(
+                            egui::RichText::new(encabezado)
+                                .strong()
+                                .color(egui::Color32::WHITE),
+                        );
+                    }
+                    ui.end_row();
+
+                    for (index, info) in INTEGER_TYPES[family_offset..family_offset + 6]
+                        .iter()
+                        .enumerate()
+                    {
+                        let is_selected = selected == index;
+                        if ui
+                            .selectable_label(
+                                is_selected,
+                                egui::RichText::new(info.name)
+                                    .monospace()
+                                    .strong()
+                                    .color(if is_selected { naranja } else { cyan }),
+                            )
+                            .clicked()
+                        {
+                            state.lessons.tipo_entero_seleccionado = index;
+                        }
+                        ui.label(
+                            egui::RichText::new(info.bits)
+                                .monospace()
+                                .size(11.5)
+                                .color(egui::Color32::from_rgb(180, 190, 205)),
+                        );
+                        ui.label(
+                            egui::RichText::new(info.range)
+                                .monospace()
+                                .size(11.5)
+                                .color(egui::Color32::from_rgb(180, 190, 205)),
+                        );
+                        ui.end_row();
+                    }
+                });
+        });
 }
 
 pub fn mostrar_categoria_enteros(ui: &mut egui::Ui) {
@@ -282,25 +503,103 @@ pub fn mostrar_categoria_enteros(ui: &mut egui::Ui) {
                 ui.end_row();
 
                 let metodos = [
-                    ("Matemáticas", "pow", "Calcula una potencia con un exponente entero.", "3u32.pow(4) // 81"),
-                    ("Matemáticas", "abs", "Obtiene el valor absoluto de un entero con signo.", "(-8i32).abs() // 8"),
-                    ("Matemáticas", "signum", "Devuelve -1, 0 o 1 según el signo del entero.", "(-8i32).signum() // -1"),
-                    ("Matemáticas", "min / max", "Devuelve el menor o el mayor entre dos valores.", "10u8.max(20) // 20"),
-                    ("Matemáticas", "clamp", "Limita un valor dentro de un mínimo y un máximo.", "50u8.clamp(0, 10) // 10"),
-                    ("Matemáticas", "div_euclid", "Realiza una división euclidiana, útil con negativos.", "(-7i32).div_euclid(3) // -3"),
-                    ("Matemáticas", "rem_euclid", "Obtiene el resto euclidiano no negativo.", "(-7i32).rem_euclid(3) // 2"),
-                    ("Matemáticas", "is_power_of_two", "Indica si el entero es una potencia de dos.", "16u32.is_power_of_two() // true"),
-                    ("Matemáticas", "next_power_of_two", "Obtiene la siguiente potencia de dos igual o mayor.", "10u32.next_power_of_two() // 16"),
-                    ("Matemáticas", "ilog2 / ilog10", "Calcula el logaritmo entero en base 2 o 10.", "100u32.ilog10() // 2"),
-                    ("Comparaciones", "is_positive", "Indica si el entero es positivo.", "8i32.is_positive() // true"),
-                    ("Comparaciones", "is_negative", "Indica si el entero es negativo.", "(-8i32).is_negative() // true"),
-                    ("Bits", "count_ones", "Cuenta cuántos bits están en 1.", "0b1011u8.count_ones() // 3"),
-                    ("Bits", "leading_zeros", "Cuenta los ceros al comienzo de la representación binaria.", "8u8.leading_zeros()"),
-                    ("Bytes", "to_le_bytes", "Convierte el entero en bytes little-endian.", "0x1234u16.to_le_bytes()"),
+                    (
+                        "Matemáticas",
+                        "pow",
+                        "Calcula una potencia con un exponente entero.",
+                        "3u32.pow(4) // 81",
+                    ),
+                    (
+                        "Matemáticas",
+                        "abs",
+                        "Obtiene el valor absoluto de un entero con signo.",
+                        "(-8i32).abs() // 8",
+                    ),
+                    (
+                        "Matemáticas",
+                        "signum",
+                        "Devuelve -1, 0 o 1 según el signo del entero.",
+                        "(-8i32).signum() // -1",
+                    ),
+                    (
+                        "Matemáticas",
+                        "min / max",
+                        "Devuelve el menor o el mayor entre dos valores.",
+                        "10u8.max(20) // 20",
+                    ),
+                    (
+                        "Matemáticas",
+                        "clamp",
+                        "Limita un valor dentro de un mínimo y un máximo.",
+                        "50u8.clamp(0, 10) // 10",
+                    ),
+                    (
+                        "Matemáticas",
+                        "div_euclid",
+                        "Realiza una división euclidiana, útil con negativos.",
+                        "(-7i32).div_euclid(3) // -3",
+                    ),
+                    (
+                        "Matemáticas",
+                        "rem_euclid",
+                        "Obtiene el resto euclidiano no negativo.",
+                        "(-7i32).rem_euclid(3) // 2",
+                    ),
+                    (
+                        "Matemáticas",
+                        "is_power_of_two",
+                        "Indica si el entero es una potencia de dos.",
+                        "16u32.is_power_of_two() // true",
+                    ),
+                    (
+                        "Matemáticas",
+                        "next_power_of_two",
+                        "Obtiene la siguiente potencia de dos igual o mayor.",
+                        "10u32.next_power_of_two() // 16",
+                    ),
+                    (
+                        "Matemáticas",
+                        "ilog2 / ilog10",
+                        "Calcula el logaritmo entero en base 2 o 10.",
+                        "100u32.ilog10() // 2",
+                    ),
+                    (
+                        "Comparaciones",
+                        "is_positive",
+                        "Indica si el entero es positivo.",
+                        "8i32.is_positive() // true",
+                    ),
+                    (
+                        "Comparaciones",
+                        "is_negative",
+                        "Indica si el entero es negativo.",
+                        "(-8i32).is_negative() // true",
+                    ),
+                    (
+                        "Bits",
+                        "count_ones",
+                        "Cuenta cuántos bits están en 1.",
+                        "0b1011u8.count_ones() // 3",
+                    ),
+                    (
+                        "Bits",
+                        "leading_zeros",
+                        "Cuenta los ceros al comienzo de la representación binaria.",
+                        "8u8.leading_zeros()",
+                    ),
+                    (
+                        "Bytes",
+                        "to_le_bytes",
+                        "Convierte el entero en bytes little-endian.",
+                        "0x1234u16.to_le_bytes()",
+                    ),
                 ];
 
                 for (categoria, metodo, descripcion, ejemplo) in metodos {
-                    ui.label(egui::RichText::new(categoria).color(egui::Color32::from_rgb(180, 190, 205)));
+                    ui.label(
+                        egui::RichText::new(categoria)
+                            .color(egui::Color32::from_rgb(180, 190, 205)),
+                    );
                     ui.label(
                         egui::RichText::new(metodo)
                             .monospace()
@@ -355,9 +654,21 @@ pub fn mostrar_categoria_enteros(ui: &mut egui::Ui) {
                 ui.end_row();
 
                 let constantes = [
-                    ("MIN", "El valor mínimo que puede representar el tipo.", "i8::MIN // -128"),
-                    ("MAX", "El valor máximo que puede representar el tipo.", "u8::MAX // 255"),
-                    ("BITS", "Cantidad de bits utilizados por el tipo.", "u32::BITS // 32"),
+                    (
+                        "MIN",
+                        "El valor mínimo que puede representar el tipo.",
+                        "i8::MIN // -128",
+                    ),
+                    (
+                        "MAX",
+                        "El valor máximo que puede representar el tipo.",
+                        "u8::MAX // 255",
+                    ),
+                    (
+                        "BITS",
+                        "Cantidad de bits utilizados por el tipo.",
+                        "u32::BITS // 32",
+                    ),
                 ];
 
                 for (constante, descripcion, ejemplo) in constantes {
@@ -378,7 +689,6 @@ pub fn mostrar_categoria_enteros(ui: &mut egui::Ui) {
             });
     });
 }
-
 
 pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui) {
     ui.label("Los tipos flotantes representan números con coma o fracción decimal en el estándar IEEE-754.");
@@ -483,19 +793,59 @@ pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui) {
         "Métodos útiles de los flotantes",
         "Estos métodos ayudan a redondear, calcular y comprobar propiedades de f32 y f64.",
         &[
-            ("abs", "Obtiene el valor absoluto.", "(-3.5f64).abs() // 3.5"),
+            (
+                "abs",
+                "Obtiene el valor absoluto.",
+                "(-3.5f64).abs() // 3.5",
+            ),
             ("floor", "Redondea hacia abajo.", "3.8f64.floor() // 3.0"),
             ("ceil", "Redondea hacia arriba.", "3.2f64.ceil() // 4.0"),
-            ("round", "Redondea al entero más cercano.", "3.5f64.round() // 4.0"),
-            ("trunc", "Elimina la parte fraccionaria.", "3.8f64.trunc() // 3.0"),
-            ("fract", "Obtiene la parte fraccionaria.", "3.8f64.fract() // 0.8"),
+            (
+                "round",
+                "Redondea al entero más cercano.",
+                "3.5f64.round() // 4.0",
+            ),
+            (
+                "trunc",
+                "Elimina la parte fraccionaria.",
+                "3.8f64.trunc() // 3.0",
+            ),
+            (
+                "fract",
+                "Obtiene la parte fraccionaria.",
+                "3.8f64.fract() // 0.8",
+            ),
             ("sqrt", "Calcula la raíz cuadrada.", "16.0f64.sqrt() // 4.0"),
-            ("powi / powf", "Calcula potencias enteras o flotantes.", "2.0f64.powi(3) // 8.0"),
-            ("min / max", "Devuelve el menor o el mayor valor.", "2.0f64.max(5.0) // 5.0"),
-            ("clamp", "Limita el valor entre mínimo y máximo.", "10.0f64.clamp(0.0, 5.0) // 5.0"),
-            ("is_nan", "Indica si el valor es NaN.", "(0.0f64 / 0.0).is_nan() // true"),
-            ("is_finite", "Indica si no es infinito ni NaN.", "3.0f64.is_finite() // true"),
-            ("to_degrees / to_radians", "Convierte entre grados y radianes.", "180.0f64.to_radians()"),
+            (
+                "powi / powf",
+                "Calcula potencias enteras o flotantes.",
+                "2.0f64.powi(3) // 8.0",
+            ),
+            (
+                "min / max",
+                "Devuelve el menor o el mayor valor.",
+                "2.0f64.max(5.0) // 5.0",
+            ),
+            (
+                "clamp",
+                "Limita el valor entre mínimo y máximo.",
+                "10.0f64.clamp(0.0, 5.0) // 5.0",
+            ),
+            (
+                "is_nan",
+                "Indica si el valor es NaN.",
+                "(0.0f64 / 0.0).is_nan() // true",
+            ),
+            (
+                "is_finite",
+                "Indica si no es infinito ni NaN.",
+                "3.0f64.is_finite() // true",
+            ),
+            (
+                "to_degrees / to_radians",
+                "Convierte entre grados y radianes.",
+                "180.0f64.to_radians()",
+            ),
         ],
     );
 
@@ -505,17 +855,36 @@ pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui) {
         ui,
         "grid_constantes_flotantes",
         &[
-            ("MIN / MAX", "Límites de valores finitos representables.", "f64::MAX"),
-            ("MIN_POSITIVE", "Menor valor positivo normalizado.", "f32::MIN_POSITIVE"),
-            ("EPSILON", "Diferencia entre 1.0 y el siguiente valor representable.", "f64::EPSILON"),
-            ("INFINITY / NEG_INFINITY", "Valores de infinito positivo y negativo.", "f32::INFINITY"),
-            ("NAN", "Valor que representa un resultado no numérico.", "f64::NAN"),
+            (
+                "MIN / MAX",
+                "Límites de valores finitos representables.",
+                "f64::MAX",
+            ),
+            (
+                "MIN_POSITIVE",
+                "Menor valor positivo normalizado.",
+                "f32::MIN_POSITIVE",
+            ),
+            (
+                "EPSILON",
+                "Diferencia entre 1.0 y el siguiente valor representable.",
+                "f64::EPSILON",
+            ),
+            (
+                "INFINITY / NEG_INFINITY",
+                "Valores de infinito positivo y negativo.",
+                "f32::INFINITY",
+            ),
+            (
+                "NAN",
+                "Valor que representa un resultado no numérico.",
+                "f64::NAN",
+            ),
         ],
     );
 }
 
-
-pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
     ui.label("El tipo booleano representa una verdad lógica simple. En Rust solo existen dos valores posibles: true y false.");
     ui.add_space(10.0);
 
@@ -580,8 +949,15 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
 
-    ui.heading(egui::RichText::new("De dónde vienen: Comparación").strong().color(naranja).size(20.0));
-    ui.label("Casi todos los valores booleanos en tus programas nacerán de una de estas operaciones:");
+    ui.heading(
+        egui::RichText::new("De dónde vienen: Comparación")
+            .strong()
+            .color(naranja)
+            .size(20.0),
+    );
+    ui.label(
+        "Casi todos los valores booleanos en tus programas nacerán de una de estas operaciones:",
+    );
     ui.add_space(10.0);
 
     let mut frame_comp = egui::Frame::new();
@@ -595,9 +971,21 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
             .striped(true)
             .spacing([30.0, 10.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Operador").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Nombre").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Código").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Operador")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Nombre")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ejemplo de Código")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 let comps = [
@@ -610,7 +998,12 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
                 ];
 
                 for (simbolo, nombre, ej) in comps {
-                    ui.label(egui::RichText::new(simbolo).monospace().strong().color(naranja));
+                    ui.label(
+                        egui::RichText::new(simbolo)
+                            .monospace()
+                            .strong()
+                            .color(naranja),
+                    );
                     ui.label(nombre);
                     ui.label(egui::RichText::new(ej).monospace().color(cyan));
                     ui.end_row();
@@ -624,10 +1017,26 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
         "Operaciones útiles de bool",
         "bool tiene pocos métodos propios; normalmente se trabaja con operadores lógicos y condiciones.",
         &[
-            ("!valor", "Invierte true a false y false a true.", "!true // false"),
-            ("a && b", "Devuelve true si ambos valores son true.", "true && false // false"),
-            ("a || b", "Devuelve true si al menos uno es true.", "true || false // true"),
-            ("a ^ b", "Devuelve true si los valores son diferentes.", "true ^ false // true"),
+            (
+                "!valor",
+                "Invierte true a false y false a true.",
+                "!true // false",
+            ),
+            (
+                "a && b",
+                "Devuelve true si ambos valores son true.",
+                "true && false // false",
+            ),
+            (
+                "a || b",
+                "Devuelve true si al menos uno es true.",
+                "true || false // true",
+            ),
+            (
+                "a ^ b",
+                "Devuelve true si los valores son diferentes.",
+                "true ^ false // true",
+            ),
         ],
     );
 
@@ -650,16 +1059,46 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
 
     frame_sim.show(ui, |ui| {
         ui.horizontal(|ui| {
-            ui.label(egui::RichText::new("Entrada A:").strong().color(egui::Color32::WHITE));
-            if ui.selectable_label(state.bool_sim_a, egui::RichText::new(if state.bool_sim_a { "TRUE" } else { "FALSE" }).strong()).clicked() {
-                state.bool_sim_a = !state.bool_sim_a;
+            ui.label(
+                egui::RichText::new("Entrada A:")
+                    .strong()
+                    .color(egui::Color32::WHITE),
+            );
+            if ui
+                .selectable_label(
+                    state.dashboard.bool_sim_a,
+                    egui::RichText::new(if state.dashboard.bool_sim_a {
+                        "TRUE"
+                    } else {
+                        "FALSE"
+                    })
+                    .strong(),
+                )
+                .clicked()
+            {
+                state.dashboard.bool_sim_a = !state.dashboard.bool_sim_a;
             }
 
             ui.add_space(20.0);
 
-            ui.label(egui::RichText::new("Entrada B:").strong().color(egui::Color32::WHITE));
-            if ui.selectable_label(state.bool_sim_b, egui::RichText::new(if state.bool_sim_b { "TRUE" } else { "FALSE" }).strong()).clicked() {
-                state.bool_sim_b = !state.bool_sim_b;
+            ui.label(
+                egui::RichText::new("Entrada B:")
+                    .strong()
+                    .color(egui::Color32::WHITE),
+            );
+            if ui
+                .selectable_label(
+                    state.dashboard.bool_sim_b,
+                    egui::RichText::new(if state.dashboard.bool_sim_b {
+                        "TRUE"
+                    } else {
+                        "FALSE"
+                    })
+                    .strong(),
+                )
+                .clicked()
+            {
+                state.dashboard.bool_sim_b = !state.dashboard.bool_sim_b;
             }
         });
 
@@ -667,13 +1106,28 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
         ui.separator();
         ui.add_space(10.0);
 
-        let a = state.bool_sim_a;
-        let b = state.bool_sim_b;
+        let a = state.dashboard.bool_sim_a;
+        let b = state.dashboard.bool_sim_b;
 
         let resultados = [
-            ("A && B", "AND", "Verdadero solo si AMBAS son verdaderas.", a && b),
-            ("A || B", "OR", "Verdadero si AL MENOS UNA es verdadera.", a || b),
-            ("A ^ B", "XOR", "Verdadero si son DIFERENTES entre sí.", a ^ b),
+            (
+                "A && B",
+                "AND",
+                "Verdadero solo si AMBAS son verdaderas.",
+                a && b,
+            ),
+            (
+                "A || B",
+                "OR",
+                "Verdadero si AL MENOS UNA es verdadera.",
+                a || b,
+            ),
+            (
+                "A ^ B",
+                "XOR",
+                "Verdadero si son DIFERENTES entre sí.",
+                a ^ b,
+            ),
             ("!A", "NOT", "Invierte el valor de A.", !a),
         ];
 
@@ -681,10 +1135,26 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
             .striped(true)
             .spacing([20.0, 10.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Operación").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Compuerta").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Resultado").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Operación")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Compuerta")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Descripción")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Resultado")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 for (op, compuerta, desc, res) in resultados {
@@ -707,7 +1177,6 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut PortfolioState
             });
     });
 }
-
 
 pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
     ui.label("En Rust, un 'char' es un valor escalar Unicode de 4 bytes (32 bits), lo que significa que soporta mucho más que texto ASCII.");
@@ -777,15 +1246,51 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
         "Métodos útiles de char",
         "Los métodos de char ayudan a clasificar caracteres Unicode y trabajar con ASCII.",
         &[
-            ("is_alphabetic", "Indica si es una letra.", "'ñ'.is_alphabetic() // true"),
-            ("is_numeric", "Indica si representa un número Unicode.", "'7'.is_numeric() // true"),
-            ("is_alphanumeric", "Indica si es letra o número.", "'A'.is_alphanumeric() // true"),
-            ("is_whitespace", "Indica si es un espacio o separación.", "' '.is_whitespace() // true"),
-            ("is_uppercase / is_lowercase", "Comprueba el uso de mayúsculas o minúsculas.", "'A'.is_uppercase() // true"),
-            ("is_ascii", "Indica si pertenece al conjunto ASCII.", "'A'.is_ascii() // true"),
-            ("to_ascii_uppercase", "Convierte un carácter ASCII a mayúscula.", "'a'.to_ascii_uppercase() // 'A'"),
-            ("to_ascii_lowercase", "Convierte un carácter ASCII a minúscula.", "'A'.to_ascii_lowercase() // 'a'"),
-            ("len_utf8 / len_utf16", "Indica cuántos bytes o unidades UTF utiliza.", "'ñ'.len_utf8() // 2"),
+            (
+                "is_alphabetic",
+                "Indica si es una letra.",
+                "'ñ'.is_alphabetic() // true",
+            ),
+            (
+                "is_numeric",
+                "Indica si representa un número Unicode.",
+                "'7'.is_numeric() // true",
+            ),
+            (
+                "is_alphanumeric",
+                "Indica si es letra o número.",
+                "'A'.is_alphanumeric() // true",
+            ),
+            (
+                "is_whitespace",
+                "Indica si es un espacio o separación.",
+                "' '.is_whitespace() // true",
+            ),
+            (
+                "is_uppercase / is_lowercase",
+                "Comprueba el uso de mayúsculas o minúsculas.",
+                "'A'.is_uppercase() // true",
+            ),
+            (
+                "is_ascii",
+                "Indica si pertenece al conjunto ASCII.",
+                "'A'.is_ascii() // true",
+            ),
+            (
+                "to_ascii_uppercase",
+                "Convierte un carácter ASCII a mayúscula.",
+                "'a'.to_ascii_uppercase() // 'A'",
+            ),
+            (
+                "to_ascii_lowercase",
+                "Convierte un carácter ASCII a minúscula.",
+                "'A'.to_ascii_lowercase() // 'a'",
+            ),
+            (
+                "len_utf8 / len_utf16",
+                "Indica cuántos bytes o unidades UTF utiliza.",
+                "'ñ'.len_utf8() // 2",
+            ),
         ],
     );
 
@@ -797,7 +1302,11 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
         &[
             ("MIN", "Primer valor Unicode válido.", "char::MIN // '\\0'"),
             ("MAX", "Último valor Unicode válido.", "char::MAX"),
-            ("REPLACEMENT_CHARACTER", "Carácter usado para reemplazar texto inválido.", "char::REPLACEMENT_CHARACTER // '�'"),
+            (
+                "REPLACEMENT_CHARACTER",
+                "Carácter usado para reemplazar texto inválido.",
+                "char::REPLACEMENT_CHARACTER // '�'",
+            ),
         ],
     );
 
@@ -809,17 +1318,17 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
             .color(egui::Color32::from_rgb(100, 200, 255)),
     );
     ui.label("Como un char es un valor escalar Unicode de 32 bits, podemos convertirlo explícitamente a un u32 o formato Hexadecimal para ver exactamente cómo se almacena en la memoria de la computadora:");
-    
+
     let mut frame_code = egui::Frame::new();
     frame_code.fill = egui::Color32::from_rgb(20, 22, 27);
     frame_code.inner_margin = egui::Margin::same(12);
     frame_code.corner_radius = egui::CornerRadius::same(6);
     frame_code.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(60, 80, 110));
-    
+
     frame_code.show(ui, |ui| {
         ui.label(
             egui::RichText::new(
-"fn main() {
+                "fn main() {
     let letra: char = '🦀';
     let numero_crudo = letra as u32; // Casting a entero de 32 bits
 
@@ -837,10 +1346,10 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
 
     // Escapando Unicode directamente en un string
     println!(\"Hola amigo \\u{1F980}\");
-}"
+}",
             )
             .monospace()
-            .color(egui::Color32::from_rgb(180, 220, 180))
+            .color(egui::Color32::from_rgb(180, 220, 180)),
         );
     });
 }
@@ -860,31 +1369,83 @@ pub fn mostrar_categoria_casting(ui: &mut egui::Ui) {
             .striped(true)
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Conversión").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Sintaxis con 'as'").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Comportamiento").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Código").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Conversión")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis con 'as'")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Comportamiento")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ejemplo de Código")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 // Fila 1: Entero a Flotante
-                ui.label(egui::RichText::new("Entero a Decimal").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.label(egui::RichText::new("i32 as f64").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("Entero a Decimal")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("i32 as f64")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("Conversión exacta sin pérdida de datos.");
-                ui.label(egui::RichText::new("let a: i32 = 10;\nlet b = a as f64 + 0.5;").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("let a: i32 = 10;\nlet b = a as f64 + 0.5;")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.end_row();
 
                 // Fila 2: Flotante a Entero
-                ui.label(egui::RichText::new("Decimal a Entero").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.label(egui::RichText::new("f64 as i32").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("Decimal a Entero")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("f64 as i32")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("Trunca la parte decimal (redondeo hacia cero).");
-                ui.label(egui::RichText::new("let pi: f64 = 3.1415;\nlet entero = pi as i32; // Vale 3").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("let pi: f64 = 3.1415;\nlet entero = pi as i32; // Vale 3")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.end_row();
 
                 // Fila 3: Entero a usize
-                ui.label(egui::RichText::new("Entero a Índice").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.label(egui::RichText::new("u32 as usize").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("Entero a Índice")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("u32 as usize")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("Permite indexar arrays y slices con seguridad.");
-                ui.label(egui::RichText::new("let pos: u8 = 2;\nlet val = array[pos as usize];").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("let pos: u8 = 2;\nlet val = array[pos as usize];")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.end_row();
             });
     });
@@ -957,9 +1518,8 @@ pub fn mostrar_categoria_casting(ui: &mut egui::Ui) {
     });
 }
 
-
 #[allow(dead_code)]
-pub fn mostrar_macro_println(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_macro_println(ui: &mut egui::Ui, state: &mut AppState) {
     ui.heading("🧩 ¿Por qué `println!` termina con `!`?");
     ui.label("El signo `!` indica que estás invocando una macro. Una macro recibe tokens y genera código durante la compilación.");
     ui.add_space(8.0);
@@ -977,10 +1537,10 @@ pub fn mostrar_macro_println(ui: &mut egui::Ui, state: &mut PortfolioState) {
     });
     ui.add_space(10.0);
     if ui.button("🔬 Expandir println! con cargo expand").clicked() {
-        state.show_macro_expansion = true;
+        state.ui.show_macro_expansion = true;
     }
 
-    let mut abierto = state.show_macro_expansion;
+    let mut abierto = state.ui.show_macro_expansion;
     egui::Window::new("Expansión didáctica de println!")
         .open(&mut abierto)
         .collapsible(false)
@@ -994,12 +1554,11 @@ pub fn mostrar_macro_println(ui: &mut egui::Ui, state: &mut PortfolioState) {
             ui.code("cargo install cargo-expand");
             ui.code("cargo expand");
         });
-    state.show_macro_expansion = abierto;
+    state.ui.show_macro_expansion = abierto;
 }
 
-
 #[allow(dead_code)]
-pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let gris_tab = egui::Color32::from_rgb(180, 190, 205);
@@ -1024,7 +1583,7 @@ pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut PortfolioStat
                 .color(egui::Color32::from_rgb(140, 150, 165)),
         );
         for (i, label) in [(0, "Array [T; N]"), (1, "Slice &[T]"), (2, "Tupla")] {
-            let activo = state.compuestos_tab == i;
+            let activo = state.lessons.compuestos_tab == i;
             let color = if activo { naranja } else { gris_tab };
             if ui
                 .add(
@@ -1033,12 +1592,12 @@ pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut PortfolioStat
                 )
                 .clicked()
             {
-                state.compuestos_tab = i;
+                state.lessons.compuestos_tab = i;
             }
             ui.add_space(4.0);
         }
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            let activo = state.compuestos_tab == 3;
+            let activo = state.lessons.compuestos_tab == 3;
             let color = if activo { naranja } else { gris_tab };
             if ui
                 .add(
@@ -1047,7 +1606,7 @@ pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut PortfolioStat
                 )
                 .clicked()
             {
-                state.compuestos_tab = 3;
+                state.lessons.compuestos_tab = 3;
             }
             ui.add_space(4.0);
             ui.label(
@@ -1065,26 +1624,26 @@ pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut PortfolioStat
     egui::ScrollArea::vertical()
         .auto_shrink([false, false])
         .show(ui, |ui| {
-            if state.compuestos_tab < 3 {
+            if state.lessons.compuestos_tab < 3 {
                 mostrar_selector_proyectos_estandar_con_archivos(
                     ui,
-                    &mut state.selected_project,
-                    &mut state.selected_file,
-                    &mut state.term_cwd,
+                    &mut state.project.selected_project,
+                    &mut state.project.selected_file,
+                    &mut state.terminal.term_cwd,
                     "combo_proyectos_tipos_compuestos",
-                    &mut state.datatypes_code,
+                    &mut state.lessons.datatypes_code,
                 );
 
                 ui.add_space(10.0);
 
-                let theme = &state.theme_set.themes["base16-ocean.dark"];
+                let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
                 mostrar_editor_interactivo(
                     ui,
-                    &mut state.datatypes_code,
-                    Arc::clone(&state.datatypes_output),
+                    &mut state.lessons.datatypes_code,
+                    Arc::clone(&state.lessons.datatypes_output),
                     "",
                     ejecutar_codigo_rust,
-                    &state.syntax_set,
+                    &state.editor.syntax_set,
                     theme,
                 );
 
@@ -1093,7 +1652,7 @@ pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut PortfolioStat
                 ui.add_space(12.0);
             }
 
-            match state.compuestos_tab {
+            match state.lessons.compuestos_tab {
                 0 => mostrar_compuesto_array(ui, state, naranja, cyan, texto),
                 1 => mostrar_compuesto_slice(ui, state, naranja, cyan, texto),
                 2 => mostrar_compuesto_tupla(ui, state, naranja, cyan, texto),
@@ -1102,10 +1661,9 @@ pub fn mostrar_tutorial_tipos_datos(ui: &mut egui::Ui, state: &mut PortfolioStat
         });
 }
 
-
 fn mostrar_compuesto_array(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -1124,19 +1682,46 @@ fn mostrar_compuesto_array(
             .striped(true)
             .spacing([18.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Pieza").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Nota").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Pieza")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Nota")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
-                ui.label(egui::RichText::new("Tipo").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Tipo")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("[i32; 5]").monospace().color(cyan));
                 ui.label("T y N fijos; N es parte del tipo.");
                 ui.end_row();
-                ui.label(egui::RichText::new("Acceso").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Acceso")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("arr[i]").monospace().color(cyan));
                 ui.label("Fuera de rango → panic en runtime.");
                 ui.end_row();
-                ui.label(egui::RichText::new("len").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("len")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("arr.len()").monospace().color(cyan));
                 ui.label("Siempre N; no crece como un Vec.");
                 ui.end_row();
@@ -1146,19 +1731,19 @@ fn mostrar_compuesto_array(
     ui.add_space(12.0);
     ui.horizontal(|ui| {
         ui.label(egui::RichText::new("Tipo T:").strong().color(texto));
-        ui.selectable_value(&mut state.arr_elem_type, 0, "i8");
-        ui.selectable_value(&mut state.arr_elem_type, 1, "i32");
-        ui.selectable_value(&mut state.arr_elem_type, 2, "f64");
-        ui.selectable_value(&mut state.arr_elem_type, 3, "bool");
-        ui.selectable_value(&mut state.arr_elem_type, 4, "char");
+        ui.selectable_value(&mut state.lessons.arr_elem_type, 0, "i8");
+        ui.selectable_value(&mut state.lessons.arr_elem_type, 1, "i32");
+        ui.selectable_value(&mut state.lessons.arr_elem_type, 2, "f64");
+        ui.selectable_value(&mut state.lessons.arr_elem_type, 3, "bool");
+        ui.selectable_value(&mut state.lessons.arr_elem_type, 4, "char");
         ui.add_space(12.0);
         ui.label(egui::RichText::new("N:").strong().color(texto));
-        ui.add(egui::Slider::new(&mut state.arr_len, 1..=8).text("elems"));
+        ui.add(egui::Slider::new(&mut state.lessons.arr_len, 1..=8).text("elems"));
     });
 
     let mut custom_items: Vec<String> = Vec::new();
-    if let Some(pos_eq) = state.arr_code.find("= [") {
-        let rest = &state.arr_code[pos_eq + 3..];
+    if let Some(pos_eq) = state.lessons.arr_code.find("= [") {
+        let rest = &state.lessons.arr_code[pos_eq + 3..];
         if let Some(pos_end) = rest.find(']') {
             custom_items = rest[..pos_end]
                 .split(',')
@@ -1166,24 +1751,28 @@ fn mostrar_compuesto_array(
                 .filter(|s| !s.is_empty())
                 .collect();
             if !custom_items.is_empty() {
-                state.arr_len = custom_items.len().clamp(1, 8);
+                state.lessons.arr_len = custom_items.len().clamp(1, 8);
             }
         }
     }
-    if state.arr_code.contains("i8") {
-        state.arr_elem_type = 0;
-    } else if state.arr_code.contains("f64") {
-        state.arr_elem_type = 2;
-    } else if state.arr_code.contains("bool") {
-        state.arr_elem_type = 3;
-    } else if state.arr_code.contains("char") {
-        state.arr_elem_type = 4;
-    } else if state.arr_code.contains("i32") || state.arr_code.contains("u32") {
-        state.arr_elem_type = 1;
+    if state.lessons.arr_code.contains("i8") {
+        state.lessons.arr_elem_type = 0;
+    } else if state.lessons.arr_code.contains("f64") {
+        state.lessons.arr_elem_type = 2;
+    } else if state.lessons.arr_code.contains("bool") {
+        state.lessons.arr_elem_type = 3;
+    } else if state.lessons.arr_code.contains("char") {
+        state.lessons.arr_elem_type = 4;
+    } else if state.lessons.arr_code.contains("i32") || state.lessons.arr_code.contains("u32") {
+        state.lessons.arr_elem_type = 1;
     }
 
-    let (type_str, elem_size, default_samples) = match state.arr_elem_type {
-        0 => ("i8", 1, vec!["-12", "45", "127", "-8", "0", "99", "-50", "12"]),
+    let (type_str, elem_size, default_samples) = match state.lessons.arr_elem_type {
+        0 => (
+            "i8",
+            1,
+            vec!["-12", "45", "127", "-8", "0", "99", "-50", "12"],
+        ),
         1 => (
             "i32",
             4,
@@ -1192,12 +1781,16 @@ fn mostrar_compuesto_array(
         2 => (
             "f64",
             8,
-            vec!["3.14", "9.81", "-0.5", "2.71", "100.0", "0.001", "-45.2", "1.61"],
+            vec![
+                "3.14", "9.81", "-0.5", "2.71", "100.0", "0.001", "-45.2", "1.61",
+            ],
         ),
         3 => (
             "bool",
             1,
-            vec!["true", "false", "true", "true", "false", "false", "true", "false"],
+            vec![
+                "true", "false", "true", "true", "false", "false", "true", "false",
+            ],
         ),
         _ => (
             "char",
@@ -1210,13 +1803,13 @@ fn mostrar_compuesto_array(
     } else {
         default_samples
     };
-    let total_stack_bytes = state.arr_len * elem_size;
+    let total_stack_bytes = state.lessons.arr_len * elem_size;
 
     ui.add_space(8.0);
     ui.label(
         egui::RichText::new(format!(
             "Firma: [{type_str}; {}]  ·  Stack ≈ {total_stack_bytes} bytes",
-            state.arr_len
+            state.lessons.arr_len
         ))
         .monospace()
         .color(cyan),
@@ -1232,14 +1825,14 @@ fn mostrar_compuesto_array(
         egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90)),
         egui::StrokeKind::Inside,
     );
-    let cell_w = (rect.width() - 40.0) / state.arr_len as f32;
+    let cell_w = (rect.width() - 40.0) / state.lessons.arr_len as f32;
     let start_x = rect.left() + 20.0;
     let y = rect.center().y;
-    for i in 0..state.arr_len {
+    for i in 0..state.lessons.arr_len {
         let box_x = start_x + (i as f32 * cell_w) + cell_w / 2.0;
         let box_rect =
             egui::Rect::from_center_size(egui::pos2(box_x, y), egui::vec2(cell_w - 6.0, 48.0));
-        let is_active = i == state.arr_active_idx;
+        let is_active = i == state.lessons.arr_active_idx;
         let fill = if is_active {
             egui::Color32::from_rgb(48, 36, 22)
         } else {
@@ -1272,19 +1865,25 @@ fn mostrar_compuesto_array(
     ui.add_space(8.0);
     ui.horizontal(|ui| {
         ui.label("Índice arr[i]:");
-        ui.add(egui::Slider::new(&mut state.arr_active_idx, 0..=state.arr_len.max(1)).text("i"));
+        ui.add(
+            egui::Slider::new(
+                &mut state.lessons.arr_active_idx,
+                0..=state.lessons.arr_len.max(1),
+            )
+            .text("i"),
+        );
         if ui.button("arr.len()").clicked() {
-            state.arr_action_msg = format!("arr.len() = {}", state.arr_len);
+            state.lessons.arr_action_msg = format!("arr.len() = {}", state.lessons.arr_len);
         }
         if ui.button("size_of").clicked() {
-            state.arr_action_msg = format!("≈ {total_stack_bytes} bytes en stack");
+            state.lessons.arr_action_msg = format!("≈ {total_stack_bytes} bytes en stack");
         }
     });
-    if state.arr_active_idx >= state.arr_len {
+    if state.lessons.arr_active_idx >= state.lessons.arr_len {
         ui.label(
             egui::RichText::new(format!(
                 "PANIC: índice {} fuera de rango (len {})",
-                state.arr_active_idx, state.arr_len
+                state.lessons.arr_active_idx, state.lessons.arr_len
             ))
             .color(egui::Color32::from_rgb(255, 120, 120)),
         );
@@ -1292,37 +1891,36 @@ fn mostrar_compuesto_array(
         ui.label(
             egui::RichText::new(format!(
                 "arr[{}] = {}",
-                state.arr_active_idx,
-                samples[state.arr_active_idx % samples.len()]
+                state.lessons.arr_active_idx,
+                samples[state.lessons.arr_active_idx % samples.len()]
             ))
             .color(egui::Color32::from_rgb(120, 220, 140)),
         );
     }
-    if !state.arr_action_msg.is_empty() {
+    if !state.lessons.arr_action_msg.is_empty() {
         ui.label(
-            egui::RichText::new(&state.arr_action_msg)
+            egui::RichText::new(&state.lessons.arr_action_msg)
                 .italics()
                 .color(egui::Color32::from_rgb(140, 150, 165)),
         );
     }
 
     ui.add_space(12.0);
-    let theme = &state.theme_set.themes["base16-ocean.dark"];
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     mostrar_editor_interactivo(
         ui,
-        &mut state.arr_code,
-        Arc::clone(&state.arr_output),
+        &mut state.lessons.arr_code,
+        Arc::clone(&state.lessons.arr_output),
         "",
         ejecutar_codigo_rust,
-        &state.syntax_set,
+        &state.editor.syntax_set,
         theme,
     );
 }
 
-
 fn mostrar_compuesto_slice(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -1341,20 +1939,51 @@ fn mostrar_compuesto_slice(
             .striped(true)
             .spacing([18.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Pieza").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Nota").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Pieza")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Nota")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
-                ui.label(egui::RichText::new("Tipo").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Tipo")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("&[i32]").monospace().color(cyan));
                 ui.label("Referencia; el array/String sigue siendo dueño.");
                 ui.end_row();
-                ui.label(egui::RichText::new("Rango").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Rango")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("&arr[1..4]").monospace().color(cyan));
                 ui.label("Inicio inclusivo, fin exclusivo.");
                 ui.end_row();
-                ui.label(egui::RichText::new("&str").monospace().strong().color(naranja));
-                ui.label(egui::RichText::new("&str ≈ &[u8] UTF-8").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("&str")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
+                ui.label(
+                    egui::RichText::new("&str ≈ &[u8] UTF-8")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("El slice de texto que ya viste en Strings.");
                 ui.end_row();
             });
@@ -1364,13 +1993,13 @@ fn mostrar_compuesto_slice(
     ui.add_space(10.0);
     ui.horizontal(|ui| {
         ui.label("Rango:");
-        ui.add(egui::Slider::new(&mut state.slice_start, 0..=slice_max - 1).text("start"));
-        ui.add(egui::Slider::new(&mut state.slice_end, 1..=slice_max).text("end"));
+        ui.add(egui::Slider::new(&mut state.lessons.slice_start, 0..=slice_max - 1).text("start"));
+        ui.add(egui::Slider::new(&mut state.lessons.slice_end, 1..=slice_max).text("end"));
     });
-    if state.slice_start >= state.slice_end {
-        state.slice_end = state.slice_start + 1;
+    if state.lessons.slice_start >= state.lessons.slice_end {
+        state.lessons.slice_end = state.lessons.slice_start + 1;
     }
-    let slice_len = state.slice_end - state.slice_start;
+    let slice_len = state.lessons.slice_end - state.lessons.slice_start;
 
     ui.add_space(8.0);
     let (_, rect) = ui.allocate_space(egui::vec2(ui.available_width().min(720.0), 130.0));
@@ -1386,11 +2015,11 @@ fn mostrar_compuesto_slice(
     let start_x = rect.left() + 36.0;
     let y = rect.center().y + 4.0;
     let vals = ["10", "20", "30", "40", "50", "60"];
-    for i in 0..slice_max {
+    for (i, value) in vals.iter().enumerate().take(slice_max) {
         let box_x = start_x + (i as f32 * cell_w) + cell_w / 2.0;
         let box_rect =
             egui::Rect::from_center_size(egui::pos2(box_x, y), egui::vec2(cell_w - 8.0, 44.0));
-        let in_slice = i >= state.slice_start && i < state.slice_end;
+        let in_slice = i >= state.lessons.slice_start && i < state.lessons.slice_end;
         painter.rect(
             box_rect,
             4.0,
@@ -1399,19 +2028,26 @@ fn mostrar_compuesto_slice(
             } else {
                 egui::Color32::from_rgb(24, 28, 36)
             },
-            egui::Stroke::new(1.2, if in_slice { cyan } else { egui::Color32::from_rgb(60, 70, 85) }),
+            egui::Stroke::new(
+                1.2,
+                if in_slice {
+                    cyan
+                } else {
+                    egui::Color32::from_rgb(60, 70, 85)
+                },
+            ),
             egui::StrokeKind::Middle,
         );
         painter.text(
             box_rect.center(),
             egui::Align2::CENTER_CENTER,
-            vals[i],
+            value,
             egui::FontId::monospace(13.0),
             egui::Color32::WHITE,
         );
     }
-    let slice_min_x = start_x + (state.slice_start as f32 * cell_w);
-    let slice_max_x = start_x + (state.slice_end as f32 * cell_w);
+    let slice_min_x = start_x + (state.lessons.slice_start as f32 * cell_w);
+    let slice_max_x = start_x + (state.lessons.slice_end as f32 * cell_w);
     let slice_rect = egui::Rect::from_min_max(
         egui::pos2(slice_min_x + 2.0, y - 30.0),
         egui::pos2(slice_max_x - 2.0, y + 30.0),
@@ -1427,29 +2063,28 @@ fn mostrar_compuesto_slice(
         egui::Align2::CENTER_BOTTOM,
         format!(
             "&arr[{}..{}]  len={slice_len}",
-            state.slice_start, state.slice_end
+            state.lessons.slice_start, state.lessons.slice_end
         ),
         egui::FontId::proportional(12.0),
         naranja,
     );
 
     ui.add_space(12.0);
-    let theme = &state.theme_set.themes["base16-ocean.dark"];
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     mostrar_editor_interactivo(
         ui,
-        &mut state.slice_code,
-        Arc::clone(&state.slice_output),
+        &mut state.lessons.slice_code,
+        Arc::clone(&state.lessons.slice_output),
         "",
         ejecutar_codigo_rust,
-        &state.syntax_set,
+        &state.editor.syntax_set,
         theme,
     );
 }
 
-
 fn mostrar_compuesto_tupla(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -1468,20 +2103,55 @@ fn mostrar_compuesto_tupla(
             .striped(true)
             .spacing([18.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Pieza").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Nota").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Pieza")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Sintaxis")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Nota")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
-                ui.label(egui::RichText::new("Tipo").monospace().strong().color(naranja));
-                ui.label(egui::RichText::new("(i32, bool, f64)").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Tipo")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
+                ui.label(
+                    egui::RichText::new("(i32, bool, f64)")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("Heterogénea; el orden define el tipo.");
                 ui.end_row();
-                ui.label(egui::RichText::new("Campo").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("Campo")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label(egui::RichText::new("t.0  t.1").monospace().color(cyan));
                 ui.label("Índices fijos desde cero.");
                 ui.end_row();
-                ui.label(egui::RichText::new("Destruct").monospace().strong().color(naranja));
-                ui.label(egui::RichText::new("let (a, b, c) = t;").monospace().color(cyan));
+                ui.label(
+                    egui::RichText::new("Destruct")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
+                ui.label(
+                    egui::RichText::new("let (a, b, c) = t;")
+                        .monospace()
+                        .color(cyan),
+                );
                 ui.label("Muy usado al devolver varios valores desde fn.");
                 ui.end_row();
             });
@@ -1497,9 +2167,9 @@ fn mostrar_compuesto_tupla(
             ui.selectable_value(slot, 3, "char");
         });
     };
-    row(ui, "Campo .0:", &mut state.tup_t0);
-    row(ui, "Campo .1:", &mut state.tup_t1);
-    row(ui, "Campo .2:", &mut state.tup_t2);
+    row(ui, "Campo .0:", &mut state.lessons.tup_t0);
+    row(ui, "Campo .1:", &mut state.lessons.tup_t1);
+    row(ui, "Campo .2:", &mut state.lessons.tup_t2);
 
     let info = |id: usize| match id {
         0 => ("i32", "100", egui::Color32::from_rgb(60, 140, 240)),
@@ -1507,9 +2177,9 @@ fn mostrar_compuesto_tupla(
         2 => ("f64", "3.14", egui::Color32::from_rgb(240, 140, 40)),
         _ => ("char", "'R'", egui::Color32::from_rgb(180, 120, 240)),
     };
-    let (n0, v0, c0) = info(state.tup_t0);
-    let (n1, v1, c1) = info(state.tup_t1);
-    let (n2, v2, c2) = info(state.tup_t2);
+    let (n0, v0, c0) = info(state.lessons.tup_t0);
+    let (n1, v1, c1) = info(state.lessons.tup_t1);
+    let (n2, v2, c2) = info(state.lessons.tup_t2);
 
     ui.add_space(8.0);
     ui.label(
@@ -1552,18 +2222,17 @@ fn mostrar_compuesto_tupla(
     }
 
     ui.add_space(12.0);
-    let theme = &state.theme_set.themes["base16-ocean.dark"];
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     mostrar_editor_interactivo(
         ui,
-        &mut state.tup_code,
-        Arc::clone(&state.tup_output),
+        &mut state.lessons.tup_code,
+        Arc::clone(&state.lessons.tup_output),
         "",
         ejecutar_codigo_rust,
-        &state.syntax_set,
+        &state.editor.syntax_set,
         theme,
     );
 }
-
 
 fn mostrar_compuesto_comparar(
     ui: &mut egui::Ui,
@@ -1585,28 +2254,63 @@ fn mostrar_compuesto_comparar(
             .striped(true)
             .spacing([14.0, 10.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Tipo").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Homogéneo").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Tamaño").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Dueño").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Siguiente paso").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Tipo")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Homogéneo")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Tamaño")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Dueño")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Siguiente paso")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
-                ui.label(egui::RichText::new("[T; N]").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("[T; N]")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label("Sí");
                 ui.label("Fijo N");
                 ui.label("El array");
                 ui.label(egui::RichText::new("Vec<T>").monospace().color(cyan));
                 ui.end_row();
 
-                ui.label(egui::RichText::new("&[T]").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("&[T]")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label("Sí");
                 ui.label("Dinámico (vista)");
                 ui.label("No (préstamo)");
                 ui.label(egui::RichText::new("&str / APIs").monospace().color(cyan));
                 ui.end_row();
 
-                ui.label(egui::RichText::new("(A,B,…)").monospace().strong().color(naranja));
+                ui.label(
+                    egui::RichText::new("(A,B,…)")
+                        .monospace()
+                        .strong()
+                        .color(naranja),
+                );
                 ui.label("No");
                 ui.label("Fijo #campos");
                 ui.label("La tupla");
@@ -1630,15 +2334,20 @@ pub fn mostrar_categoria_numeros(ui: &mut egui::Ui) {
     mostrar_categoria_enteros(ui);
     ui.add_space(25.0);
     mostrar_categoria_flotantes(ui);
-    
+
     ui.add_space(30.0);
     ui.separator();
     ui.add_space(20.0);
-    
+
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
 
-    ui.heading(egui::RichText::new("Operadores Numéricos").strong().color(naranja).size(20.0));
+    ui.heading(
+        egui::RichText::new("Operadores Numéricos")
+            .strong()
+            .color(naranja)
+            .size(20.0),
+    );
     ui.add_space(10.0);
     ui.label("Rust incluye los operadores matemáticos y de comparación estándar. Es importante recordar que en Rust no puedes operar entre diferentes tipos numéricos sin hacer un casting explícito primero.");
     ui.add_space(15.0);
@@ -1649,16 +2358,32 @@ pub fn mostrar_categoria_numeros(ui: &mut egui::Ui) {
     frame.corner_radius = egui::CornerRadius::same(8);
     frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
 
-    ui.label(egui::RichText::new("Aritméticos").strong().color(egui::Color32::WHITE));
+    ui.label(
+        egui::RichText::new("Aritméticos")
+            .strong()
+            .color(egui::Color32::WHITE),
+    );
     ui.add_space(8.0);
     frame.show(ui, |ui| {
         egui::Grid::new("grid_operadores_aritmeticos")
             .striped(true)
             .spacing([30.0, 10.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Operador").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Nombre").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Código").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Operador")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Nombre")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ejemplo de Código")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 let ops = [
@@ -1670,7 +2395,12 @@ pub fn mostrar_categoria_numeros(ui: &mut egui::Ui) {
                 ];
 
                 for (simbolo, nombre, ej) in ops {
-                    ui.label(egui::RichText::new(simbolo).monospace().strong().color(naranja));
+                    ui.label(
+                        egui::RichText::new(simbolo)
+                            .monospace()
+                            .strong()
+                            .color(naranja),
+                    );
                     ui.label(nombre);
                     ui.label(egui::RichText::new(ej).monospace().color(cyan));
                     ui.end_row();
@@ -1680,16 +2410,32 @@ pub fn mostrar_categoria_numeros(ui: &mut egui::Ui) {
 
     ui.add_space(15.0);
 
-    ui.label(egui::RichText::new("Asignación Compuesta").strong().color(egui::Color32::WHITE));
+    ui.label(
+        egui::RichText::new("Asignación Compuesta")
+            .strong()
+            .color(egui::Color32::WHITE),
+    );
     ui.add_space(8.0);
     frame.show(ui, |ui| {
         egui::Grid::new("grid_operadores_asignacion")
             .striped(true)
             .spacing([30.0, 10.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Operador").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Equivalente").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Código").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Operador")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Equivalente")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ejemplo de Código")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 let ops = [
@@ -1701,12 +2447,16 @@ pub fn mostrar_categoria_numeros(ui: &mut egui::Ui) {
                 ];
 
                 for (simbolo, equiv, ej) in ops {
-                    ui.label(egui::RichText::new(simbolo).monospace().strong().color(naranja));
+                    ui.label(
+                        egui::RichText::new(simbolo)
+                            .monospace()
+                            .strong()
+                            .color(naranja),
+                    );
                     ui.label(equiv);
                     ui.label(egui::RichText::new(ej).monospace().color(cyan));
                     ui.end_row();
                 }
             });
     });
-
 }

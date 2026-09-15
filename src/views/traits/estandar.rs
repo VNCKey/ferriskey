@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_estandar(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -45,7 +45,7 @@ pub fn mostrar_tab_estandar(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Derivación Automática con #[derive]".to_string(), code_derive));
+                    state.ui.show_code_modal = Some(("Derivación Automática con #[derive]".to_string(), code_derive));
                 }
                 ui.label("Atajo que implementa automáticamente Debug, Clone, PartialEq y Default sin escribir impl.");
                 ui.end_row();
@@ -58,7 +58,7 @@ pub fn mostrar_tab_estandar(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Formateo Legible: Display".to_string(), code_display));
+                    state.ui.show_code_modal = Some(("Formateo Legible: Display".to_string(), code_display));
                 }
                 ui.label("Trait estándar para formatear e imprimir un tipo con println!(\"{}\").");
                 ui.end_row();
@@ -71,7 +71,7 @@ pub fn mostrar_tab_estandar(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Conversión de Tipos: From e Into".to_string(), code_from));
+                    state.ui.show_code_modal = Some(("Conversión de Tipos: From e Into".to_string(), code_from));
                 }
                 ui.label("Traits estándar de conversión de tipos. Implementar From otorga gratis el trait Into.");
                 ui.end_row();

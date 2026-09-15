@@ -1,8 +1,8 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use eframe::egui;
 
-pub fn mostrar_modal_codigo(ctx: &egui::Context, state: &mut PortfolioState) {
-    if let Some((title, code)) = state.show_code_modal.clone() {
+pub fn mostrar_modal_codigo(ctx: &egui::Context, state: &mut AppState) {
+    if let Some((title, code)) = state.ui.show_code_modal.clone() {
         let mut abierto = true;
         egui::Window::new(
             egui::RichText::new(&title)
@@ -17,13 +17,13 @@ pub fn mostrar_modal_codigo(ctx: &egui::Context, state: &mut PortfolioState) {
         .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
         .show(ctx, |ui| {
             ui.add_space(6.0);
-            let theme = &state.theme_set.themes["base16-ocean.dark"];
+            let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
             let mut layouter = |ui: &egui::Ui, text: &dyn egui::TextBuffer, wrap_width: f32| {
                 crate::components::code_editor::rust_layouter(
                     ui,
                     text.as_str(),
                     wrap_width,
-                    &state.syntax_set,
+                    &state.editor.syntax_set,
                     theme,
                 )
             };
@@ -52,7 +52,7 @@ pub fn mostrar_modal_codigo(ctx: &egui::Context, state: &mut PortfolioState) {
         });
 
         if !abierto {
-            state.show_code_modal = None;
+            state.ui.show_code_modal = None;
         }
     }
 }

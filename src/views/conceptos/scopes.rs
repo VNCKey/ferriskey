@@ -1,7 +1,7 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
-pub fn mostrar(ui: &mut egui::Ui, _state: &mut PortfolioState) {
+pub fn mostrar(ui: &mut egui::Ui, _state: &mut AppState) {
     ui.label(
         "En Rust, un Bloque delimita un conjunto de instrucciones mediante llaves. Cada bloque crea un nuevo Scope que controla el ciclo de vida de las variables declaradas en su interior.",
     );

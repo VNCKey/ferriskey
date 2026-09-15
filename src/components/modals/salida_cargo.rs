@@ -1,10 +1,10 @@
+use crate::app::AppState;
+use crate::components::console_output::formatear_salida_consola;
 use eframe::egui;
 use std::sync::atomic::Ordering;
-use crate::app::PortfolioState;
-use crate::components::console_output::formatear_salida_consola;
 
-pub fn mostrar_modal_salida_cargo(ctx: &egui::Context, state: &mut PortfolioState) {
-    if !state.show_cargo_output_modal.load(Ordering::Relaxed) {
+pub fn mostrar_modal_salida_cargo(ctx: &egui::Context, state: &mut AppState) {
+    if !state.ui.show_cargo_output_modal.load(Ordering::Relaxed) {
         return;
     }
 
@@ -59,6 +59,7 @@ pub fn mostrar_modal_salida_cargo(ctx: &egui::Context, state: &mut PortfolioStat
 
     if !open {
         state
+            .ui
             .show_cargo_output_modal
             .store(false, Ordering::Relaxed);
     }

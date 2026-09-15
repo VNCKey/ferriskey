@@ -1,10 +1,10 @@
 use eframe::egui;
 
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::components::educational_table::mostrar_tabla_educativa;
 
 #[allow(dead_code)]
-pub fn mostrar_toolchains(ui: &mut egui::Ui, _state: &mut PortfolioState) {
+pub fn mostrar_toolchains(ui: &mut egui::Ui, _state: &mut AppState) {
     egui::ScrollArea::vertical().show(ui, |ui| {
         mostrar_toolchains_contenido(ui);
     });

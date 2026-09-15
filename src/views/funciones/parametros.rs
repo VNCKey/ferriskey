@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_parametros(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_parametros(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Parámetro por Valor (T)".to_string(), code_val));
+                    state.ui.show_code_modal = Some(("Parámetro por Valor (T)".to_string(), code_val));
                 }
                 ui.label("La función toma la propiedad (Ownership). La variable original se Mueve (o Copia si es de tipo primitivo).");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_parametros(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Parámetro por Borrowing (&T)".to_string(), code_ref));
+                    state.ui.show_code_modal = Some(("Parámetro por Borrowing (&T)".to_string(), code_ref));
                 }
                 ui.label("Presta el valor de solo lectura. La función lee el dato sin quitarle la propiedad a la variable dueña.");
                 ui.end_row();
@@ -61,7 +61,7 @@ pub fn mostrar_tab_parametros(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Parámetro por Borrowing Mutable (&mut T)".to_string(), code_mut));
+                    state.ui.show_code_modal = Some(("Parámetro por Borrowing Mutable (&mut T)".to_string(), code_mut));
                 }
                 ui.label("Presta el valor con permiso de modificación in-situ. Permite alterar la variable original en memoria.");
                 ui.end_row();

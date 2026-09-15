@@ -1,10 +1,10 @@
-use eframe::egui;
-use std::sync::Arc;
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::components::code_editor::mostrar_editor_interactivo;
 use crate::execution::{ejecutar_codigo_api, ejecutar_codigo_rust};
+use eframe::egui;
+use std::sync::Arc;
 
-pub fn mostrar_editor(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_editor(ui: &mut egui::Ui, state: &mut AppState) {
     ui.add_space(20.0);
     ui.vertical_centered(|ui| {
         ui.heading(egui::RichText::new("💻 Code Playground").size(32.0).strong().color(egui::Color32::from_rgb(100, 200, 255)));
@@ -16,20 +16,19 @@ pub fn mostrar_editor(ui: &mut egui::Ui, state: &mut PortfolioState) {
     ui.separator();
     ui.add_space(20.0);
 
-    let theme = &state.theme_set.themes["base16-ocean.dark"];
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     mostrar_editor_interactivo(
         ui,
-        &mut state.playground_code,
-        Arc::clone(&state.playground_output),
+        &mut state.lessons.playground_code,
+        Arc::clone(&state.lessons.playground_output),
         "▶ Ejecutar Local (rustc)",
         ejecutar_codigo_rust,
-        &state.syntax_set,
+        &state.editor.syntax_set,
         theme,
     );
 }
 
-
-pub fn mostrar_editor_nube(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_editor_nube(ui: &mut egui::Ui, state: &mut AppState) {
     ui.add_space(20.0);
     ui.vertical_centered(|ui| {
         ui.heading(egui::RichText::new("☁️ Rust Playground API").size(32.0).strong().color(egui::Color32::from_rgb(255, 150, 100)));
@@ -41,14 +40,14 @@ pub fn mostrar_editor_nube(ui: &mut egui::Ui, state: &mut PortfolioState) {
     ui.separator();
     ui.add_space(20.0);
 
-    let theme = &state.theme_set.themes["base16-ocean.dark"];
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     mostrar_editor_interactivo(
         ui,
-        &mut state.playground_nube_code,
-        Arc::clone(&state.playground_nube_output),
+        &mut state.lessons.playground_nube_code,
+        Arc::clone(&state.lessons.playground_nube_output),
         "☁️ Compilar en la Nube",
         ejecutar_codigo_api,
-        &state.syntax_set,
+        &state.editor.syntax_set,
         theme,
     );
 }

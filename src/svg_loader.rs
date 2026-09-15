@@ -2,10 +2,10 @@ use eframe::egui;
 use std::sync::Arc;
 
 /// Loader de SVG personalizado que inicializa `usvg` y `resvg`
-/// con TODAS las fuentes del sistema operativo Linux cargadas en memoria (`fontdb.load_system_fonts()`).
+/// con las fuentes del sistema operativo cargadas en memoria (`fontdb.load_system_fonts()`).
 ///
 /// Esto permite que cualquier archivo SVG con etiquetas estándar `<text font-family="...">`
-/// se pinte directamente con las fuentes de Linux (DejaVu Sans, Ubuntu, Roboto, etc.) sin necesidad
+/// se pinte directamente con las fuentes disponibles (DejaVu Sans, Ubuntu, Roboto, etc.) sin necesidad
 /// de vectorizar textos manualmente a trazos `<path>`.
 pub struct SystemFontSvgLoader {
     options: usvg::Options<'static>,
@@ -19,7 +19,10 @@ impl SystemFontSvgLoader {
         fontdb.set_monospace_family("DejaVu Sans Mono");
         fontdb.set_serif_family("DejaVu Serif");
 
-        log::info!("🔤 Base de datos de fuentes del sistema Linux cargada en el loader SVG ({} fuentes encontradas).", fontdb.len());
+        tracing::info!(
+            fuentes = fontdb.len(),
+            "🔤 Base de datos de fuentes del sistema cargada en el loader SVG"
+        );
 
         let options = usvg::Options {
             fontdb: Arc::new(fontdb),
@@ -39,7 +42,12 @@ impl egui::load::ImageLoader for SystemFontSvgLoader {
         egui::generate_loader_id!(SystemFontSvgLoader)
     }
 
-    fn load(&self, ctx: &egui::Context, uri: &str, size_hint: egui::load::SizeHint) -> egui::load::ImageLoadResult {
+    fn load(
+        &self,
+        ctx: &egui::Context,
+        uri: &str,
+        size_hint: egui::load::SizeHint,
+    ) -> egui::load::ImageLoadResult {
         if !uri.ends_with(".svg") && !uri.starts_with("bytes://") {
             return Err(egui::load::LoadError::NotSupported);
         }
@@ -47,7 +55,9 @@ impl egui::load::ImageLoader for SystemFontSvgLoader {
         // Obtener bytes del archivo o recurso
         let bytes = match ctx.try_load_bytes(uri) {
             Ok(egui::load::BytesPoll::Ready { bytes, .. }) => bytes,
-            Ok(egui::load::BytesPoll::Pending { .. }) => return Ok(egui::load::ImagePoll::Pending { size: None }),
+            Ok(egui::load::BytesPoll::Pending { .. }) => {
+                return Ok(egui::load::ImagePoll::Pending { size: None });
+            }
             Err(err) => return Err(err),
         };
 
@@ -62,7 +72,11 @@ impl egui::load::ImageLoader for SystemFontSvgLoader {
 
         // Ajustar al tamaño solicitado según size_hint
         match size_hint {
-            egui::load::SizeHint::Size { width: target_w, height: target_h, .. } => {
+            egui::load::SizeHint::Size {
+                width: target_w,
+                height: target_h,
+                ..
+            } => {
                 if target_w > 0 && target_h > 0 {
                     width = target_w as f32;
                     height = target_h as f32;
@@ -75,25 +89,29 @@ impl egui::load::ImageLoader for SystemFontSvgLoader {
                     height = svg_size.height() * ratio;
                 }
             }
-            egui::load::SizeHint::Height(h) => {
-                if h > 0 {
-                    let ratio = h as f32 / svg_size.height();
-                    width = svg_size.width() * ratio;
-                    height = h as f32;
-                }
+            egui::load::SizeHint::Height(h) if h > 0 => {
+                let ratio = h as f32 / svg_size.height();
+                width = svg_size.width() * ratio;
+                height = h as f32;
             }
             _ => {}
         }
 
-        let pixmap_size = match resvg::tiny_skia::IntSize::from_wh(width.round() as u32, height.round() as u32) {
-            Some(size) => size,
-            None => return Err(egui::load::LoadError::Loading("Tamaño SVG inválido".into())),
-        };
+        let pixmap_size =
+            match resvg::tiny_skia::IntSize::from_wh(width.round() as u32, height.round() as u32) {
+                Some(size) => size,
+                None => return Err(egui::load::LoadError::Loading("Tamaño SVG inválido".into())),
+            };
 
-        let mut pixmap = match resvg::tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height()) {
-            Some(pixmap) => pixmap,
-            None => return Err(egui::load::LoadError::Loading("No se pudo crear pixmap".into())),
-        };
+        let mut pixmap =
+            match resvg::tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height()) {
+                Some(pixmap) => pixmap,
+                None => {
+                    return Err(egui::load::LoadError::Loading(
+                        "No se pudo crear pixmap".into(),
+                    ));
+                }
+            };
 
         let transform = resvg::tiny_skia::Transform::from_scale(
             pixmap_size.width() as f32 / svg_size.width(),

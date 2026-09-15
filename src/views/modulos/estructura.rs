@@ -34,11 +34,36 @@ pub fn mostrar_teoria_modulos(ui: &mut egui::Ui) {
 
             code_box.show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 2.0;
-                ui.label(egui::RichText::new("src/").monospace().size(12.0).color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("├── main.rs").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("├── redes.rs          // mod redes;").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("└── redes/").monospace().size(12.0).color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("    └── http.rs      // mod http;").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("src/")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("├── main.rs")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("├── redes.rs          // mod redes;")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("└── redes/")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("    └── http.rs      // mod http;")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
             });
         });
 
@@ -69,11 +94,36 @@ pub fn mostrar_teoria_modulos(ui: &mut egui::Ui) {
 
             code_box.show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 2.0;
-                ui.label(egui::RichText::new("src/").monospace().size(12.0).color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("├── main.rs").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("└── redes/").monospace().size(12.0).color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("    ├── mod.rs       // Archivo raíz de redes").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("    └── http.rs      // mod http;").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("src/")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("├── main.rs")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("└── redes/")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("    ├── mod.rs       // Archivo raíz de redes")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
+                ui.label(
+                    egui::RichText::new("    └── http.rs      // mod http;")
+                        .monospace()
+                        .size(12.0)
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
             });
         });
     });

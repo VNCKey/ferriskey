@@ -179,7 +179,8 @@ fn puntos_flecha_en_path_d(d: &str) -> Vec<(f32, f32)> {
                     let _rot = read_num(&chars, &mut i);
                     let _large = read_num(&chars, &mut i);
                     let _sweep = read_num(&chars, &mut i);
-                    if let (Some(ex), Some(ey)) = (read_num(&chars, &mut i), read_num(&chars, &mut i))
+                    if let (Some(ex), Some(ey)) =
+                        (read_num(&chars, &mut i), read_num(&chars, &mut i))
                     {
                         if cmd == 'a' {
                             x += ex;
@@ -269,12 +270,11 @@ fn consume_rel_move(svg: &str, pos: usize) -> Option<usize> {
 /// y padding horizontal. Las bolitas de inicio/fin vienen de SimpleStart/SimpleEnd
 /// (ya unidas al riel); no se dibujan círculos flotantes aparte.
 fn limpiar_svg_railroad(raw_svg: &str) -> String {
-    let clean = quitar_flechas_railroad(
-        &raw_svg
-            .replace(">\n", ">")
-            .replace(">\r\n", ">")
-            .replace("<rect width=\"100%\" height=\"100%\" class=\"railroad_canvas\"/>", ""),
-    );
+    let clean =
+        quitar_flechas_railroad(&raw_svg.replace(">\n", ">").replace(">\r\n", ">").replace(
+            "<rect width=\"100%\" height=\"100%\" class=\"railroad_canvas\"/>",
+            "",
+        ));
 
     // 1. Extraer viewBox original
     let mut orig_w = 500.0f32;
@@ -304,77 +304,81 @@ fn limpiar_svg_railroad(raw_svg: &str) -> String {
         let is_terminal = g_substr.starts_with("<g class=\"terminal\"");
         let is_nonterminal = g_substr.starts_with("<g class=\"nonterminal\"");
 
-        if is_terminal || is_nonterminal {
-            if let Some(g_end_rel) = g_substr.find("</g>") {
-                let g_end = g_start + g_end_rel + 4;
-                let group_block = &clean[g_start..g_end];
+        if (is_terminal || is_nonterminal)
+            && let Some(g_end_rel) = g_substr.find("</g>")
+        {
+            let g_end = g_start + g_end_rel + 4;
+            let group_block = &clean[g_start..g_end];
 
-                let mut content = "";
-                if let (Some(t_start), Some(t_end)) =
-                    (group_block.find("<text"), group_block.find("</text>"))
-                {
-                    let text_sub = &group_block[t_start..t_end];
-                    if let Some(tag_close) = text_sub.find('>') {
-                        content = text_sub[tag_close + 1..].trim();
-                    }
+            let mut content = "";
+            if let (Some(t_start), Some(t_end)) =
+                (group_block.find("<text"), group_block.find("</text>"))
+            {
+                let text_sub = &group_block[t_start..t_end];
+                if let Some(tag_close) = text_sub.find('>') {
+                    content = text_sub[tag_close + 1..].trim();
                 }
-
-                let mut rx = 0.0f32;
-                let mut ry = 0.0f32;
-                let mut rw = 0.0f32;
-                let mut rh = 0.0f32;
-
-                if let Some(r_pos) = group_block.find("<rect ") {
-                    let r_sub = &group_block[r_pos..];
-                    if let Some(r_close) = r_sub.find('>') {
-                        let r_tag = &r_sub[..r_close + 1];
-                        rx = extract_attr(r_tag, "x");
-                        ry = extract_attr(r_tag, "y");
-                        rw = extract_attr(r_tag, "width");
-                        rh = extract_attr(r_tag, "height");
-                    }
-                }
-
-                if rw <= 0.0 {
-                    rw = (content.len() as f32 * 8.0) + 20.0;
-                }
-                if rh <= 0.0 {
-                    rh = 22.0;
-                }
-
-                let new_rect = if is_terminal {
-                    format!(
-                        "<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\" rx=\"10\" ry=\"10\" fill=\"#1e2638\" stroke=\"#ff9d00\" stroke-width=\"2\"/>",
-                        rx, ry, rw, rh
-                    )
-                } else {
-                    format!(
-                        "<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\" fill=\"#1a2336\" stroke=\"#64c8ff\" stroke-width=\"2\"/>",
-                        rx, ry, rw, rh
-                    )
-                };
-
-                // Texto regular y un poco más chico (sin bold) — se lee mejor al escalar el modal
-                let font_size = if is_terminal { 12.0f32 } else { 11.0f32 };
-                let font_color = if is_terminal { "#ffb347" } else { "#ffffff" };
-                let font_weight = "normal";
-
-                let cx = rx + rw / 2.0;
-                let cy = ry + rh / 2.0 + (font_size * 0.35);
-
-                let new_text = format!(
-                    "<text x=\"{:.2}\" y=\"{:.2}\" font-family=\"DejaVu Sans, Arial, sans-serif\" font-size=\"{:.1}\" font-weight=\"{}\" fill=\"{}\" text-anchor=\"middle\">{}</text>",
-                    cx, cy, font_size, font_weight, font_color, content
-                );
-
-                let class_name = if is_terminal { "terminal" } else { "nonterminal" };
-                let new_group = format!("<g class=\"{}\">{}{}</g>", class_name, new_rect, new_text);
-
-                output.push_str(&clean[search_idx..g_start]);
-                output.push_str(&new_group);
-                search_idx = g_end;
-                continue;
             }
+
+            let mut rx = 0.0f32;
+            let mut ry = 0.0f32;
+            let mut rw = 0.0f32;
+            let mut rh = 0.0f32;
+
+            if let Some(r_pos) = group_block.find("<rect ") {
+                let r_sub = &group_block[r_pos..];
+                if let Some(r_close) = r_sub.find('>') {
+                    let r_tag = &r_sub[..r_close + 1];
+                    rx = extract_attr(r_tag, "x");
+                    ry = extract_attr(r_tag, "y");
+                    rw = extract_attr(r_tag, "width");
+                    rh = extract_attr(r_tag, "height");
+                }
+            }
+
+            if rw <= 0.0 {
+                rw = (content.len() as f32 * 8.0) + 20.0;
+            }
+            if rh <= 0.0 {
+                rh = 22.0;
+            }
+
+            let new_rect = if is_terminal {
+                format!(
+                    "<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\" rx=\"10\" ry=\"10\" fill=\"#1e2638\" stroke=\"#ff9d00\" stroke-width=\"2\"/>",
+                    rx, ry, rw, rh
+                )
+            } else {
+                format!(
+                    "<rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\" fill=\"#1a2336\" stroke=\"#64c8ff\" stroke-width=\"2\"/>",
+                    rx, ry, rw, rh
+                )
+            };
+
+            // Texto regular y un poco más chico (sin bold) — se lee mejor al escalar el modal
+            let font_size = if is_terminal { 12.0f32 } else { 11.0f32 };
+            let font_color = if is_terminal { "#ffb347" } else { "#ffffff" };
+            let font_weight = "normal";
+
+            let cx = rx + rw / 2.0;
+            let cy = ry + rh / 2.0 + (font_size * 0.35);
+
+            let new_text = format!(
+                "<text x=\"{:.2}\" y=\"{:.2}\" font-family=\"DejaVu Sans, Arial, sans-serif\" font-size=\"{:.1}\" font-weight=\"{}\" fill=\"{}\" text-anchor=\"middle\">{}</text>",
+                cx, cy, font_size, font_weight, font_color, content
+            );
+
+            let class_name = if is_terminal {
+                "terminal"
+            } else {
+                "nonterminal"
+            };
+            let new_group = format!("<g class=\"{}\">{}{}</g>", class_name, new_rect, new_text);
+
+            output.push_str(&clean[search_idx..g_start]);
+            output.push_str(&new_group);
+            search_idx = g_end;
+            continue;
         }
 
         output.push_str(&clean[search_idx..g_start + 8]);
@@ -478,13 +482,15 @@ fn convertir_texto_a_vectores(svg_str: &str) -> String {
     if let Ok(tree) = usvg::Tree::from_str(svg_str, &opt) {
         let write_opt = usvg::WriteOptions::default();
         let raw_out = tree.to_string(&write_opt);
-        let mut transparent_out = raw_out
-            .replace("<rect width=\"100%\" height=\"100%\" class=\"railroad_canvas\"/>", "");
+        let mut transparent_out = raw_out.replace(
+            "<rect width=\"100%\" height=\"100%\" class=\"railroad_canvas\"/>",
+            "",
+        );
 
-        if let Some(p_start) = transparent_out.find("<path fill=\"#000000\" stroke=\"none\"") {
-            if let Some(p_end) = transparent_out[p_start..].find("/>") {
-                transparent_out.replace_range(p_start..p_start + p_end + 2, "");
-            }
+        if let Some(p_start) = transparent_out.find("<path fill=\"#000000\" stroke=\"none\"")
+            && let Some(p_end) = transparent_out[p_start..].find("/>")
+        {
+            transparent_out.replace_range(p_start..p_start + p_end + 2, "");
         }
 
         return transparent_out;
@@ -495,10 +501,11 @@ fn convertir_texto_a_vectores(svg_str: &str) -> String {
 fn main() {
     println!("Generando diagramas SVG con SimpleStart/SimpleEnd (bolitas conectadas al riel)...");
 
+    let diagram_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("diagramas");
     let out = |name: &str, svg: String| {
-        let path = format!("/home/alek/VNC/repos/egui_vnc/diagramas/{name}");
+        let path = diagram_dir.join(name);
         std::fs::write(&path, svg).unwrap();
-        println!("  wrote {path}");
+        println!("  wrote {}", path.display());
     };
 
     // 1. Diagrama Inmutable: let ident [: tipo] = expr;
@@ -544,7 +551,9 @@ fn main() {
         Box::new(Optional::new(NonTerminal::new("parámetros".to_string()))),
         Box::new(Terminal::new(")".to_string())),
         Box::new(Terminal::new("{".to_string())),
-        Box::new(Optional::new(NonTerminal::new("bloque de código".to_string()))),
+        Box::new(Optional::new(NonTerminal::new(
+            "bloque de código".to_string(),
+        ))),
         Box::new(Terminal::new("}".to_string())),
     ]));
     out(
@@ -558,7 +567,9 @@ fn main() {
         Box::new(NonTerminal::new("fn / struct / mod".to_string())),
         Box::new(NonTerminal::new("ident".to_string())),
         Box::new(Terminal::new("{".to_string())),
-        Box::new(Optional::new(NonTerminal::new("cuerpo librería".to_string()))),
+        Box::new(Optional::new(NonTerminal::new(
+            "cuerpo librería".to_string(),
+        ))),
         Box::new(Terminal::new("}".to_string())),
     ]));
     out(

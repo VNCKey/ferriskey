@@ -1,109 +1,117 @@
-pub mod entorno;
 pub mod anatomy;
-pub mod cargo_workflow;
+pub mod entorno;
 pub mod estructura_tiempos;
 pub mod foundations;
 pub mod pipeline;
-pub mod project_anatomy;
 
-use crate::app::PortfolioState;
+use crate::app::AppState;
+use crate::components::navigation::{
+    separador_vertical_centrado, underline_tab, underline_tab_destacado,
+};
 use eframe::egui;
 
-pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut PortfolioState) {
-    let mut is_expanded = state.mostrar_nav_superior;
+pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
+    let mut is_expanded = state.ui.mostrar_nav_superior;
 
     let color_header = egui::Color32::from_rgb(13, 15, 19);
+    let cyan = egui::Color32::from_rgb(100, 200, 255);
+    let orange = egui::Color32::from_rgb(255, 160, 50);
 
-    egui::Panel::top("nav_top_global")
+    egui::Panel::top("app_nav_top_header")
         .frame(egui::Frame::default().fill(color_header).inner_margin(4.0))
         .resizable(false)
         .show_collapsible(ui, &mut is_expanded, |ui| {
-            ui.add_space(6.0);
-            ui.horizontal(|ui| {
-                ui.add_space(5.0);
-                
-                // --- LADO IZQUIERDO: Título y Teoría ---
-                ui.label(
-                    egui::RichText::new("Rust Foundations")
-                        .size(16.0)
-                        .strong()
-                        .color(egui::Color32::from_rgb(255, 160, 50)),
-                );
-                
-                ui.separator();
-
-                let img_book = egui::Image::new(egui::include_image!("../../../assets/icons/book-line.svg")).fit_to_exact_size(egui::Vec2::new(24.0, 24.0));
-                ui.add(img_book);
-                let tabs_teoria = [
-                    (0, "Rust Ecosystem"),
-                    (3, "Build & Execution"),
-                    (2, "Cargo Workflow"),
-                    (4, "Project Anatomy"),
-                ];
-                for (indice, texto) in tabs_teoria {
-                    let es_activo = state.pilares_step == indice;
-                    if ui.selectable_label(es_activo, texto).clicked() {
-                        state.pilares_step = indice;
-                        state.anim_trigger = ui.input(|i| i.time); // Reiniciar animaciones al cambiar de pestaña
-                    }
-                }
-
-                // --- LADO DERECHO: Práctica ---
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            ui.add_space(2.0);
+            ui.allocate_ui_with_layout(
+                egui::vec2(ui.available_width(), 30.0),
+                egui::Layout::left_to_right(egui::Align::Center),
+                |ui| {
                     ui.add_space(5.0);
-                    
-                    let tabs_practica = [
-                        (1, "Code Lab"),
-                    ];
-                    // Iteramos al revés para que se dibujen correctamente de derecha a izquierda
-                    for (indice, texto) in tabs_practica.iter().rev() {
-                        let es_activo = state.pilares_step == *indice;
-                        if ui.selectable_label(es_activo, *texto).clicked() {
-                            state.pilares_step = *indice;
+
+                    // --- LADO IZQUIERDO: Título y Teoría (Centrado vertical flex) ---
+                    ui.label(
+                        egui::RichText::new("Rust Foundations")
+                            .size(14.5)
+                            .strong()
+                            .color(orange),
+                    );
+
+                    separador_vertical_centrado(ui, 14.0);
+
+                    let img_book = egui::Image::new(egui::include_image!(
+                        "../../../assets/icons/book-line.svg"
+                    ))
+                    .fit_to_exact_size(egui::Vec2::new(18.0, 18.0));
+                    let (_id, book_rect) = ui.allocate_space(egui::Vec2::new(18.0, 18.0));
+                    img_book.paint_at(ui, book_rect);
+                    ui.add_space(4.0);
+
+                    let tabs_teoria = [(0, "Rust Ecosystem")];
+                    for (indice, texto) in tabs_teoria {
+                        let es_activo = state.lessons.pilares_step == indice;
+                        if underline_tab(ui, texto, es_activo, cyan).clicked() {
+                            state.lessons.pilares_step = indice;
+                            state.ui.anim_trigger = ui.input(|i| i.time); // Reiniciar animaciones al cambiar de pestaña
                         }
                     }
 
-                    let img_code = egui::Image::new(egui::include_image!("../../../assets/icons/monitor-code-line.svg")).fit_to_exact_size(egui::Vec2::new(24.0, 24.0));
-                    ui.add(img_code);
+                    // --- LADO DERECHO: Práctica ---
+                    ui.scope_builder(
+                        egui::UiBuilder::new()
+                            .id(egui::Id::new("nav_right_section"))
+                            .layout(egui::Layout::right_to_left(egui::Align::Center)),
+                        |ui| {
+                            ui.add_space(5.0);
 
-                    ui.separator();
-                });
-            });
-            ui.add_space(6.0);
+                            let es_code_lab_activo = state.lessons.pilares_step == 1;
+                            let tabs_practica = [(1, "Code Lab")];
+                            // Iteramos al revés para que se dibujen correctamente de derecha a izquierda
+                            for (indice, texto) in tabs_practica.iter().rev() {
+                                let es_activo = state.lessons.pilares_step == *indice;
+                                // Destacamos con baliza pulsante e intuición visual hacia Code Lab cuando no está seleccionado
+                                if underline_tab_destacado(ui, texto, es_activo, orange, true)
+                                    .clicked()
+                                {
+                                    state.lessons.pilares_step = *indice;
+                                }
+                            }
+
+                            let img_code = egui::Image::new(egui::include_image!(
+                                "../../../assets/icons/monitor-code-line.svg"
+                            ))
+                            .fit_to_exact_size(egui::Vec2::new(18.0, 18.0));
+                            let (_id, code_rect) = ui.allocate_space(egui::Vec2::new(18.0, 18.0));
+
+                            let time = ui.input(|i| i.time);
+                            let pulse = ((time * 1.8).sin() * 0.5 + 0.5) as f32;
+                            let tint = if es_code_lab_activo {
+                                orange
+                            } else {
+                                egui::Color32::from_rgb(
+                                    (205.0 + 35.0 * pulse) as u8,
+                                    (140.0 + 25.0 * pulse) as u8,
+                                    (65.0 + 20.0 * pulse) as u8,
+                                )
+                            };
+                            img_code.tint(tint).paint_at(ui, code_rect);
+
+                            separador_vertical_centrado(ui, 14.0);
+                        },
+                    );
+                },
+            );
+            ui.add_space(2.0);
         });
 
-    state.mostrar_nav_superior = is_expanded;
+    state.ui.mostrar_nav_superior = is_expanded;
 }
 
-pub fn mostrar_tutorial_cargo(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tutorial_cargo(ui: &mut egui::Ui, state: &mut AppState) {
     // El encabezado y tabs se movieron al panel derecho global
 
-    match state.pilares_step {
+    match state.lessons.pilares_step {
         0 => foundations::mostrar_ecosystem(ui, state),
         1 => anatomy::mostrar_anatomia_cargo(ui, state),
-        2 => cargo_workflow::mostrar_cargo_workflow(ui, state),
-        3 => estructura_tiempos::mostrar_build_execution(ui, state),
-        4 => project_anatomy::mostrar_project_anatomy(ui, state),
         _ => foundations::mostrar_ecosystem(ui, state),
     }
-}
-
-fn mostrar_tab(
-    ui: &mut egui::Ui,
-    state: &mut PortfolioState,
-    indice: usize,
-    texto: &str,
-    naranja: egui::Color32,
-    gris_tab: egui::Color32,
-) {
-    let es_activo = state.pilares_step == indice;
-    let color = if es_activo { naranja } else { gris_tab };
-
-    if ui
-        .add(egui::Button::new(egui::RichText::new(texto).strong().color(color)).frame(es_activo))
-        .clicked()
-    {
-        state.pilares_step = indice;
-    }
-    ui.add_space(4.0);
 }

@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_pattern_matching(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_pattern_matching(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Coincidencia Concisa: if let".to_string(), code_if_let));
+                    state.ui.show_code_modal = Some(("Coincidencia Concisa: if let".to_string(), code_if_let));
                 }
                 ui.label("Evalúa y desempaqueta una variante específica sin necesidad de escribir un match exhaustivo.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_pattern_matching(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Bucle Conciso: while let".to_string(), code_while_let));
+                    state.ui.show_code_modal = Some(("Bucle Conciso: while let".to_string(), code_while_let));
                 }
                 ui.label("Repite el bucle mientras la expresión coincida con el patrón especificado.");
                 ui.end_row();

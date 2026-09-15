@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_coleccion_info(
     ui: &mut egui::Ui,
-    _state: &mut PortfolioState,
+    _state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -73,10 +73,26 @@ pub fn mostrar_coleccion_info(
             .striped(true)
             .spacing([18.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Categoría").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Método").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Firma de Código").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Complejidad & Descripción").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Categoría")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Método")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Firma de Código")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Complejidad & Descripción")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 // Modificación
@@ -92,19 +108,31 @@ pub fn mostrar_coleccion_info(
                 ui.label("O(1). Elimina y devuelve el último elemento.");
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Inserción por Índice").strong().color(texto));
+                ui.label(
+                    egui::RichText::new("Inserción por Índice")
+                        .strong()
+                        .color(texto),
+                );
                 ui.label(egui::RichText::new("insert").monospace().color(cyan));
                 ui.label("v.insert(idx, val)");
                 ui.label("O(N). Inserta y desplaza los elementos hacia la derecha.");
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Eliminación Lenta").strong().color(texto));
+                ui.label(
+                    egui::RichText::new("Eliminación Lenta")
+                        .strong()
+                        .color(texto),
+                );
                 ui.label(egui::RichText::new("remove").monospace().color(cyan));
                 ui.label("v.remove(idx) -> T");
                 ui.label("O(N). Elimina un elemento manteniendo el orden de los demás.");
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Eliminación Rápida").strong().color(texto));
+                ui.label(
+                    egui::RichText::new("Eliminación Rápida")
+                        .strong()
+                        .color(texto),
+                );
                 ui.label(egui::RichText::new("swap_remove").monospace().color(cyan));
                 ui.label("v.swap_remove(idx) -> T");
                 ui.label("O(1). Reemplaza el elemento por el último. Cambia el orden.");
@@ -117,7 +145,11 @@ pub fn mostrar_coleccion_info(
                 ui.label("Reserva espacio en Heap para evitar reasignaciones futuras.");
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Optimización Memoria").strong().color(texto));
+                ui.label(
+                    egui::RichText::new("Optimización Memoria")
+                        .strong()
+                        .color(texto),
+                );
                 ui.label(egui::RichText::new("shrink_to_fit").monospace().color(cyan));
                 ui.label("v.shrink_to_fit()");
                 ui.label("Libera el exceso de capacidad no utilizada en el Heap.");
@@ -130,7 +162,11 @@ pub fn mostrar_coleccion_info(
                 ui.label("Devuelve Option<&T> al primer o último elemento.");
                 ui.end_row();
 
-                ui.label(egui::RichText::new("Búsqueda Binaria").strong().color(texto));
+                ui.label(
+                    egui::RichText::new("Búsqueda Binaria")
+                        .strong()
+                        .color(texto),
+                );
                 ui.label(egui::RichText::new("binary_search").monospace().color(cyan));
                 ui.label("v.binary_search(&val)");
                 ui.label("O(log N). Busca en vectores previamente ordenados.");

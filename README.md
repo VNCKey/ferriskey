@@ -53,7 +53,7 @@ Sigue estos sencillos pasos para clonar y correr la aplicación localmente:
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/VNCKey/taller.git ferriskey
+git clone https://github.com/VNCKey/ferriskey.git
 cd ferriskey
 ```
 

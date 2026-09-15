@@ -4,7 +4,7 @@ pub mod facade;
 pub mod rutas;
 pub mod visibilidad;
 
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::components::code_editor::mostrar_editor_interactivo;
 use crate::execution::ejecutar_codigo_rust;
 use crate::views::conceptos::mostrar_selector_proyectos_estandar_con_archivos;
@@ -12,7 +12,7 @@ use eframe::egui;
 #[allow(unused_imports)]
 use std::sync::Arc;
 
-pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let gris_tab = egui::Color32::from_rgb(180, 190, 205);
 
@@ -42,7 +42,7 @@ pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut PortfolioState) {
             (3, "Re-exportación"),
         ];
         for (indice, texto) in tabs_practica {
-            let es_activo = state.modulos_tab == indice;
+            let es_activo = state.lessons.modulos_tab == indice;
             let color = if es_activo { naranja } else { gris_tab };
             if ui
                 .add(
@@ -51,13 +51,13 @@ pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 )
                 .clicked()
             {
-                state.modulos_tab = indice;
+                state.lessons.modulos_tab = indice;
             }
             ui.add_space(4.0);
         }
 
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            let es_activo = state.modulos_tab == 4;
+            let es_activo = state.lessons.modulos_tab == 4;
             let color = if es_activo { naranja } else { gris_tab };
             if ui
                 .add(
@@ -70,7 +70,7 @@ pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 )
                 .clicked()
             {
-                state.modulos_tab = 4;
+                state.lessons.modulos_tab = 4;
             }
             ui.add_space(4.0);
             ui.label(
@@ -88,26 +88,26 @@ pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut PortfolioState) {
     egui::ScrollArea::vertical()
         .auto_shrink([false, false])
         .show(ui, |ui| {
-            if state.modulos_tab < 4 {
-                let code_target = if state.selected_project.is_some() {
-                    &mut state.shared_project_code
+            if state.lessons.modulos_tab < 4 {
+                let code_target = if state.project.selected_project.is_some() {
+                    &mut state.project.shared_project_code
                 } else {
-                    &mut state.modulos_code
+                    &mut state.lessons.modulos_code
                 };
 
                 mostrar_selector_proyectos_estandar_con_archivos(
                     ui,
-                    &mut state.selected_project,
-                    &mut state.selected_file,
-                    &mut state.term_cwd,
+                    &mut state.project.selected_project,
+                    &mut state.project.selected_file,
+                    &mut state.terminal.term_cwd,
                     "combo_proyectos_modulos",
                     code_target,
                 );
 
                 ui.add_space(10.0);
 
-                let syntax_set = state.syntax_set.clone();
-                let theme = state.theme_set.themes["base16-ocean.dark"].clone();
+                let syntax_set = state.editor.syntax_set.clone();
+                let theme = state.editor.theme_set.themes["base16-ocean.dark"].clone();
                 let (code_ref, output_arc) = state.obtener_editor_activo_mut();
                 mostrar_editor_interactivo(
                     ui,
@@ -124,7 +124,7 @@ pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 ui.add_space(12.0);
             }
 
-            match state.modulos_tab {
+            match state.lessons.modulos_tab {
                 0 => declaracion::mostrar_tab_declaracion(ui),
                 1 => visibilidad::mostrar_tab_visibilidad(ui),
                 2 => rutas::mostrar_tab_rutas(ui),

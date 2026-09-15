@@ -5,6 +5,7 @@ pub enum AppRoute {
     LandingPage,
     TutorialCargo,
     Comenzando,
+    LibTiposDatos,
     TutorialCompilacion,
     TutorialTiposDatos,
     TutorialControlFlujo,

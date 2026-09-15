@@ -1,8 +1,8 @@
 use eframe::egui;
-use crate::app::PortfolioState;
+use crate::app::AppState;
 
-pub fn mostrar_modal_template_creado(ctx: &egui::Context, state: &mut PortfolioState) {
-    let proj_name = match &state.created_project_name {
+pub fn mostrar_modal_template_creado(ctx: &egui::Context, state: &mut AppState) {
+    let proj_name = match &state.project.created_project_name {
         Some(name) => name.clone(),
         None => return,
     };
@@ -15,7 +15,7 @@ pub fn mostrar_modal_template_creado(ctx: &egui::Context, state: &mut PortfolioS
         .resizable(true)
         .collapsible(true)
         .show(ctx, |ui| {
-            let is_lib = proj_name.contains("lib") || state.estructura_tab == 2;
+            let is_lib = proj_name.contains("lib") || state.lessons.estructura_tab == 2;
             let src_file = if is_lib { "src/lib.rs" } else { "src/main.rs" };
             let src_desc = if is_lib {
                 "Archivo raíz de la librería. No lleva fn main(), sino funciones y structs con pub."
@@ -70,7 +70,7 @@ pub fn mostrar_modal_template_creado(ctx: &egui::Context, state: &mut PortfolioS
         });
 
     if !open {
-        state.created_project_name = None;
-        state.show_cargo_output_modal.store(true, std::sync::atomic::Ordering::Relaxed);
+        state.project.created_project_name = None;
+        state.ui.show_cargo_output_modal.store(true, std::sync::atomic::Ordering::Relaxed);
     }
 }

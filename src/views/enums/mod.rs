@@ -3,13 +3,13 @@ pub mod info;
 pub mod option;
 pub mod result;
 
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::components::code_editor::mostrar_editor_interactivo;
 use crate::execution::ejecutar_codigo_rust;
 use crate::views::conceptos::mostrar_selector_proyectos_estandar_con_archivos;
 use eframe::egui;
 
-pub fn mostrar_tutorial_enums(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tutorial_enums(ui: &mut egui::Ui, state: &mut AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let gris_tab = egui::Color32::from_rgb(180, 190, 205);
@@ -41,7 +41,7 @@ pub fn mostrar_tutorial_enums(ui: &mut egui::Ui, state: &mut PortfolioState) {
             (2, "Desempaquetado (& ?)"),
         ];
         for (indice, label) in tabs_izq {
-            let activo = state.enums_tab == indice;
+            let activo = state.lessons.enums_tab == indice;
             let color = if activo { naranja } else { gris_tab };
             if ui
                 .add(
@@ -50,13 +50,13 @@ pub fn mostrar_tutorial_enums(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 )
                 .clicked()
             {
-                state.enums_tab = indice;
+                state.lessons.enums_tab = indice;
             }
             ui.add_space(4.0);
         }
 
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            let activo = state.enums_tab == 3;
+            let activo = state.lessons.enums_tab == 3;
             let color = if activo { naranja } else { gris_tab };
             if ui
                 .add(
@@ -65,7 +65,7 @@ pub fn mostrar_tutorial_enums(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 )
                 .clicked()
             {
-                state.enums_tab = 3;
+                state.lessons.enums_tab = 3;
             }
             ui.add_space(4.0);
             ui.label(
@@ -83,26 +83,26 @@ pub fn mostrar_tutorial_enums(ui: &mut egui::Ui, state: &mut PortfolioState) {
     egui::ScrollArea::vertical()
         .auto_shrink([false, false])
         .show(ui, |ui| {
-            if state.enums_tab < 3 {
-                let code_target = if state.selected_project.is_some() {
-                    &mut state.shared_project_code
+            if state.lessons.enums_tab < 3 {
+                let code_target = if state.project.selected_project.is_some() {
+                    &mut state.project.shared_project_code
                 } else {
-                    &mut state.enums_code
+                    &mut state.lessons.enums_code
                 };
 
                 mostrar_selector_proyectos_estandar_con_archivos(
                     ui,
-                    &mut state.selected_project,
-                    &mut state.selected_file,
-                    &mut state.term_cwd,
+                    &mut state.project.selected_project,
+                    &mut state.project.selected_file,
+                    &mut state.terminal.term_cwd,
                     "combo_proyectos_enums",
                     code_target,
                 );
 
                 ui.add_space(10.0);
 
-                let syntax_set = state.syntax_set.clone();
-                let theme = state.theme_set.themes["base16-ocean.dark"].clone();
+                let syntax_set = state.editor.syntax_set.clone();
+                let theme = state.editor.theme_set.themes["base16-ocean.dark"].clone();
                 let (code_ref, output_arc) = state.obtener_editor_activo_mut();
                 mostrar_editor_interactivo(
                     ui,
@@ -119,7 +119,7 @@ pub fn mostrar_tutorial_enums(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 ui.add_space(12.0);
             }
 
-            match state.enums_tab {
+            match state.lessons.enums_tab {
                 0 => option::mostrar_tab_option(ui, state, naranja, cyan, texto),
                 1 => result::mostrar_tab_result(ui, state, naranja, cyan, texto),
                 2 => desempaquetado::mostrar_tab_desempaquetado(ui, state, naranja, cyan, texto),

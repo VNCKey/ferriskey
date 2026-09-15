@@ -1,15 +1,15 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
 #[allow(dead_code)]
-pub fn mostrar(ui: &mut egui::Ui, _state: &mut PortfolioState) {
-            let mut table_frame = egui::Frame::new();
-            table_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-            table_frame.inner_margin = egui::Margin::same(12);
-            table_frame.corner_radius = egui::CornerRadius::same(8);
-            table_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+pub fn mostrar(ui: &mut egui::Ui, _state: &mut AppState) {
+    let mut table_frame = egui::Frame::new();
+    table_frame.fill = egui::Color32::from_rgb(14, 18, 26);
+    table_frame.inner_margin = egui::Margin::same(12);
+    table_frame.corner_radius = egui::CornerRadius::same(8);
+    table_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
 
-            table_frame.show(ui, |ui| {
+    table_frame.show(ui, |ui| {
                 egui::Grid::new("tabla_const_static")
                     .striped(true)
                     .spacing([25.0, 8.0])
@@ -87,5 +87,4 @@ pub fn mostrar(ui: &mut egui::Ui, _state: &mut PortfolioState) {
                         ui.end_row();
                     });
             });
-
 }

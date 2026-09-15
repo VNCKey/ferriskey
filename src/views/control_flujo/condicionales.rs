@@ -1,8 +1,8 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
-pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let texto = egui::Color32::from_rgb(200, 210, 225);
@@ -46,7 +46,7 @@ pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut PortfolioState) 
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: if / else".to_string(), code_if_else));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: if / else".to_string(), code_if_else));
                 }
                 ui.label("Evalúa una condición booleana. Las condiciones no llevan paréntesis obligatorios.");
                 ui.end_row();
@@ -63,7 +63,7 @@ pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut PortfolioState) 
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: else if".to_string(), code_else_if));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: else if".to_string(), code_else_if));
                 }
                 ui.label("Encadena múltiples evaluaciones condicionales secuenciales.");
                 ui.end_row();
@@ -80,7 +80,7 @@ pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut PortfolioState) 
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo de Sintaxis: if como Expresión".to_string(), code_if_expr));
+                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: if como Expresión".to_string(), code_if_expr));
                 }
                 ui.label("Devuelve un valor directamente a una variable. Ambas ramas DEBEN retornar el mismo tipo de dato.");
                 ui.end_row();
@@ -114,7 +114,7 @@ pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut PortfolioState) 
                     .button(egui::RichText::new("Ver Ejemplo").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo: Asignación Directa con if".to_string(), ex1));
+                    state.ui.show_code_modal = Some(("Ejemplo: Asignación Directa con if".to_string(), ex1));
                 }
                 ui.label("Como 'if' es una expresión, la última línea de cada bloque sin punto y coma ';' es devuelta e inferida como tipo &str.");
                 ui.end_row();
@@ -125,7 +125,7 @@ pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut PortfolioState) 
                     .button(egui::RichText::new("Ver Ejemplo").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo: Múltiples Condiciones".to_string(), ex2));
+                    state.ui.show_code_modal = Some(("Ejemplo: Múltiples Condiciones".to_string(), ex2));
                 }
                 ui.label("Permite evaluar un flujo continuo de alternativas excluyentes de arriba hacia abajo.");
                 ui.end_row();
@@ -136,7 +136,7 @@ pub fn mostrar_tab_condicionales(ui: &mut egui::Ui, state: &mut PortfolioState) 
                     .button(egui::RichText::new("Ver Ejemplo").strong().color(cyan))
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Ejemplo: Operadores Lógicos (&&, ||)".to_string(), ex3));
+                    state.ui.show_code_modal = Some(("Ejemplo: Operadores Lógicos (&&, ||)".to_string(), ex3));
                 }
                 ui.label("Combina múltiples evaluaciones booleanas utilizando AND (&&), OR (||) y NOT (!).");
                 ui.end_row();

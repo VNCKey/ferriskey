@@ -8,6 +8,7 @@ pub mod funciones;
 pub mod genericos;
 pub mod iteradores;
 pub mod landing;
+pub mod lib;
 pub mod memoria;
 pub mod modulos;
 pub mod pilares;

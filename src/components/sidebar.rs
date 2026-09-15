@@ -1,10 +1,11 @@
+use crate::app::AppState;
+use crate::components::navigation::nav_item_sidebar;
+use crate::routes::AppRoute;
 use eframe::egui;
 use std::sync::atomic::Ordering;
-use crate::app::PortfolioState;
-use crate::routes::AppRoute;
 
-pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
-    let mut is_expanded = state.mostrar_sidebar;
+pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
+    let mut is_expanded = state.ui.mostrar_sidebar;
 
     let color_sidebar = egui::Color32::from_rgb(13, 15, 19); // Aún más oscuro para dar profundidad
 
@@ -22,10 +23,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                         "Ferris",
                         0.0,
                         egui::TextFormat {
-                            font_id: egui::FontId::new(
-                                24.0,
-                                egui::FontFamily::Proportional,
-                            ),
+                            font_id: egui::FontId::new(24.0, egui::FontFamily::Proportional),
                             color: egui::Color32::from_rgb(255, 160, 50),
                             ..Default::default()
                         },
@@ -34,10 +32,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                         "Key",
                         0.0,
                         egui::TextFormat {
-                            font_id: egui::FontId::new(
-                                24.0,
-                                egui::FontFamily::Proportional,
-                            ),
+                            font_id: egui::FontId::new(24.0, egui::FontFamily::Proportional),
                             color: egui::Color32::WHITE,
                             ..Default::default()
                         },
@@ -49,7 +44,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                         .on_hover_text("Volver a la pantalla de inicio (FerrisKey)");
 
                     if logo_response.clicked() {
-                        state.ruta_actual = AppRoute::LandingPage;
+                        state.ui.ruta_actual = AppRoute::LandingPage;
                     }
 
                     ui.label(
@@ -72,154 +67,182 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                 ui.add_space(10.0);
 
                 // 1. Rust Foundations
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialCargo,
-                        "Rust Foundations",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Rust Foundations",
+                    state.ui.ruta_actual == AppRoute::TutorialCargo,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialCargo; state.anim_trigger = ui.input(|i| i.time);
+                    state.ui.ruta_actual = AppRoute::TutorialCargo;
+                    state.ui.anim_trigger = ui.input(|i| i.time);
                 }
+                ui.add_space(2.0);
 
                 // 2. Conceptos
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::Comenzando,
-                        "Conceptos",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Conceptos",
+                    state.ui.ruta_actual == AppRoute::Comenzando,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::Comenzando; state.anim_trigger = ui.input(|i| i.time);
+                    state.ui.ruta_actual = AppRoute::Comenzando;
+                    state.ui.anim_trigger = ui.input(|i| i.time);
                 }
+                ui.add_space(2.0);
 
                 // 3. Memoria (reglas de memoria + String/&str)
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialOwnership
-                            || state.ruta_actual == AppRoute::TutorialStrings,
-                        "Memoria",
-                    )
-                    .clicked()
-                {
-                    state.ruta_actual = AppRoute::TutorialOwnership;
+                let es_memoria = state.ui.ruta_actual == AppRoute::TutorialOwnership
+                    || state.ui.ruta_actual == AppRoute::TutorialStrings;
+                if nav_item_sidebar(ui, "Memoria", es_memoria).clicked() {
+                    state.ui.ruta_actual = AppRoute::TutorialOwnership;
                 }
+                ui.add_space(2.0);
 
                 // 4. Módulos
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialModulos,
-                        "Módulos",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Módulos",
+                    state.ui.ruta_actual == AppRoute::TutorialModulos,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialModulos;
+                    state.ui.ruta_actual = AppRoute::TutorialModulos;
                 }
+                ui.add_space(2.0);
 
                 // 5. Tipos Compuestos
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialTiposDatos,
-                        "Tipos Compuestos",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Tipos Compuestos",
+                    state.ui.ruta_actual == AppRoute::TutorialTiposDatos,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialTiposDatos;
+                    state.ui.ruta_actual = AppRoute::TutorialTiposDatos;
                 }
+                ui.add_space(2.0);
 
                 // 6. Control de Flujo
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialControlFlujo,
-                        "Control de Flujo",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Control de Flujo",
+                    state.ui.ruta_actual == AppRoute::TutorialControlFlujo,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialControlFlujo;
+                    state.ui.ruta_actual = AppRoute::TutorialControlFlujo;
                 }
+                ui.add_space(2.0);
 
                 // 7. Funciones & Closures
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialFunciones,
-                        "Closures",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Closures",
+                    state.ui.ruta_actual == AppRoute::TutorialFunciones,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialFunciones;
+                    state.ui.ruta_actual = AppRoute::TutorialFunciones;
                 }
+                ui.add_space(2.0);
 
                 // 8. Iteradores
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialIteradores,
-                        "Iteradores",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Iteradores",
+                    state.ui.ruta_actual == AppRoute::TutorialIteradores,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialIteradores;
+                    state.ui.ruta_actual = AppRoute::TutorialIteradores;
                 }
+                ui.add_space(2.0);
 
                 // 9. Structs & impl
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialStructs,
-                        "Custom Types",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Custom Types",
+                    state.ui.ruta_actual == AppRoute::TutorialStructs,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialStructs;
+                    state.ui.ruta_actual = AppRoute::TutorialStructs;
                 }
+                ui.add_space(2.0);
 
                 // 10. Error Handling
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialEnums,
-                        "Error Handling",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Error Handling",
+                    state.ui.ruta_actual == AppRoute::TutorialEnums,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialEnums;
+                    state.ui.ruta_actual = AppRoute::TutorialEnums;
                 }
+                ui.add_space(2.0);
 
                 // 11. Generics
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialGenericos,
-                        "Generics",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Generics",
+                    state.ui.ruta_actual == AppRoute::TutorialGenericos,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialGenericos;
+                    state.ui.ruta_actual = AppRoute::TutorialGenericos;
                 }
-
+                ui.add_space(2.0);
 
                 // 13. Traits & Genéricos
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::TutorialTraits,
-                        "Traits",
-                    )
-                    .clicked()
+                if nav_item_sidebar(
+                    ui,
+                    "Traits",
+                    state.ui.ruta_actual == AppRoute::TutorialTraits,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::TutorialTraits;
+                    state.ui.ruta_actual = AppRoute::TutorialTraits;
+                }
+                ui.add_space(2.0);
+
+                ui.add_space(16.0);
+                ui.separator();
+                ui.add_space(12.0);
+                ui.label(
+                    egui::RichText::new("LIB")
+                        .strong()
+                        .color(egui::Color32::GRAY),
+                );
+                ui.add_space(8.0);
+
+                if nav_item_sidebar(
+                    ui,
+                    "Tipos y métodos",
+                    state.ui.ruta_actual == AppRoute::LibTiposDatos,
+                )
+                .clicked()
+                {
+                    state.ui.ruta_actual = AppRoute::LibTiposDatos;
                 }
 
-                ui.add_space(20.0);
+                ui.add_space(16.0);
                 ui.label(
                     egui::RichText::new("PROYECTOS TÉCNICOS")
                         .strong()
                         .color(egui::Color32::GRAY),
                 );
-                ui.add_space(10.0);
-                if ui
-                    .selectable_label(
-                        state.ruta_actual == AppRoute::DashboardGraficos,
-                        "Visualización de Datos",
-                    )
-                    .clicked()
+                ui.add_space(8.0);
+                if nav_item_sidebar(
+                    ui,
+                    "Visualización de Datos",
+                    state.ui.ruta_actual == AppRoute::DashboardGraficos,
+                )
+                .clicked()
                 {
-                    state.ruta_actual = AppRoute::DashboardGraficos;
+                    state.ui.ruta_actual = AppRoute::DashboardGraficos;
                 }
 
                 ui.add_space(20.0);
@@ -228,8 +251,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
 
                 // Botones de Utilidades: Salida/Logs, Terminal y Configuración
                 ui.horizontal(|ui| {
-                    let is_cargo_open =
-                        state.show_cargo_output_modal.load(Ordering::Relaxed);
+                    let is_cargo_open = state.ui.show_cargo_output_modal.load(Ordering::Relaxed);
                     let cargo_text_color = if is_cargo_open {
                         egui::Color32::from_rgb(255, 160, 50)
                     } else {
@@ -237,19 +259,19 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                     };
 
                     if ui
-                        .button(
-                            egui::RichText::new("ℹ️").size(18.0).color(cargo_text_color),
-                        )
+                        .button(egui::RichText::new("ℹ️").size(18.0).color(cargo_text_color))
                         .on_hover_text("Información / Salida de compilación y macros")
                         .clicked()
                     {
-                        state.show_cargo_output_modal
+                        state
+                            .ui
+                            .show_cargo_output_modal
                             .store(!is_cargo_open, Ordering::Relaxed);
                     }
 
                     ui.add_space(8.0);
 
-                    let term_text_color = if state.show_terminal_modal {
+                    let term_text_color = if state.ui.show_terminal_modal {
                         egui::Color32::from_rgb(255, 160, 50)
                     } else {
                         egui::Color32::from_rgb(180, 190, 205)
@@ -257,15 +279,16 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
 
                     if ui
                         .button(egui::RichText::new("💻").size(18.0).color(term_text_color))
-                        .on_hover_text("Terminal Linux interactiva")
+                        .on_hover_text("Terminal del sistema interactiva")
                         .clicked()
                     {
-                        state.show_terminal_modal = !state.show_terminal_modal;
+                        let abrir_terminal = !state.ui.show_terminal_modal;
+                        state.ui.show_terminal_modal = abrir_terminal;
                     }
 
                     ui.add_space(8.0);
 
-                    let config_icon_color = if state.show_settings_modal {
+                    let config_icon_color = if state.ui.show_settings_modal {
                         egui::Color32::from_rgb(255, 160, 50)
                     } else {
                         egui::Color32::from_rgb(180, 190, 205)
@@ -283,11 +306,11 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                         .on_hover_text("Configuración y Atajos de Teclado")
                         .clicked()
                     {
-                        state.show_settings_modal = !state.show_settings_modal;
+                        state.ui.show_settings_modal = !state.ui.show_settings_modal;
                     }
                 });
             });
         });
 
-    state.mostrar_sidebar = is_expanded;
+    state.ui.mostrar_sidebar = is_expanded;
 }

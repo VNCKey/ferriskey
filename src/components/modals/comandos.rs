@@ -1,5 +1,5 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
 pub const COMANDOS_TALLER: &[(&str, &str)] = &[
     (
@@ -35,8 +35,8 @@ pub const COMANDOS_TALLER: &[(&str, &str)] = &[
 ];
 
 #[allow(dead_code)]
-pub fn mostrar_modal_comandos(ctx: &egui::Context, state: &mut PortfolioState) {
-    let mut abierto = state.show_commands_modal;
+pub fn mostrar_modal_comandos(ctx: &egui::Context, state: &mut AppState) {
+    let mut abierto = state.ui.show_commands_modal;
     let mut comando_elegido = None;
     egui::Window::new("⌨ Referencia rápida de comandos")
         .open(&mut abierto)
@@ -62,8 +62,8 @@ pub fn mostrar_modal_comandos(ctx: &egui::Context, state: &mut PortfolioState) {
             ui.separator();
             ui.small("cargo expand no forma parte de Cargo: se instala con `cargo install cargo-expand`.");
         });
-    state.show_commands_modal = abierto;
+    state.ui.show_commands_modal = abierto;
     if let Some(comando) = comando_elegido {
-        state.term_input = comando.to_owned();
+        state.terminal.term_input = comando.to_owned();
     }
 }

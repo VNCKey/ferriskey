@@ -19,10 +19,26 @@ pub fn mostrar_compuesto_comparar(
             .striped(true)
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
-                ui.label(egui::RichText::new("Tipo").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("¿Tipos Mixtos?").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("¿Tamaño Dinámico?").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ubicación Principal").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Tipo")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("¿Tipos Mixtos?")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("¿Tamaño Dinámico?")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ubicación Principal")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 ui.label(egui::RichText::new("Array").strong().color(naranja));

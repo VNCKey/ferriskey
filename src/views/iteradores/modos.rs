@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_modos(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_modos(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Iterador por Referencia (&T): .iter()".to_string(), code_iter));
+                    state.ui.show_code_modal = Some(("Iterador por Referencia (&T): .iter()".to_string(), code_iter));
                 }
                 ui.label("Itera sobre referencias inmutables (&T). No consume la colección ni retira su propiedad.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_modos(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Iterador por Referencia Mutable (&mut T): .iter_mut()".to_string(), code_iter_mut));
+                    state.ui.show_code_modal = Some(("Iterador por Referencia Mutable (&mut T): .iter_mut()".to_string(), code_iter_mut));
                 }
                 ui.label("Itera sobre referencias mutables (&mut T). Permite modificar los elementos in-situ en el Heap.");
                 ui.end_row();
@@ -61,7 +61,7 @@ pub fn mostrar_tab_modos(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Iterador por Valor (T): .into_iter()".to_string(), code_into_iter));
+                    state.ui.show_code_modal = Some(("Iterador por Valor (T): .into_iter()".to_string(), code_into_iter));
                 }
                 ui.label("Itera por valor (T), transfiriendo el Ownership de cada elemento y destruyendo la colección original.");
                 ui.end_row();

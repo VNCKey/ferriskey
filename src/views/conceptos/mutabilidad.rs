@@ -1,7 +1,7 @@
+use crate::app::AppState;
 use eframe::egui;
-use crate::app::PortfolioState;
 
-pub fn mostrar(ui: &mut egui::Ui, state: &mut PortfolioState) {
+pub fn mostrar(ui: &mut egui::Ui, state: &mut AppState) {
     ui.label(
         "En Rust, las variables son inmutables por defecto. Esto garantiza seguridad de memoria, previene errores de concurrencia y obliga a declarar explícitamente con 'mut' cuando un valor necesita cambiar.",
     );
@@ -30,21 +30,42 @@ pub fn mostrar(ui: &mut egui::Ui, state: &mut PortfolioState) {
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
                 // Encabezados
-                ui.label(egui::RichText::new("Declaración").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Mutabilidad").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Código").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
+                ui.label(
+                    egui::RichText::new("Declaración")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Mutabilidad")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ejemplo de Código")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Descripción")
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
                 ui.end_row();
 
                 // Fila 1: let (Inmutable)
-                let btn_color_0 = if state.show_railroad_modal == Some(0) {
+                let btn_color_0 = if state.ui.show_railroad_modal == Some(0) {
                     egui::Color32::from_rgb(255, 160, 50)
                 } else {
                     egui::Color32::from_rgb(180, 190, 205)
                 };
 
                 ui.horizontal(|ui| {
-                    ui.label(egui::RichText::new("let").monospace().strong().color(egui::Color32::from_rgb(255, 160, 50)));
+                    ui.label(
+                        egui::RichText::new("let")
+                            .monospace()
+                            .strong()
+                            .color(egui::Color32::from_rgb(255, 160, 50)),
+                    );
                     ui.add_space(4.0);
                     if ui
                         .add(
@@ -56,28 +77,45 @@ pub fn mostrar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                                 .fit_to_exact_size(egui::vec2(18.0, 18.0))
                                 .tint(btn_color_0),
                             )
-                            .frame(state.show_railroad_modal == Some(0)),
+                            .frame(state.ui.show_railroad_modal == Some(0)),
                         )
                         .on_hover_text("Ver diagrama Railroad de sintaxis (let inmutable)")
                         .clicked()
                     {
-                        state.show_railroad_modal = if state.show_railroad_modal == Some(0) { None } else { Some(0) };
+                        state.ui.show_railroad_modal = if state.ui.show_railroad_modal == Some(0) {
+                            None
+                        } else {
+                            Some(0)
+                        };
                     }
                 });
-                ui.label(egui::RichText::new("No").strong().color(egui::Color32::from_rgb(180, 190, 205)));
-                ui.label(egui::RichText::new("let x = 5;").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("No")
+                        .strong()
+                        .color(egui::Color32::from_rgb(180, 190, 205)),
+                );
+                ui.label(
+                    egui::RichText::new("let x = 5;")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("No puede reasignarse. El valor permanece fijo.");
                 ui.end_row();
 
                 // Fila 2: let mut (Mutable)
-                let btn_color_1 = if state.show_railroad_modal == Some(1) {
+                let btn_color_1 = if state.ui.show_railroad_modal == Some(1) {
                     egui::Color32::from_rgb(255, 160, 50)
                 } else {
                     egui::Color32::from_rgb(180, 190, 205)
                 };
 
                 ui.horizontal(|ui| {
-                    ui.label(egui::RichText::new("let mut").monospace().strong().color(egui::Color32::from_rgb(255, 160, 50)));
+                    ui.label(
+                        egui::RichText::new("let mut")
+                            .monospace()
+                            .strong()
+                            .color(egui::Color32::from_rgb(255, 160, 50)),
+                    );
                     ui.add_space(4.0);
                     if ui
                         .add(
@@ -89,16 +127,28 @@ pub fn mostrar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                                 .fit_to_exact_size(egui::vec2(18.0, 18.0))
                                 .tint(btn_color_1),
                             )
-                            .frame(state.show_railroad_modal == Some(1)),
+                            .frame(state.ui.show_railroad_modal == Some(1)),
                         )
                         .on_hover_text("Ver diagrama Railroad de sintaxis (let mut mutable)")
                         .clicked()
                     {
-                        state.show_railroad_modal = if state.show_railroad_modal == Some(1) { None } else { Some(1) };
+                        state.ui.show_railroad_modal = if state.ui.show_railroad_modal == Some(1) {
+                            None
+                        } else {
+                            Some(1)
+                        };
                     }
                 });
-                ui.label(egui::RichText::new("Sí").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.label(egui::RichText::new("let mut x = 5;\nx = 10;").monospace().color(egui::Color32::from_rgb(100, 200, 255)));
+                ui.label(
+                    egui::RichText::new("Sí")
+                        .strong()
+                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                );
+                ui.label(
+                    egui::RichText::new("let mut x = 5;\nx = 10;")
+                        .monospace()
+                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                );
                 ui.label("Permite cambiar el valor de la variable de forma explícita.");
                 ui.end_row();
 
@@ -109,7 +159,11 @@ pub fn mostrar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                         .strong()
                         .color(egui::Color32::from_rgb(255, 160, 50)),
                 );
-                ui.label(egui::RichText::new("No").strong().color(egui::Color32::from_rgb(180, 190, 205)));
+                ui.label(
+                    egui::RichText::new("No")
+                        .strong()
+                        .color(egui::Color32::from_rgb(180, 190, 205)),
+                );
                 ui.label(
                     egui::RichText::new("const MAX: u32 = 100;")
                         .monospace()
@@ -125,7 +179,11 @@ pub fn mostrar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                         .strong()
                         .color(egui::Color32::from_rgb(255, 160, 50)),
                 );
-                ui.label(egui::RichText::new("No por defecto").strong().color(egui::Color32::from_rgb(180, 190, 205)));
+                ui.label(
+                    egui::RichText::new("No por defecto")
+                        .strong()
+                        .color(egui::Color32::from_rgb(180, 190, 205)),
+                );
                 ui.label(
                     egui::RichText::new("static VALOR: &str = \"OK\";")
                         .monospace()
@@ -141,7 +199,11 @@ pub fn mostrar(ui: &mut egui::Ui, state: &mut PortfolioState) {
                         .strong()
                         .color(egui::Color32::from_rgb(255, 160, 50)),
                 );
-                ui.label(egui::RichText::new("N/A").strong().color(egui::Color32::from_rgb(180, 190, 205)));
+                ui.label(
+                    egui::RichText::new("N/A")
+                        .strong()
+                        .color(egui::Color32::from_rgb(180, 190, 205)),
+                );
                 ui.label(
                     egui::RichText::new("type Metros = u64;")
                         .monospace()

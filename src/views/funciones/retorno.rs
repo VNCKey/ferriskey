@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_retorno(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_retorno(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Retorno Múltiple con Tuplas -> (T1, T2)".to_string(), code_tuple));
+                    state.ui.show_code_modal = Some(("Retorno Múltiple con Tuplas -> (T1, T2)".to_string(), code_tuple));
                 }
                 ui.label("Agrupa y devuelve varios valores a la vez. Permite desestructurarlos fácilmente en el punto de llamada.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_retorno(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Retorno de Tipo Unidad ()".to_string(), code_unit));
+                    state.ui.show_code_modal = Some(("Retorno de Tipo Unidad ()".to_string(), code_unit));
                 }
                 ui.label("Cuando una función solo realiza efectos secundarios (como imprimir), devuelve implícitamente el tipo de unidad ().");
                 ui.end_row();

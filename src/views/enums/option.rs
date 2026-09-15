@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_option(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_option(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Option<T>: Some vs None".to_string(), code_option_basic));
+                    state.ui.show_code_modal = Some(("Option<T>: Some vs None".to_string(), code_option_basic));
                 }
                 ui.label("Some(val) envuelve un valor existente; None indica la ausencia total de valor.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_option(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Manejo Seguro: .unwrap_or()".to_string(), code_unwrap_or));
+                    state.ui.show_code_modal = Some(("Manejo Seguro: .unwrap_or()".to_string(), code_unwrap_or));
                 }
                 ui.label("Extrae el valor si es Some; si es None, devuelve de forma segura un valor por defecto ya calculado.");
                 ui.end_row();
@@ -61,7 +61,7 @@ pub fn mostrar_tab_option(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Manejo Lazy: .unwrap_or_else()".to_string(), code_unwrap_else));
+                    state.ui.show_code_modal = Some(("Manejo Lazy: .unwrap_or_else()".to_string(), code_unwrap_else));
                 }
                 ui.label("Ejecuta una closure para calcular el valor por defecto de forma perezosa (Lazy) solo si era None.");
                 ui.end_row();
@@ -74,7 +74,7 @@ pub fn mostrar_tab_option(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Valor Estándar: .unwrap_or_default()".to_string(), code_unwrap_default));
+                    state.ui.show_code_modal = Some(("Valor Estándar: .unwrap_or_default()".to_string(), code_unwrap_default));
                 }
                 ui.label("Devuelve el valor predeterminado estándar del tipo T (ej. 0 para enteros, \"\" para String).");
                 ui.end_row();
@@ -87,7 +87,7 @@ pub fn mostrar_tab_option(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Desempaquetado con Mensaje: .expect()".to_string(), code_expect));
+                    state.ui.show_code_modal = Some(("Desempaquetado con Mensaje: .expect()".to_string(), code_expect));
                 }
                 ui.label("Extrae el valor o provoca pánico (panic!) imprimiendo un mensaje explicativo personalizado.");
                 ui.end_row();
@@ -100,7 +100,7 @@ pub fn mostrar_tab_option(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Transformadores: .map() y .and_then()".to_string(), code_map_then));
+                    state.ui.show_code_modal = Some(("Transformadores: .map() y .and_then()".to_string(), code_map_then));
                 }
                 ui.label(".map() transforma el valor interno; .and_then() encadena operaciones que retornan otro Option.");
                 ui.end_row();

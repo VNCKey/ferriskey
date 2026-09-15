@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_enums(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_enums(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Enum Simple".to_string(), code_enum_simple));
+                    state.ui.show_code_modal = Some(("Enum Simple".to_string(), code_enum_simple));
                 }
                 ui.label("Conjunto discreto de variantes exclusivas.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_enums(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Enum con Datos Asociados".to_string(), code_enum_data));
+                    state.ui.show_code_modal = Some(("Enum con Datos Asociados".to_string(), code_enum_data));
                 }
                 ui.label("Cada variante puede guardar diferentes estructuras de datos o valores internos.");
                 ui.end_row();
@@ -61,7 +61,7 @@ pub fn mostrar_tab_enums(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Bloque impl en Enums".to_string(), code_enum_impl));
+                    state.ui.show_code_modal = Some(("Bloque impl en Enums".to_string(), code_enum_impl));
                 }
                 ui.label("Los bloques impl permiten agregar métodos propios a un Enum igual que a una Struct.");
                 ui.end_row();

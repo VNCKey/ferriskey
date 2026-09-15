@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_bounds(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -47,7 +47,7 @@ pub fn mostrar_tab_bounds(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Sintaxis Concisa: impl Trait".to_string(), code_impl_trait));
+                    state.ui.show_code_modal = Some(("Sintaxis Concisa: impl Trait".to_string(), code_impl_trait));
                 }
                 ui.label("Forma concisa de indicar que un parámetro debe implementar un trait determinado.");
                 ui.end_row();
@@ -60,7 +60,7 @@ pub fn mostrar_tab_bounds(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Trait Bound Explícito <T: Trait>".to_string(), code_bound));
+                    state.ui.show_code_modal = Some(("Trait Bound Explícito <T: Trait>".to_string(), code_bound));
                 }
                 ui.label("Sintaxis explícita con genéricos útil cuando múltiples parámetros comparten el mismo tipo T.");
                 ui.end_row();
@@ -73,7 +73,7 @@ pub fn mostrar_tab_bounds(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Cláusula where para Múltiples Bounds".to_string(), code_where));
+                    state.ui.show_code_modal = Some(("Cláusula where para Múltiples Bounds".to_string(), code_where));
                 }
                 ui.label("Mantiene limpia la firma de la función agrupando las restricciones complejas al final.");
                 ui.end_row();

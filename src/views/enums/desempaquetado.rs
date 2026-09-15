@@ -1,10 +1,10 @@
-use crate::app::PortfolioState;
+use crate::app::AppState;
 use crate::views::control_flujo::card_frame_tutorial;
 use eframe::egui;
 
 pub fn mostrar_tab_desempaquetado(
     ui: &mut egui::Ui,
-    state: &mut PortfolioState,
+    state: &mut AppState,
     naranja: egui::Color32,
     cyan: egui::Color32,
     texto: egui::Color32,
@@ -35,7 +35,7 @@ pub fn mostrar_tab_desempaquetado(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Desempaquetado Conciso: if let".to_string(), code_if_let));
+                    state.ui.show_code_modal = Some(("Desempaquetado Conciso: if let".to_string(), code_if_let));
                 }
                 ui.label("Extrae el valor contenido en Some u Ok solo cuando la coincidencia tiene éxito.");
                 ui.end_row();
@@ -48,7 +48,7 @@ pub fn mostrar_tab_desempaquetado(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Bucle Conciso: while let".to_string(), code_while_let));
+                    state.ui.show_code_modal = Some(("Bucle Conciso: while let".to_string(), code_while_let));
                 }
                 ui.label("Mantiene la iteración de un bucle mientras la expresión retorne Some o Ok.");
                 ui.end_row();
@@ -61,7 +61,7 @@ pub fn mostrar_tab_desempaquetado(
                     .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
                     .clicked()
                 {
-                    state.show_code_modal = Some(("Propagación de Errores: Operador ?".to_string(), code_question));
+                    state.ui.show_code_modal = Some(("Propagación de Errores: Operador ?".to_string(), code_question));
                 }
                 ui.label("Desempaqueta el valor si es Ok; si es Err, retorna tempranamente el error a la función llamadora.");
                 ui.end_row();

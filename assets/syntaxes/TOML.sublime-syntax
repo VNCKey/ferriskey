@@ -1,0 +1,91 @@
+%YAML 1.2
+---
+name: TOML
+file_extensions:
+  - toml
+scope: source.toml
+
+contexts:
+  main:
+    - match: '^\s*(\[\[)([A-Za-z0-9_.-]+)(\]\])'
+      captures:
+        1: punctuation.definition.array.table.begin.toml
+        2: entity.name.section.toml
+        3: punctuation.definition.array.table.end.toml
+
+    - match: '^\s*(\[)([A-Za-z0-9_.-]+)(\])'
+      captures:
+        1: punctuation.definition.table.begin.toml
+        2: entity.name.section.toml
+        3: punctuation.definition.table.end.toml
+
+    - match: '^\s*([A-Za-z0-9_-]+)(\s*)(=)'
+      captures:
+        1: variable.other.key.toml
+        2: punctuation.separator.key-value.toml
+        3: keyword.operator.assignment.toml
+
+    - match: '#'
+      scope: punctuation.definition.comment.toml
+      push: comment
+
+    - match: '"""'
+      scope: punctuation.definition.string.begin.toml
+      push: multiline-basic-string
+
+    - match: "'''"
+      scope: punctuation.definition.string.begin.toml
+      push: multiline-literal-string
+
+    - match: '"'
+      scope: punctuation.definition.string.begin.toml
+      push: basic-string
+
+    - match: "'"
+      scope: punctuation.definition.string.begin.toml
+      push: literal-string
+
+    - match: '\b(true|false)\b'
+      scope: constant.language.boolean.toml
+
+    - match: '\b([-+]?(?:0|[1-9][0-9_]*)(?:\.[0-9_]+)?(?:[eE][-+]?[0-9]+)?)\b'
+      scope: constant.numeric.toml
+
+    - match: '\b(0x[0-9A-Fa-f_]+|0o[0-7_]+|0b[01_]+)\b'
+      scope: constant.numeric.toml
+
+    - match: '[\[\]{},.]'
+      scope: punctuation.separator.toml
+
+  comment:
+    - meta_scope: comment.line.number-sign.toml
+    - match: '$'
+      pop: true
+
+  basic-string:
+    - meta_scope: string.quoted.double.toml
+    - match: '\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})'
+      scope: constant.character.escape.toml
+    - match: '"'
+      scope: punctuation.definition.string.end.toml
+      pop: true
+
+  literal-string:
+    - meta_scope: string.quoted.single.toml
+    - match: "'"
+      scope: punctuation.definition.string.end.toml
+      pop: true
+
+  multiline-basic-string:
+    - meta_scope: string.quoted.double.multiline.toml
+    - match: '\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})'
+      scope: constant.character.escape.toml
+    - match: '"""'
+      scope: punctuation.definition.string.end.toml
+      pop: true
+
+  multiline-literal-string:
+    - meta_scope: string.quoted.single.multiline.toml
+    - match: "'''"
+      scope: punctuation.definition.string.end.toml
+      pop: true
