@@ -1,4 +1,4 @@
-#[derive(PartialEq, Default, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Hash, Default, Clone, Copy, Debug)]
 #[allow(dead_code)]
 pub enum AppRoute {
     #[default]
