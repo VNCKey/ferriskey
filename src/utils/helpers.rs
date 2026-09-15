@@ -36,6 +36,7 @@ pub fn es_archivo_rust(path: &Path) -> bool {
 }
 
 /// Limpia secuencias ANSI de escape de una cadena de texto (como la salida formateada de terminal/rustc).
+#[allow(dead_code)]
 pub fn limpiar_codigos_ansi(texto: &str) -> String {
     let mut resultado = String::with_capacity(texto.len());
     let mut en_escape = false;
@@ -62,7 +63,7 @@ mod tests {
     #[test]
     fn test_truncar_texto() {
         assert_eq!(truncar_texto("Hola mundo", 20), "Hola mundo");
-        assert_eq!(truncar_texto("Hola mundo desde Rust", 10), "Hola m...");
+        assert_eq!(truncar_texto("Hola mundo desde Rust", 10), "Hola mu...");
     }
 
     #[test]
