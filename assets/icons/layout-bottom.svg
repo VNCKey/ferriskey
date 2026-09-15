@@ -1,8 +1,0 @@
-<svg width="256px" height="256px" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g id="SVGRepo_iconCarrier">
-    <!-- Fondo principal semi-transparente -->
-    <rect x="2" y="3" width="20" height="18" rx="3.17" fill="#FFFFFF" opacity="0.5"/>
-    <!-- Footer inferior sólido -->
-    <path d="M2 15 L22 15 L22 17.83 C22 19.581 20.581 21 18.83 21 L5.17 21 C3.419 21 2 19.581 2 17.83 Z" fill="#FFFFFF"/>
-  </g>
-</svg>
