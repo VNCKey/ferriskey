@@ -1,8 +1,8 @@
 # FerrisKey (v0.1.0-alpha)
 
-> **Plataforma Educativa Interactiva para Aprender Rust de forma Visual e Intuitiva.**
+> **Cross-platform desktop app to learn Rust regardless of your programming level. FerrisKey helps you master core concepts to build robust software using best practices.**
 
-FerrisKey es una aplicación de escritorio desarrollada en Rust con `egui`/`eframe` diseñada para enseñar los conceptos fundamentales e intermedios del lenguaje Rust mediante explicaciones conceptuales, tablas interactivas, visores de código y un editor ejecutable integrado en tiempo real.
+FerrisKey es una aplicación de escritorio multiplataforma desarrollada en Rust con `egui`/`eframe` diseñada para ayudarte a comprender conceptos clave y desarrollar habilidades para construir software robusto siguiendo las mejores prácticas del lenguaje.
 
 ---
 
