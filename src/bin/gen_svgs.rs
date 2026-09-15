@@ -501,7 +501,7 @@ fn convertir_texto_a_vectores(svg_str: &str) -> String {
 fn main() {
     println!("Generando diagramas SVG con SimpleStart/SimpleEnd (bolitas conectadas al riel)...");
 
-    let diagram_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("diagramas");
+    let diagram_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets/diagramas");
     let out = |name: &str, svg: String| {
         let path = diagram_dir.join(name);
         std::fs::write(&path, svg).unwrap();

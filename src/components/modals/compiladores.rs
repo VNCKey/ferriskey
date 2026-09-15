@@ -32,7 +32,7 @@ pub fn mostrar_modal_comparacion_compiladores(ctx: &egui::Context, state: &mut A
 
                 let img = egui::Image::from_bytes(
                     "bytes://compilacion_rustc.svg",
-                    include_bytes!("../../../diagramas/compilacion_rustc.svg"),
+                    include_bytes!("../../../assets/diagramas/compilacion_rustc.svg"),
                 )
                 .fit_to_exact_size(egui::vec2(available_width, image_height))
                 .maintain_aspect_ratio(true);

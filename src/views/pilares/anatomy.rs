@@ -1681,7 +1681,7 @@ fn tarjeta_fase_compile_run(
             };
             egui::Image::from_bytes(
                 "bytes://view.svg",
-                include_bytes!("../../../diagramas/view.svg"),
+                include_bytes!("../../../assets/diagramas/view.svg"),
             )
             .fit_to_exact_size(egui::vec2(16.0, 16.0))
             .tint(icon_color)

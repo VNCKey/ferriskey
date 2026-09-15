@@ -65,42 +65,42 @@ pub fn mostrar_modal_railroad_let(ctx: &egui::Context, state: &mut AppState) {
     let (titulo, bytes_data, uri) = match mode {
         0 => (
             "Inmutable",
-            include_bytes!("../../../diagramas/diagrama_let_immut.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/diagrama_let_immut.svg").as_slice(),
             "bytes://diagrama_let_immut.svg",
         ),
         1 => (
             "Mutable",
-            include_bytes!("../../../diagramas/diagrama_let_mut.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/diagrama_let_mut.svg").as_slice(),
             "bytes://diagrama_let_mut.svg",
         ),
         2 => (
             "fn main()",
-            include_bytes!("../../../diagramas/diagrama_fn_main.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/diagrama_fn_main.svg").as_slice(),
             "bytes://diagrama_fn_main.svg",
         ),
         3 => (
             "Librería (src/lib.rs)",
-            include_bytes!("../../../diagramas/diagrama_lib.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/diagrama_lib.svg").as_slice(),
             "bytes://diagrama_lib.svg",
         ),
         4 => (
             "Compile time",
-            include_bytes!("../../../diagramas/compile_time.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/compile_time.svg").as_slice(),
             "bytes://compile_time.svg",
         ),
         5 => (
             "Run time",
-            include_bytes!("../../../diagramas/run_time.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/run_time.svg").as_slice(),
             "bytes://run_time.svg",
         ),
         6 => (
             "Arquitectura Memoria Stack",
-            include_bytes!("../../../diagramas/diagrama_stack.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/diagrama_stack.svg").as_slice(),
             "bytes://diagrama_stack.svg",
         ),
         _ => (
             "Arquitectura Memoria Heap",
-            include_bytes!("../../../diagramas/diagrama_heap.svg").as_slice(),
+            include_bytes!("../../../assets/diagramas/diagrama_heap.svg").as_slice(),
             "bytes://diagrama_heap.svg",
         ),
     };

@@ -37,7 +37,7 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
                     egui::Button::image(
                         egui::Image::from_bytes(
                             "bytes://view.svg",
-                            include_bytes!("../../../diagramas/view.svg"),
+                            include_bytes!("../../../assets/diagramas/view.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(18.0, 18.0))
                         .tint(btn_color),
