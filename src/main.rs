@@ -11,6 +11,7 @@ mod platform;
 mod routes;
 mod state;
 mod svg_loader;
+mod utils;
 mod views;
 
 use app::AppState;
