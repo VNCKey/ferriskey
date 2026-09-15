@@ -48,6 +48,7 @@ impl EventBus {
             .map_err(|e| format!("No se pudo enviar el comando: {e}"))
     }
 
+    #[allow(dead_code)]
     pub fn procesar_eventos<F>(&self, mut handler: F)
     where
         F: FnMut(AppEvent),
