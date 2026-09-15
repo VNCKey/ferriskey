@@ -1,6 +1,82 @@
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+use crate::app::routes::AppRoute;
+
+/// Datos individuales de una lección ejecutable (código fuente y salida de la terminal).
+#[derive(Clone, Debug)]
+pub struct LessonData {
+    pub id: String,
+    pub title: String,
+    pub code: String,
+    pub output: Arc<Mutex<String>>,
+}
+
+impl LessonData {
+    pub fn new(id: impl Into<String>, title: impl Into<String>, initial_code: impl Into<String>) -> Self {
+        Self {
+            id: id.into(),
+            title: title.into(),
+            code: initial_code.into(),
+            output: Arc::new(Mutex::new(String::new())),
+        }
+    }
+
+    pub fn limpiar_salida(&self) {
+        if let Ok(mut out) = self.output.lock() {
+            out.clear();
+        }
+    }
+}
+
+/// Catálogo centralizado de lecciones gestionado mediante un registro modular.
+#[derive(Default, Debug)]
+pub struct LessonCatalog {
+    lessons: HashMap<AppRoute, LessonData>,
+}
+
+impl LessonCatalog {
+    pub fn new() -> Self {
+        let mut catalog = Self {
+            lessons: HashMap::new(),
+        };
+
+        catalog.registrar(AppRoute::Playground, "Playground Local", crate::content::PLAYGROUND_CODE);
+        catalog.registrar(AppRoute::PlaygroundNube, "Playground Nube", crate::content::PLAYGROUND_NUBE_CODE);
+        catalog.registrar(AppRoute::TutorialTiposDatos, "Tipos de Datos", crate::content::DATATYPES_CODE);
+        catalog.registrar(AppRoute::TutorialControlFlujo, "Control de Flujo", crate::content::CONTROL_FLUJO_CODE);
+        catalog.registrar(AppRoute::TutorialOwnership, "Ownership", crate::content::OWNERSHIP_CODE);
+        catalog.registrar(AppRoute::TutorialMemoria, "Memoria", crate::content::OWNERSHIP_CODE);
+        catalog.registrar(AppRoute::TutorialStrings, "Strings", crate::content::OWNERSHIP_CODE);
+        catalog.registrar(AppRoute::TutorialStructs, "Structs", crate::content::STRUCTS_CODE);
+        catalog.registrar(AppRoute::TutorialEnums, "Enums", crate::content::ENUMS_CODE);
+        catalog.registrar(AppRoute::TutorialColecciones, "Colecciones", crate::content::COLLECTIONS_CODE);
+        catalog.registrar(AppRoute::TutorialErrores, "Error Handling", crate::content::ERRORS_CODE);
+        catalog.registrar(AppRoute::TutorialTraits, "Traits", crate::content::TRAITS_CODE);
+        catalog.registrar(AppRoute::TutorialGenericos, "Generics", crate::content::GENERICS_CODE);
+        catalog.registrar(AppRoute::TutorialFunciones, "Funciones & Closures", crate::content::FUNCTIONS_CODE);
+        catalog.registrar(AppRoute::TutorialIteradores, "Iteradores", crate::content::ITERATORS_CODE);
+        catalog.registrar(AppRoute::TutorialModulos, "Módulos", crate::content::MODULES_CODE);
+
+        catalog
+    }
+
+    pub fn registrar(&mut self, route: AppRoute, title: impl Into<String>, code: impl Into<String>) {
+        self.lessons.insert(route, LessonData::new(format!("{:?}", route), title, code));
+    }
+
+    pub fn obtener(&self, route: AppRoute) -> Option<&LessonData> {
+        self.lessons.get(&route)
+    }
+
+    pub fn obtener_mut(&mut self, route: AppRoute) -> Option<&mut LessonData> {
+        self.lessons.get_mut(&route)
+    }
+}
+
 pub struct LessonsState {
+    pub catalog: LessonCatalog,
+
     pub playground_code: String,
     pub playground_output: Arc<Mutex<String>>,
     pub datatypes_code: String,
@@ -87,9 +163,25 @@ pub struct LessonsState {
     pub modulos_tab: usize,
 }
 
+impl LessonsState {
+    pub fn obtener_codigo(&self, route: AppRoute) -> Option<&str> {
+        self.catalog.obtener(route).map(|l| l.code.as_str())
+    }
+
+    pub fn obtener_editor_mut(&mut self, route: AppRoute) -> Option<(&mut String, Arc<Mutex<String>>)> {
+        if let Some(lesson) = self.catalog.obtener_mut(route) {
+            let output = Arc::clone(&lesson.output);
+            Some((&mut lesson.code, output))
+        } else {
+            None
+        }
+    }
+}
+
 impl Default for LessonsState {
     fn default() -> Self {
         Self {
+            catalog: LessonCatalog::new(),
             playground_code: crate::content::PLAYGROUND_CODE.to_owned(),
             playground_output: Arc::new(Mutex::new(String::new())),
             datatypes_code: crate::content::DATATYPES_CODE.to_owned(),
@@ -171,5 +263,26 @@ impl Default for LessonsState {
             modulos_output: Arc::new(Mutex::new(String::new())),
             modulos_tab: 0,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lesson_catalog_initialization() {
+        let catalog = LessonCatalog::new();
+        assert!(catalog.obtener(AppRoute::TutorialControlFlujo).is_some());
+        let lesson = catalog.obtener(AppRoute::TutorialControlFlujo).unwrap();
+        assert_eq!(lesson.title, "Control de Flujo");
+        assert!(!lesson.code.is_empty());
+    }
+
+    #[test]
+    fn test_lessons_state_obtener_codigo() {
+        let state = LessonsState::default();
+        let code = state.obtener_codigo(AppRoute::TutorialControlFlujo);
+        assert!(code.is_some());
     }
 }
