@@ -5,6 +5,7 @@ use std::thread;
 use crate::app::routes::AppRoute;
 
 /// Intenciones / Comandos de la UI dirigidos a workers en segundo plano.
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum AppCommand {
     EjecutarCodigo { route: AppRoute, code: String },
@@ -13,6 +14,7 @@ pub enum AppCommand {
 }
 
 /// Eventos emitidos por los workers asíncronos para actualizar el estado de la UI.
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum AppEvent {
     CodigoEjecutado { route: AppRoute, output: String },
@@ -87,6 +89,7 @@ pub fn iniciar_worker_asincrono(rx_cmd: Receiver<AppCommand>, tx_evt: Sender<App
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::Duration;
 
     #[test]
     fn test_event_bus_command_flow() {
@@ -99,18 +102,14 @@ mod tests {
         });
         assert!(res.is_ok());
 
-        // Esperar la respuesta del worker
-        thread::sleep(std::time::Duration::from_millis(300));
-
-        let mut evento_recibido = false;
-        bus.procesar_eventos(|event| {
-            if let AppEvent::CodigoEjecutado { route, output } = event {
-                assert_eq!(route, AppRoute::Playground);
-                assert!(output.contains("Test EventBus"));
-                evento_recibido = true;
-            }
-        });
-
-        assert!(evento_recibido);
+        // Esperar la respuesta del worker mediante recv_timeout robusco
+        let event = bus.rx_event.recv_timeout(Duration::from_secs(10));
+        assert!(event.is_ok());
+        if let Ok(AppEvent::CodigoEjecutado { route, output }) = event {
+            assert_eq!(route, AppRoute::Playground);
+            assert!(output.contains("Test EventBus"));
+        } else {
+            panic!("Respuesta de evento inesperada");
+        }
     }
 }
