@@ -1,19 +1,19 @@
 mod app;
 mod application;
-mod binary_analysis;
 mod components;
 mod content;
 mod domain;
 mod errors;
-mod execution;
 mod infrastructure;
 mod routes;
 mod state;
-mod svg_loader;
 mod utils;
 mod views;
 
+pub use infrastructure::binary_analysis;
+pub use infrastructure::execution;
 pub use utils::platform;
+pub use utils::svg_loader;
 
 use app::AppState;
 use eframe::egui;
