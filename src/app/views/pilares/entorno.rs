@@ -156,7 +156,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://rustc.svg",
-                            include_bytes!("../../../assets/diagramas/rustc.svg"),
+                            include_bytes!("../../../../assets/diagramas/rustc.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -184,7 +184,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://cargo2.svg",
-                            include_bytes!("../../../assets/diagramas/cargo2.svg"),
+                            include_bytes!("../../../../assets/diagramas/cargo2.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -205,7 +205,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://crates.svg",
-                            include_bytes!("../../../assets/diagramas/crates.svg"),
+                            include_bytes!("../../../../assets/diagramas/crates.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -239,7 +239,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://clippy.svg",
-                            include_bytes!("../../../assets/diagramas/clippy.svg"),
+                            include_bytes!("../../../../assets/diagramas/clippy.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -260,7 +260,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://format2.svg",
-                            include_bytes!("../../../assets/diagramas/format2.svg"),
+                            include_bytes!("../../../../assets/diagramas/format2.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -281,7 +281,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://error.svg",
-                            include_bytes!("../../../assets/diagramas/error.svg"),
+                            include_bytes!("../../../../assets/diagramas/error.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -315,7 +315,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://rustup.svg",
-                            include_bytes!("../../../assets/diagramas/rustup.svg"),
+                            include_bytes!("../../../../assets/diagramas/rustup.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -336,7 +336,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://analyzer.svg",
-                            include_bytes!("../../../assets/diagramas/analyzer.svg"),
+                            include_bytes!("../../../../assets/diagramas/analyzer.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),
@@ -357,7 +357,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
                     ui.add(
                         egui::Image::from_bytes(
                             "bytes://doc.svg",
-                            include_bytes!("../../../assets/diagramas/doc.svg"),
+                            include_bytes!("../../../../assets/diagramas/doc.svg"),
                         )
                         .fit_to_exact_size(egui::vec2(22.0, 22.0))
                         .tint(title_color),

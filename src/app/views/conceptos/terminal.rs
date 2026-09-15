@@ -49,7 +49,7 @@ pub fn mostrar_componente_terminal_3_modos(
             } else {
                 egui::Color32::from_rgb(160, 180, 205)
             };
-            let img_hist = egui::Image::new(egui::include_image!("../../../assets/icons/semi-select-svgrepo-com.svg"))
+            let img_hist = egui::Image::new(egui::include_image!("../../../../assets/icons/semi-select-svgrepo-com.svg"))
                 .fit_to_exact_size(egui::vec2(18.0, 18.0))
                 .tint(hist_tint);
             img_hist.paint_at(ui, hist_rect);
@@ -88,7 +88,7 @@ pub fn mostrar_componente_terminal_3_modos(
                 } else {
                     egui::Color32::from_rgb(160, 175, 195)
                 };
-                let img_close = egui::Image::new(egui::include_image!("../../../assets/icons/close-circle-svgrepo-com.svg"))
+                let img_close = egui::Image::new(egui::include_image!("../../../../assets/icons/close-circle-svgrepo-com.svg"))
                     .fit_to_exact_size(egui::vec2(18.0, 18.0))
                     .tint(close_tint);
                 img_close.paint_at(ui, close_rect);
@@ -107,7 +107,7 @@ pub fn mostrar_componente_terminal_3_modos(
                 } else {
                     egui::Color32::from_rgb(160, 175, 195)
                 };
-                let img_clean = egui::Image::new(egui::include_image!("../../../assets/icons/clean.svg"))
+                let img_clean = egui::Image::new(egui::include_image!("../../../../assets/icons/clean.svg"))
                     .fit_to_exact_size(egui::vec2(18.0, 18.0))
                     .tint(clean_tint);
                 img_clean.paint_at(ui, clean_rect);
@@ -127,7 +127,7 @@ pub fn mostrar_componente_terminal_3_modos(
                 } else {
                     egui::Color32::from_rgb(160, 175, 195)
                 };
-                let img_copy = egui::Image::new(egui::include_image!("../../../assets/icons/copy-svgrepo-com.svg"))
+                let img_copy = egui::Image::new(egui::include_image!("../../../../assets/icons/copy-svgrepo-com.svg"))
                     .fit_to_exact_size(egui::vec2(18.0, 18.0))
                     .tint(copy_tint);
                 img_copy.paint_at(ui, copy_rect);

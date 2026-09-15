@@ -62,7 +62,7 @@ pub fn mostrar_modal_template_creado(ctx: &egui::Context, state: &mut AppState) 
 
                 // Columna Derecha: Imagen 7.png fija inamovible
                 ui.add(
-                    egui::Image::new(egui::include_image!("../../../assets/taller/7.png"))
+                    egui::Image::new(egui::include_image!("../../../../assets/taller/7.png"))
                         .fit_to_exact_size(egui::vec2(280.0, 180.0))
                         .corner_radius(8),
                 );

@@ -1,3 +1,9 @@
+pub mod components;
+pub mod content;
+pub mod routes;
+pub mod state;
+pub mod views;
+
 use eframe::egui;
 use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
@@ -362,7 +368,7 @@ impl eframe::App for AppState {
 
                         // Toggle Sidebar Izquierda
                         let img_sidebar = egui::Image::new(egui::include_image!(
-                            "../assets/icons/sidebar-left.svg"
+                            "../../assets/icons/sidebar-left.svg"
                         ))
                         .fit_to_exact_size(egui::Vec2::new(16.0, 16.0));
                         let mut btn_sidebar = egui::Button::image(img_sidebar);
@@ -382,7 +388,7 @@ impl eframe::App for AppState {
                             || self.ui.ruta_actual == AppRoute::TutorialCargo;
                         if has_top_nav {
                             let img_top = egui::Image::new(egui::include_image!(
-                                "../assets/icons/layout-top.svg"
+                                "../../assets/icons/layout-top.svg"
                             ))
                             .fit_to_exact_size(egui::Vec2::new(16.0, 16.0));
                             let mut btn_top = egui::Button::image(img_top);

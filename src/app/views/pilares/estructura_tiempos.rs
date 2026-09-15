@@ -83,7 +83,7 @@ pub fn mostrar_pilares_proyecto(ui: &mut egui::Ui, state: &mut AppState) {
                             egui::Button::image(
                                 egui::Image::from_bytes(
                                     "bytes://view.svg",
-                                    include_bytes!("../../../assets/diagramas/view.svg"),
+                                    include_bytes!("../../../../assets/diagramas/view.svg"),
                                 )
                                 .fit_to_exact_size(egui::vec2(18.0, 18.0))
                                 .tint(btn_color_main),
@@ -133,7 +133,7 @@ pub fn mostrar_pilares_proyecto(ui: &mut egui::Ui, state: &mut AppState) {
                             egui::Button::image(
                                 egui::Image::from_bytes(
                                     "bytes://view.svg",
-                                    include_bytes!("../../../assets/diagramas/view.svg"),
+                                    include_bytes!("../../../../assets/diagramas/view.svg"),
                                 )
                                 .fit_to_exact_size(egui::vec2(18.0, 18.0))
                                 .tint(btn_color_lib),
@@ -258,7 +258,7 @@ pub fn mostrar_desglose_template_con_imagen(ui: &mut egui::Ui, state: &mut AppSt
                 });
 
             cols[1].add(
-                egui::Image::new(egui::include_image!("../../../assets/taller/7.png"))
+                egui::Image::new(egui::include_image!("../../../../assets/taller/7.png"))
                     .fit_to_exact_size(egui::vec2(340.0, 220.0))
                     .corner_radius(8),
             );
@@ -313,7 +313,7 @@ pub fn mostrar_pilares_tiempo(ui: &mut egui::Ui, state: &mut AppState) {
                             egui::Button::image(
                                 egui::Image::from_bytes(
                                     "bytes://view.svg",
-                                    include_bytes!("../../../assets/diagramas/view.svg"),
+                                    include_bytes!("../../../../assets/diagramas/view.svg"),
                                 )
                                 .fit_to_exact_size(egui::vec2(18.0, 18.0))
                                 .tint(btn_color_compile),
@@ -349,7 +349,7 @@ pub fn mostrar_pilares_tiempo(ui: &mut egui::Ui, state: &mut AppState) {
                             egui::Button::image(
                                 egui::Image::from_bytes(
                                     "bytes://view.svg",
-                                    include_bytes!("../../../assets/diagramas/view.svg"),
+                                    include_bytes!("../../../../assets/diagramas/view.svg"),
                                 )
                                 .fit_to_exact_size(egui::vec2(18.0, 18.0))
                                 .tint(btn_color_run),

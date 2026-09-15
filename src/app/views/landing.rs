@@ -114,7 +114,7 @@ pub fn mostrar_landing_page(ui: &mut egui::Ui, state: &mut AppState) {
                 let max_img_h = (avail_h * 0.40).clamp(160.0, 420.0);
 
                 ui.add(
-                    egui::Image::new(egui::include_image!("../../assets/taller/home2.png"))
+                    egui::Image::new(egui::include_image!("../../../assets/taller/home2.png"))
                         .max_width(max_img_w)
                         .max_height(max_img_h)
                         .corner_radius(egui::CornerRadius::same(16)),

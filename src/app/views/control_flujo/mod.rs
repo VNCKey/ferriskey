@@ -31,7 +31,7 @@ pub fn mostrar_tutorial_control_flujo(ui: &mut egui::Ui, state: &mut AppState) {
 
         // --- LADO IZQUIERDO: Teoría ---
         let img_book =
-            egui::Image::new(egui::include_image!("../../../assets/icons/book-line.svg"))
+            egui::Image::new(egui::include_image!("../../../../assets/icons/book-line.svg"))
                 .fit_to_exact_size(egui::Vec2::new(24.0, 24.0));
         ui.add(img_book);
 
@@ -60,7 +60,7 @@ pub fn mostrar_tutorial_control_flujo(ui: &mut egui::Ui, state: &mut AppState) {
             }
 
             let img_code = egui::Image::new(egui::include_image!(
-                "../../../assets/icons/monitor-code-line.svg"
+                "../../../../assets/icons/monitor-code-line.svg"
             ))
             .fit_to_exact_size(egui::Vec2::new(24.0, 24.0));
             ui.add(img_code);

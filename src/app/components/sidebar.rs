@@ -296,7 +296,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
 
                     let config_img = egui::Image::from_bytes(
                         "bytes://config.svg",
-                        include_bytes!("../../assets/diagramas/config.svg"),
+                        include_bytes!("../../../assets/diagramas/config.svg"),
                     )
                     .fit_to_exact_size(egui::vec2(20.0, 20.0))
                     .tint(config_icon_color);

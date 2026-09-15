@@ -39,7 +39,7 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
                     separador_vertical_centrado(ui, 14.0);
 
                     let img_book = egui::Image::new(egui::include_image!(
-                        "../../../assets/icons/book-line.svg"
+                        "../../../../assets/icons/book-line.svg"
                     ))
                     .fit_to_exact_size(egui::Vec2::new(18.0, 18.0));
                     let (_id, book_rect) = ui.allocate_space(egui::Vec2::new(18.0, 18.0));
@@ -77,7 +77,7 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
                             }
 
                             let img_code = egui::Image::new(egui::include_image!(
-                                "../../../assets/icons/monitor-code-line.svg"
+                                "../../../../assets/icons/monitor-code-line.svg"
                             ))
                             .fit_to_exact_size(egui::Vec2::new(18.0, 18.0));
                             let (_id, code_rect) = ui.allocate_space(egui::Vec2::new(18.0, 18.0));

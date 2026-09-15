@@ -13,7 +13,7 @@ pub fn cargar_syntax_set() -> SyntaxSet {
     let mut builder = SyntaxSet::load_defaults_newlines().into_builder();
 
     if let Ok(toml) = SyntaxDefinition::load_from_str(
-        include_str!("../../assets/syntaxes/TOML.sublime-syntax"),
+        include_str!("../../../assets/syntaxes/TOML.sublime-syntax"),
         true,
         None,
     ) {

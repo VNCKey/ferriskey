@@ -139,7 +139,7 @@ where
             // Botón de Archivos / Explorador de Proyecto: SIEMPRE VISIBLE para abrir la barra lateral derecha (Explorador)
             ui.add_space(2.0);
             let explorador_abierto = drawer_open && drawer_tab == 1;
-            let img_file = egui::Image::new(egui::include_image!("../../../assets/icons/file-svgrepo-com.svg"))
+            let img_file = egui::Image::new(egui::include_image!("../../../../assets/icons/file-svgrepo-com.svg"))
                 .fit_to_exact_size(egui::Vec2::new(15.0, 15.0));
             let btn_file = pintar_icono_badge_tile(
                 ui,
@@ -159,7 +159,7 @@ where
             }
 
             // 1. Botón Ejecutar (play-svgrepo-com.svg con iluminación interactiva Cyan en hover)
-            let img_play = egui::Image::new(egui::include_image!("../../../assets/icons/play-svgrepo-com.svg"))
+            let img_play = egui::Image::new(egui::include_image!("../../../../assets/icons/play-svgrepo-com.svg"))
                 .fit_to_exact_size(egui::Vec2::new(14.0, 14.0));
             let cargo_project_available = state.project.selected_project.as_deref().is_some_and(|project| {
                 let project_dir = buscar_ruta_proyecto(&state.terminal.term_cwd, project);
@@ -187,7 +187,7 @@ where
 
             // 2. Botón de Salida (terminal-svgrepo-com.svg con iluminación interactiva Cyan en hover)
             let console_abierta = output_open;
-            let img_terminal = egui::Image::new(egui::include_image!("../../../assets/icons/terminal-svgrepo-com.svg"))
+            let img_terminal = egui::Image::new(egui::include_image!("../../../../assets/icons/terminal-svgrepo-com.svg"))
                 .fit_to_exact_size(egui::Vec2::new(15.0, 15.0));
             let btn_console = boton_icono_toolbar(
                 ui,
@@ -228,7 +228,7 @@ where
             }
 
             // Botón único en el extremo derecho para abrir/cerrar el Panel Lateral (con las pestañas de Reto y Explorador)
-            let img_panel = egui::Image::new(egui::include_image!("../../../assets/icons/design-distribution-of-elements-of-an-article-svgrepo-com.svg"))
+            let img_panel = egui::Image::new(egui::include_image!("../../../../assets/icons/design-distribution-of-elements-of-an-article-svgrepo-com.svg"))
                 .fit_to_exact_size(egui::Vec2::new(15.0, 15.0));
             let btn_panel = if drawer_activo {
                 boton_icono_toolbar(
@@ -432,7 +432,7 @@ where
                                         ui.painter().rect_filled(close_rect, egui::CornerRadius::same(3), egui::Color32::from_rgba_unmultiplied(255, 255, 255, 22));
                                     }
                                     let close_color = if close_hovered { egui::Color32::WHITE } else { egui::Color32::from_rgb(150, 165, 185) };
-                                    let img_close = egui::Image::new(egui::include_image!("../../../assets/icons/close-bold-svgrepo-com.svg"))
+                                    let img_close = egui::Image::new(egui::include_image!("../../../../assets/icons/close-bold-svgrepo-com.svg"))
                                         .fit_to_exact_size(egui::vec2(12.0, 12.0))
                                         .tint(close_color);
                                     img_close.paint_at(ui, egui::Rect::from_center_size(close_rect.center(), egui::vec2(12.0, 12.0)));
@@ -449,7 +449,7 @@ where
                                         ui.painter().rect_filled(min_rect, egui::CornerRadius::same(3), egui::Color32::from_rgba_unmultiplied(255, 255, 255, 22));
                                     }
                                     let min_color = if min_hovered { egui::Color32::WHITE } else { egui::Color32::from_rgb(150, 165, 185) };
-                                    let img_min = egui::Image::new(egui::include_image!("../../../assets/icons/semi-select-svgrepo-com.svg"))
+                                    let img_min = egui::Image::new(egui::include_image!("../../../../assets/icons/semi-select-svgrepo-com.svg"))
                                         .fit_to_exact_size(egui::vec2(12.0, 12.0))
                                         .tint(min_color);
                                     img_min.paint_at(ui, egui::Rect::from_center_size(min_rect.center(), egui::vec2(12.0, 12.0)));
@@ -466,7 +466,7 @@ where
                                         ui.painter().rect_filled(copy_rect, egui::CornerRadius::same(3), egui::Color32::from_rgba_unmultiplied(255, 255, 255, 22));
                                     }
                                     let copy_color = if copy_hovered { egui::Color32::WHITE } else { egui::Color32::from_rgb(150, 165, 185) };
-                                    let img_copy = egui::Image::new(egui::include_image!("../../../assets/icons/copy-document-svgrepo-com.svg"))
+                                    let img_copy = egui::Image::new(egui::include_image!("../../../../assets/icons/copy-document-svgrepo-com.svg"))
                                         .fit_to_exact_size(egui::vec2(13.0, 13.0))
                                         .tint(copy_color);
                                     img_copy.paint_at(ui, egui::Rect::from_center_size(copy_rect.center(), egui::vec2(13.0, 13.0)));
@@ -483,7 +483,7 @@ where
                                         ui.painter().rect_filled(clear_rect, egui::CornerRadius::same(3), egui::Color32::from_rgba_unmultiplied(255, 255, 255, 22));
                                     }
                                     let clear_color = if clear_hovered { egui::Color32::WHITE } else { egui::Color32::from_rgb(150, 165, 185) };
-                                    let img_coffee = egui::Image::new(egui::include_image!("../../../assets/icons/coffee-svgrepo-com.svg"))
+                                    let img_coffee = egui::Image::new(egui::include_image!("../../../../assets/icons/coffee-svgrepo-com.svg"))
                                         .fit_to_exact_size(egui::vec2(13.0, 13.0))
                                         .tint(clear_color);
                                     img_coffee.paint_at(ui, egui::Rect::from_center_size(clear_rect.center(), egui::vec2(13.0, 13.0)));
@@ -735,7 +735,7 @@ where
                     ui.spacing_mut().item_spacing.x = 8.0;
 
                     let img_flag = egui::Image::new(egui::include_image!(
-                        "../../../assets/icons/flag-pin-navigation-direction-svgrepo-com.svg"
+                        "../../../../assets/icons/flag-pin-navigation-direction-svgrepo-com.svg"
                     ))
                     .fit_to_exact_size(egui::vec2(15.0, 15.0));
                     let flag_response = boton_icono_toolbar(
@@ -778,7 +778,7 @@ where
                             egui::StrokeKind::Inside,
                         );
                         let img_close = egui::Image::new(egui::include_image!(
-                            "../../../assets/icons/close-circle-svgrepo-com.svg"
+                            "../../../../assets/icons/close-circle-svgrepo-com.svg"
                         ))
                         .fit_to_exact_size(egui::vec2(16.0, 16.0))
                         .tint(if hovered {
@@ -1162,7 +1162,7 @@ fn mostrar_acceso_terminal(
                     egui::vec2(15.0, 15.0),
                 );
                 let img_terminal = egui::Image::new(egui::include_image!(
-                    "../../../assets/icons/terminal-svgrepo-com.svg"
+                    "../../../../assets/icons/terminal-svgrepo-com.svg"
                 ))
                 .fit_to_exact_size(egui::vec2(15.0, 15.0))
                 .tint(icon_color);
@@ -1681,7 +1681,7 @@ fn tarjeta_fase_compile_run(
             };
             egui::Image::from_bytes(
                 "bytes://view.svg",
-                include_bytes!("../../../assets/diagramas/view.svg"),
+                include_bytes!("../../../../assets/diagramas/view.svg"),
             )
             .fit_to_exact_size(egui::vec2(16.0, 16.0))
             .tint(icon_color)
@@ -2799,7 +2799,7 @@ fn boton_archivo_codelab(
         egui::vec2(14.0, 14.0),
     );
     let img_file = egui::Image::new(egui::include_image!(
-        "../../../assets/icons/file-svgrepo-com.svg"
+        "../../../../assets/icons/file-svgrepo-com.svg"
     ))
     .fit_to_exact_size(egui::vec2(14.0, 14.0))
     .tint(if habilitado {
