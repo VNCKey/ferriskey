@@ -24,11 +24,13 @@ pub enum AppEvent {
 }
 
 /// Bus de comunicación desacoplado entre la GUI egui y las tareas asíncronas de fondo.
+#[allow(dead_code)]
 pub struct EventBus {
     pub tx_command: Sender<AppCommand>,
     pub rx_event: Receiver<AppEvent>,
 }
 
+#[allow(dead_code)]
 impl EventBus {
     pub fn new() -> (Self, Sender<AppEvent>, Receiver<AppCommand>) {
         let (tx_cmd, rx_cmd) = channel::<AppCommand>();
@@ -60,6 +62,7 @@ impl EventBus {
 }
 
 /// Worker asíncrono en segundo plano que escucha comandos y ejecuta procesos de infraestructura.
+#[allow(dead_code)]
 pub fn iniciar_worker_asincrono(rx_cmd: Receiver<AppCommand>, tx_evt: Sender<AppEvent>) {
     thread::spawn(move || {
         while let Ok(cmd) = rx_cmd.recv() {

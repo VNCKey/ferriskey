@@ -1,6 +1,7 @@
 use std::path::Path;
 
 /// Trunca una cadena de texto a una longitud máxima dada, agregando "..." si supera el límite.
+#[allow(dead_code)]
 pub fn truncar_texto(s: &str, max_len: usize) -> String {
     if s.chars().count() <= max_len {
         s.to_string()
@@ -12,6 +13,7 @@ pub fn truncar_texto(s: &str, max_len: usize) -> String {
 }
 
 /// Formatea un número de bytes a una representación legible (B, KB, MB, GB).
+#[allow(dead_code)]
 pub fn formatear_tamano_bytes(bytes: u64) -> String {
     const KB: u64 = 1024;
     const MB: u64 = KB * 1024;
@@ -29,6 +31,7 @@ pub fn formatear_tamano_bytes(bytes: u64) -> String {
 }
 
 /// Verifica si la extensión de la ruta corresponde a un archivo ejecutable o fuente de Rust (.rs).
+#[allow(dead_code)]
 pub fn es_archivo_rust(path: &Path) -> bool {
     path.extension()
         .and_then(|ext| ext.to_str())
