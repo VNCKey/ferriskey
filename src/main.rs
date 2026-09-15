@@ -7,12 +7,13 @@ mod domain;
 mod errors;
 mod execution;
 mod infrastructure;
-mod platform;
 mod routes;
 mod state;
 mod svg_loader;
 mod utils;
 mod views;
+
+pub use utils::platform;
 
 use app::AppState;
 use eframe::egui;
