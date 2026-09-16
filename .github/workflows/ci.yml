@@ -12,6 +12,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-dev \
+            libxcb1-dev \
+            libxcursor-dev \
+            libxrandr-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxext-dev \
+            libxkbcommon-dev \
+            libwayland-dev \
+            libfontconfig1-dev \
+            pkg-config \
+            libssl-dev
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -26,6 +42,22 @@ jobs:
     needs: verify
     steps:
       - uses: actions/checkout@v4
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-dev \
+            libxcb1-dev \
+            libxcursor-dev \
+            libxrandr-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxext-dev \
+            libxkbcommon-dev \
+            libwayland-dev \
+            libfontconfig1-dev \
+            pkg-config \
+            libssl-dev
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --release
