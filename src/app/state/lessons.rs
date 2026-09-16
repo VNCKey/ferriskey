@@ -13,7 +13,11 @@ pub struct LessonData {
 }
 
 impl LessonData {
-    pub fn new(id: impl Into<String>, title: impl Into<String>, initial_code: impl Into<String>) -> Self {
+    pub fn new(
+        id: impl Into<String>,
+        title: impl Into<String>,
+        initial_code: impl Into<String>,
+    ) -> Self {
         Self {
             id: id.into(),
             title: title.into(),
@@ -41,28 +45,94 @@ impl LessonCatalog {
             lessons: HashMap::new(),
         };
 
-        catalog.registrar(AppRoute::Playground, "Playground Local", crate::content::PLAYGROUND_CODE);
-        catalog.registrar(AppRoute::PlaygroundNube, "Playground Nube", crate::content::PLAYGROUND_NUBE_CODE);
-        catalog.registrar(AppRoute::TutorialTiposDatos, "Tipos de Datos", crate::content::DATATYPES_CODE);
-        catalog.registrar(AppRoute::TutorialControlFlujo, "Control de Flujo", crate::content::CONTROL_FLUJO_CODE);
-        catalog.registrar(AppRoute::TutorialOwnership, "Ownership", crate::content::OWNERSHIP_CODE);
-        catalog.registrar(AppRoute::TutorialMemoria, "Memoria", crate::content::OWNERSHIP_CODE);
-        catalog.registrar(AppRoute::TutorialStrings, "Strings", crate::content::OWNERSHIP_CODE);
-        catalog.registrar(AppRoute::TutorialStructs, "Structs", crate::content::STRUCTS_CODE);
+        catalog.registrar(
+            AppRoute::Playground,
+            "Playground Local",
+            crate::content::PLAYGROUND_CODE,
+        );
+        catalog.registrar(
+            AppRoute::PlaygroundNube,
+            "Playground Nube",
+            crate::content::PLAYGROUND_NUBE_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialTiposDatos,
+            "Tipos de Datos",
+            crate::content::DATATYPES_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialControlFlujo,
+            "Control de Flujo",
+            crate::content::CONTROL_FLUJO_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialOwnership,
+            "Ownership",
+            crate::content::OWNERSHIP_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialMemoria,
+            "Memoria",
+            crate::content::OWNERSHIP_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialStrings,
+            "Strings",
+            crate::content::OWNERSHIP_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialStructs,
+            "Structs",
+            crate::content::STRUCTS_CODE,
+        );
         catalog.registrar(AppRoute::TutorialEnums, "Enums", crate::content::ENUMS_CODE);
-        catalog.registrar(AppRoute::TutorialColecciones, "Colecciones", crate::content::COLLECTIONS_CODE);
-        catalog.registrar(AppRoute::TutorialErrores, "Error Handling", crate::content::ERRORS_CODE);
-        catalog.registrar(AppRoute::TutorialTraits, "Traits", crate::content::TRAITS_CODE);
-        catalog.registrar(AppRoute::TutorialGenericos, "Generics", crate::content::GENERICS_CODE);
-        catalog.registrar(AppRoute::TutorialFunciones, "Funciones & Closures", crate::content::FUNCTIONS_CODE);
-        catalog.registrar(AppRoute::TutorialIteradores, "Iteradores", crate::content::ITERATORS_CODE);
-        catalog.registrar(AppRoute::TutorialModulos, "Módulos", crate::content::MODULES_CODE);
+        catalog.registrar(
+            AppRoute::TutorialColecciones,
+            "Colecciones",
+            crate::content::COLLECTIONS_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialErrores,
+            "Error Handling",
+            crate::content::ERRORS_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialTraits,
+            "Traits",
+            crate::content::TRAITS_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialGenericos,
+            "Generics",
+            crate::content::GENERICS_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialFunciones,
+            "Funciones & Closures",
+            crate::content::FUNCTIONS_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialIteradores,
+            "Iteradores",
+            crate::content::ITERATORS_CODE,
+        );
+        catalog.registrar(
+            AppRoute::TutorialModulos,
+            "Módulos",
+            crate::content::MODULES_CODE,
+        );
 
         catalog
     }
 
-    pub fn registrar(&mut self, route: AppRoute, title: impl Into<String>, code: impl Into<String>) {
-        self.lessons.insert(route, LessonData::new(format!("{:?}", route), title, code));
+    pub fn registrar(
+        &mut self,
+        route: AppRoute,
+        title: impl Into<String>,
+        code: impl Into<String>,
+    ) {
+        self.lessons
+            .insert(route, LessonData::new(format!("{:?}", route), title, code));
     }
 
     pub fn obtener(&self, route: AppRoute) -> Option<&LessonData> {
@@ -169,7 +239,10 @@ impl LessonsState {
         self.catalog.obtener(route).map(|l| l.code.as_str())
     }
 
-    pub fn obtener_editor_mut(&mut self, route: AppRoute) -> Option<(&mut String, Arc<Mutex<String>>)> {
+    pub fn obtener_editor_mut(
+        &mut self,
+        route: AppRoute,
+    ) -> Option<(&mut String, Arc<Mutex<String>>)> {
         if let Some(lesson) = self.catalog.obtener_mut(route) {
             let output = Arc::clone(&lesson.output);
             Some((&mut lesson.code, output))

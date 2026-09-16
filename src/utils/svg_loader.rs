@@ -11,6 +11,12 @@ pub struct SystemFontSvgLoader {
     options: usvg::Options<'static>,
 }
 
+impl Default for SystemFontSvgLoader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SystemFontSvgLoader {
     pub fn new() -> Self {
         let mut fontdb = usvg::fontdb::Database::new();

@@ -76,7 +76,10 @@ pub fn iniciar_worker_asincrono(rx_cmd: Receiver<AppCommand>, tx_evt: Sender<App
                     let _ = tx_evt.send(AppEvent::MacroExpandida { result });
                 }
                 AppCommand::AnalizarBinario { path } => {
-                    match crate::infrastructure::binary_analysis::render_report(&path, crate::infrastructure::binary_analysis::AnalysisFocus::Header) {
+                    match crate::infrastructure::binary_analysis::render_report(
+                        &path,
+                        crate::infrastructure::binary_analysis::AnalysisFocus::Header,
+                    ) {
                         Ok(report) => {
                             let _ = tx_evt.send(AppEvent::BinarioAnalizado { report });
                         }

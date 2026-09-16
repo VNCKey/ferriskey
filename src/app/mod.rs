@@ -465,9 +465,13 @@ impl eframe::App for AppState {
             AppRoute::TutorialTiposDatos | AppRoute::TutorialColecciones => {
                 crate::views::tipos_compuestos::mostrar_nav_superior(ui, self);
             }
-            AppRoute::TutorialControlFlujo => crate::views::control_flujo::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialControlFlujo => {
+                crate::views::control_flujo::mostrar_nav_superior(ui, self)
+            }
             AppRoute::TutorialFunciones => crate::views::funciones::mostrar_nav_superior(ui, self),
-            AppRoute::TutorialIteradores => crate::views::iteradores::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialIteradores => {
+                crate::views::iteradores::mostrar_nav_superior(ui, self)
+            }
             AppRoute::TutorialStructs => crate::views::structs::mostrar_nav_superior(ui, self),
             AppRoute::TutorialEnums => crate::views::enums::mostrar_nav_superior(ui, self),
             AppRoute::TutorialGenericos => crate::views::genericos::mostrar_nav_superior(ui, self),

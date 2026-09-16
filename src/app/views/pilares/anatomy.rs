@@ -1040,6 +1040,7 @@ pub(crate) fn punto_lista(ui: &mut egui::Ui, color: egui::Color32) {
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn mostrar_reto_codelab_item(
     ui: &mut egui::Ui,
     state: &AppState,
@@ -1098,11 +1099,7 @@ pub fn mostrar_reto_codelab_item(
 
     ui.add_space(10.0);
 
-    ui.label(
-        egui::RichText::new(explicacion)
-            .size(13.0)
-            .color(text_col),
-    );
+    ui.label(egui::RichText::new(explicacion).size(13.0).color(text_col));
 
     ui.add_space(14.0);
 

@@ -9,7 +9,14 @@ use crate::views::colecciones::info::mostrar_coleccion_info;
 use crate::views::colecciones::mostrar_contenido_colecciones;
 use eframe::egui;
 
-pub fn retos_tipos_compuestos() -> Vec<(&'static str, &'static str, &'static str, &'static str, &'static str, &'static str)> {
+pub fn retos_tipos_compuestos() -> Vec<(
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+)> {
     vec![
         (
             "Arreglos e Inicialización por Repetición",
@@ -58,8 +65,12 @@ pub fn mostrar_tutorial_tipos_compuestos(ui: &mut egui::Ui, state: &mut AppState
                 navigation_total: total_retos,
             },
             |ui, state, orange, cyan| {
-                let current = state.lessons.session_codelab_reto.min(total_retos.saturating_sub(1));
-                let (titulo, categoria, subtitulo, explicacion, paso_practico, codigo_ejemplo) = retos[current];
+                let current = state
+                    .lessons
+                    .session_codelab_reto
+                    .min(total_retos.saturating_sub(1));
+                let (titulo, categoria, subtitulo, explicacion, paso_practico, codigo_ejemplo) =
+                    retos[current];
                 crate::views::pilares::anatomy::mostrar_reto_codelab_item(
                     ui,
                     state,

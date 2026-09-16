@@ -35,7 +35,7 @@ pub fn formatear_tamano_bytes(bytes: u64) -> String {
 pub fn es_archivo_rust(path: &Path) -> bool {
     path.extension()
         .and_then(|ext| ext.to_str())
-        .map_or(false, |ext| ext.eq_ignore_ascii_case("rs"))
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("rs"))
 }
 
 /// Limpia secuencias ANSI de escape de una cadena de texto (como la salida formateada de terminal/rustc).

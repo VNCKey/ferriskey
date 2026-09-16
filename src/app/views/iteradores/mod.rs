@@ -7,7 +7,14 @@ pub mod pipeline;
 use crate::app::AppState;
 use eframe::egui;
 
-pub fn retos_iteradores() -> Vec<(&'static str, &'static str, &'static str, &'static str, &'static str, &'static str)> {
+pub fn retos_iteradores() -> Vec<(
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+)> {
     vec![
         (
             "Comparación de Modos de Iteración",
@@ -56,8 +63,12 @@ pub fn mostrar_tutorial_iteradores(ui: &mut egui::Ui, state: &mut AppState) {
                 navigation_total: total_retos,
             },
             |ui, state, orange, cyan| {
-                let current = state.lessons.session_codelab_reto.min(total_retos.saturating_sub(1));
-                let (titulo, categoria, subtitulo, explicacion, paso_practico, codigo_ejemplo) = retos[current];
+                let current = state
+                    .lessons
+                    .session_codelab_reto
+                    .min(total_retos.saturating_sub(1));
+                let (titulo, categoria, subtitulo, explicacion, paso_practico, codigo_ejemplo) =
+                    retos[current];
                 crate::views::pilares::anatomy::mostrar_reto_codelab_item(
                     ui,
                     state,
