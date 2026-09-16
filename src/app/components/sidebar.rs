@@ -228,6 +228,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
                     state.ui.ruta_actual = AppRoute::LibTiposDatos;
                 }
 
+                /*
                 ui.add_space(16.0);
                 ui.label(
                     egui::RichText::new("PROYECTOS TÉCNICOS")
@@ -244,6 +245,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
                 {
                     state.ui.ruta_actual = AppRoute::DashboardGraficos;
                 }
+                */
 
                 ui.add_space(20.0);
                 ui.separator();

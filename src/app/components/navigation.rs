@@ -1,3 +1,4 @@
+use crate::app::AppState;
 use eframe::egui;
 
 /// Item de navegación para la barra lateral (Sidebar - Nivel 1).
@@ -261,4 +262,107 @@ pub fn separador_vertical_centrado(ui: &mut egui::Ui, altura: f32) {
         ],
         egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 85)),
     );
+}
+
+/// Header superior colapsable unificado para sesiones de tutorial.
+pub fn mostrar_nav_superior_sesion(
+    ui: &mut egui::Ui,
+    state: &mut AppState,
+    titulo: &str,
+    tabs: &[(&str, usize)],
+    codelab_idx: usize,
+    active_tab: usize,
+    mut on_select_tab: impl FnMut(&mut AppState, usize),
+) {
+    let mut is_expanded = state.ui.mostrar_nav_superior;
+
+    let color_header = egui::Color32::from_rgb(13, 15, 19);
+    let cyan = egui::Color32::from_rgb(100, 200, 255);
+    let orange = egui::Color32::from_rgb(255, 160, 50);
+
+    egui::Panel::top("app_nav_top_header")
+        .frame(egui::Frame::default().fill(color_header).inner_margin(4.0))
+        .resizable(false)
+        .show_collapsible(ui, &mut is_expanded, |ui| {
+            ui.add_space(2.0);
+            ui.allocate_ui_with_layout(
+                egui::vec2(ui.available_width(), 30.0),
+                egui::Layout::left_to_right(egui::Align::Center),
+                |ui| {
+                    ui.add_space(5.0);
+
+                    // --- LADO IZQUIERDO: Título y Pestañas Teóricas ---
+                    ui.label(
+                        egui::RichText::new(titulo)
+                            .size(14.5)
+                            .strong()
+                            .color(orange),
+                    );
+
+                    separador_vertical_centrado(ui, 14.0);
+
+                    let img_book = egui::Image::new(egui::include_image!(
+                        "../../../assets/icons/book-line.svg"
+                    ))
+                    .fit_to_exact_size(egui::Vec2::new(18.0, 18.0));
+                    let (_id, book_rect) = ui.allocate_space(egui::Vec2::new(18.0, 18.0));
+                    img_book.paint_at(ui, book_rect);
+                    ui.add_space(4.0);
+
+                    for &(texto, indice) in tabs {
+                        let es_activo = active_tab == indice;
+                        if underline_tab(ui, texto, es_activo, cyan).clicked() {
+                            on_select_tab(state, indice);
+                        }
+                    }
+
+                    // --- LADO DERECHO: Práctica / Code Lab ---
+                    ui.scope_builder(
+                        egui::UiBuilder::new()
+                            .id(egui::Id::new("nav_right_section"))
+                            .layout(egui::Layout::right_to_left(egui::Align::Center)),
+                        |ui| {
+                            ui.add_space(5.0);
+
+                            let es_codelab_activo = active_tab == codelab_idx;
+                            if underline_tab_destacado(
+                                ui,
+                                "Code Lab",
+                                es_codelab_activo,
+                                orange,
+                                !es_codelab_activo,
+                            )
+                            .clicked()
+                            {
+                                on_select_tab(state, codelab_idx);
+                            }
+
+                            let img_code = egui::Image::new(egui::include_image!(
+                                "../../../assets/icons/monitor-code-line.svg"
+                            ))
+                            .fit_to_exact_size(egui::Vec2::new(18.0, 18.0));
+                            let (_id, code_rect) = ui.allocate_space(egui::Vec2::new(18.0, 18.0));
+
+                            let time = ui.input(|i| i.time);
+                            let pulse = ((time * 1.8).sin() * 0.5 + 0.5) as f32;
+                            let tint = if es_codelab_activo {
+                                orange
+                            } else {
+                                egui::Color32::from_rgb(
+                                    (205.0 + 35.0 * pulse) as u8,
+                                    (140.0 + 25.0 * pulse) as u8,
+                                    (65.0 + 20.0 * pulse) as u8,
+                                )
+                            };
+                            img_code.tint(tint).paint_at(ui, code_rect);
+
+                            separador_vertical_centrado(ui, 14.0);
+                        },
+                    );
+                },
+            );
+            ui.add_space(2.0);
+        });
+
+    state.ui.mostrar_nav_superior = is_expanded;
 }

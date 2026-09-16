@@ -1,0 +1,31 @@
+# 📚 Índice Completo de Sesiones de Aprendizaje - FerrisKey
+
+Bienvenido a la carpeta contenedora de sesiones de **FerrisKey**. Este índice coincide **1:1 con la barra lateral (`sidebar.rs`) de la aplicación de escritorio**, dividida en las sesiones del **CURSO RUST COMPLETO**, la sección **LIB** y **PROYECTOS TÉCNICOS**.
+
+---
+
+## 🧭 CURSO RUST COMPLETO (12 Sesiones Principales)
+
+| # | Menú en App | Nombre de Carpeta | Documentos |
+|---|-------------|-------------------|------------|
+| **01** | `Rust Foundations` | [**01_rust_foundations**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/01_rust_foundations/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/01_rust_foundations/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/01_rust_foundations/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/01_rust_foundations/CODE_LAB.md) |
+| **02** | `Conceptos` | [**02_conceptos**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/02_conceptos/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/02_conceptos/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/02_conceptos/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/02_conceptos/CODE_LAB.md) |
+| **03** | `Memoria` | [**03_memoria**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/03_memoria/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/03_memoria/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/03_memoria/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/03_memoria/CODE_LAB.md) |
+| **04** | `Módulos` | [**04_modulos**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/04_modulos/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/04_modulos/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/04_modulos/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/04_modulos/CODE_LAB.md) |
+| **05** | `Tipos Compuestos` | [**05_tipos_compuestos**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/05_tipos_compuestos/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/05_tipos_compuestos/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/05_tipos_compuestos/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/05_tipos_compuestos/CODE_LAB.md) |
+| **06** | `Control de Flujo` | [**06_control_flujo**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/06_control_flujo/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/06_control_flujo/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/06_control_flujo/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/06_control_flujo/CODE_LAB.md) |
+| **07** | `Closures` | [**07_closures**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/07_closures/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/07_closures/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/07_closures/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/07_closures/CODE_LAB.md) |
+| **08** | `Iteradores` | [**08_iteradores**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/08_iteradores/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/08_iteradores/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/08_iteradores/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/08_iteradores/CODE_LAB.md) |
+| **09** | `Custom Types` | [**09_custom_types**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/09_custom_types/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/09_custom_types/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/09_custom_types/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/09_custom_types/CODE_LAB.md) |
+| **10** | `Error Handling` | [**10_error_handling**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/CODE_LAB.md) |
+| **11** | `Generics` | [**11_generics**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/CODE_LAB.md) |
+| **12** | `Traits` | [**12_traits**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/CODE_LAB.md) |
+
+---
+
+## 📚 LIB & PROYECTOS TÉCNICOS
+
+| # | Menú en App | Nombre de Carpeta | Documentos |
+|---|-------------|-------------------|------------|
+| **13** | `Tipos y métodos` | [**13_lib_tipos_metodos**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/CODE_LAB.md) |
+| **14** | `Visualización de Datos` | [**14_dashboard_proyectos**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/CODE_LAB.md) |

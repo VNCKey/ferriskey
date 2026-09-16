@@ -454,17 +454,48 @@ impl eframe::App for AppState {
             crate::components::sidebar::mostrar_sidebar(ui, self);
         }
 
-        // --- 1.5 PANEL DERECHO (Inspector - Solo en Conceptos y Rust Foundations) ---
-        if self.ui.ruta_actual == AppRoute::Comenzando {
-            crate::views::conceptos::mostrar_nav_superior(ui, self);
-        } else if self.ui.ruta_actual == AppRoute::TutorialCargo {
-            crate::views::pilares::mostrar_nav_superior(ui, self);
+        // --- 1.5 HEADER DE NAVEGACIÓN SUPERIOR ---
+        match self.ui.ruta_actual {
+            AppRoute::Comenzando => crate::views::conceptos::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialCargo => crate::views::pilares::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialOwnership | AppRoute::TutorialStrings | AppRoute::TutorialMemoria => {
+                crate::views::memoria::mostrar_nav_superior(ui, self);
+            }
+            AppRoute::TutorialModulos => crate::views::modulos::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialTiposDatos | AppRoute::TutorialColecciones => {
+                crate::views::tipos_compuestos::mostrar_nav_superior(ui, self);
+            }
+            AppRoute::TutorialControlFlujo => crate::views::control_flujo::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialFunciones => crate::views::funciones::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialIteradores => crate::views::iteradores::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialStructs => crate::views::structs::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialEnums => crate::views::enums::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialGenericos => crate::views::genericos::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialTraits => crate::views::traits::mostrar_nav_superior(ui, self),
+            _ => {}
         }
 
         // --- 2. PANEL CENTRAL ---
-        let is_code_lab = (self.ui.ruta_actual == AppRoute::TutorialCargo
-            && self.lessons.pilares_step == 1)
-            || (self.ui.ruta_actual == AppRoute::Comenzando && self.lessons.conceptos_tab == 0);
+        let is_code_lab = match self.ui.ruta_actual {
+            AppRoute::TutorialCargo => self.lessons.pilares_step == 1,
+            AppRoute::Comenzando => self.lessons.conceptos_tab == 0,
+            AppRoute::TutorialOwnership | AppRoute::TutorialStrings | AppRoute::TutorialMemoria => {
+                self.lessons.strings_ownership_tab == 5
+            }
+            AppRoute::TutorialModulos => self.lessons.modulos_tab == 5,
+            AppRoute::TutorialTiposDatos | AppRoute::TutorialColecciones => {
+                self.lessons.compuestos_tab == 5
+            }
+            AppRoute::TutorialControlFlujo => self.lessons.controlflujo_tab == 4,
+            AppRoute::TutorialFunciones => self.lessons.funciones_tab == 3,
+            AppRoute::TutorialIteradores => self.lessons.iteradores_tab == 4,
+            AppRoute::TutorialStructs => self.lessons.structs_tab == 4,
+            AppRoute::TutorialEnums => self.lessons.enums_tab == 4,
+            AppRoute::TutorialGenericos => self.lessons.genericos_tab == 4,
+            AppRoute::TutorialTraits => self.lessons.traits_tab == 3,
+            _ => false,
+        };
+
         let central_panel = if self.ui.ruta_actual == AppRoute::LandingPage {
             egui::CentralPanel::default().frame(egui::Frame::new().fill(egui::Color32::BLACK))
         } else if is_code_lab {
@@ -477,7 +508,12 @@ impl eframe::App for AppState {
             egui::CentralPanel::default().frame(
                 egui::Frame::default()
                     .fill(color_fondo_principal)
-                    .inner_margin(8.0),
+                    .inner_margin(egui::Margin {
+                        left: 20,
+                        right: 20,
+                        top: 16,
+                        bottom: 24,
+                    }),
             )
         };
         central_panel.show(ui, |ui| match self.ui.ruta_actual {

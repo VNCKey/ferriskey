@@ -23,6 +23,7 @@ pub struct UiState {
     pub mostrar_conceptos_drawer: bool,
     pub conceptos_drawer_tab: usize,
     pub conceptos_salida_abierta: bool,
+    pub codelab_drawer_tab: usize,
     pub show_railroad_modal: Option<usize>,
 }
 
@@ -48,6 +49,7 @@ impl Default for UiState {
             mostrar_conceptos_drawer: false,
             conceptos_drawer_tab: 0,
             conceptos_salida_abierta: false,
+            codelab_drawer_tab: 0,
             show_railroad_modal: None,
         }
     }

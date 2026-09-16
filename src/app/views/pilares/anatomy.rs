@@ -856,6 +856,11 @@ where
                     .auto_shrink([false, false])
                     .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
                     .show(&mut content_ui, |ui| {
+                        let drawer_max_w = (content_rect.width() - 34.0).max(10.0);
+                        ui.set_width(drawer_max_w);
+                        ui.set_max_width(drawer_max_w);
+                        ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+
                         egui::Frame::new()
                             .inner_margin(egui::Margin {
                                 left: 16,
@@ -865,6 +870,10 @@ where
                             })
                             .fill(egui::Color32::TRANSPARENT)
                             .show(ui, |ui| {
+                                ui.set_width(ui.available_width());
+                                ui.set_max_width(ui.available_width());
+                                ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+
                                 if active_tab == 0 {
                                     content(ui, state, orange, cyan);
                                 } else {
@@ -1029,6 +1038,90 @@ pub(crate) fn punto_lista(ui: &mut egui::Ui, color: egui::Color32) {
         2.5,
         color,
     );
+}
+
+pub fn mostrar_reto_codelab_item(
+    ui: &mut egui::Ui,
+    state: &AppState,
+    reto_num: usize,
+    titulo: &str,
+    categoria: &str,
+    subtitulo: &str,
+    explicacion: &str,
+    paso_practico: &str,
+    codigo_ejemplo: &str,
+    orange: egui::Color32,
+    _cyan: egui::Color32,
+) {
+    let text_col = egui::Color32::from_rgb(205, 215, 230);
+    let bullet_col = egui::Color32::from_rgb(140, 160, 190);
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+    let syntax_set = &state.editor.syntax_set;
+
+    ui.add_space(4.0);
+
+    ui.heading(
+        egui::RichText::new(format!("{}. {}", reto_num, titulo))
+            .size(18.0)
+            .strong()
+            .color(egui::Color32::WHITE),
+    );
+    ui.add_space(8.0);
+
+    ui.horizontal_wrapped(|ui| {
+        let mut tag_frame = egui::Frame::new();
+        tag_frame.fill = egui::Color32::from_rgb(20, 38, 28);
+        tag_frame.inner_margin = egui::Margin::symmetric(8, 2);
+        tag_frame.corner_radius = egui::CornerRadius::same(10);
+        tag_frame.show(ui, |ui| {
+            ui.label(
+                egui::RichText::new(categoria)
+                    .size(11.0)
+                    .strong()
+                    .color(egui::Color32::from_rgb(0, 200, 120)),
+            );
+        });
+
+        ui.add_space(4.0);
+        let mut tag_topic = egui::Frame::new();
+        tag_topic.fill = egui::Color32::from_rgb(22, 28, 38);
+        tag_topic.inner_margin = egui::Margin::symmetric(8, 2);
+        tag_topic.corner_radius = egui::CornerRadius::same(10);
+        tag_topic.show(ui, |ui| {
+            ui.label(
+                egui::RichText::new(subtitulo)
+                    .size(11.0)
+                    .color(egui::Color32::from_rgb(160, 185, 220)),
+            );
+        });
+    });
+
+    ui.add_space(10.0);
+
+    ui.label(
+        egui::RichText::new(explicacion)
+            .size(13.0)
+            .color(text_col),
+    );
+
+    ui.add_space(14.0);
+
+    titulo_seccion(ui, "Paso Práctico en el Editor", orange);
+    ui.add_space(8.0);
+
+    ui.horizontal_wrapped(|ui| {
+        punto_lista(ui, bullet_col);
+        ui.add_space(4.0);
+        ui.label(
+            egui::RichText::new(paso_practico)
+                .size(13.0)
+                .color(text_col),
+        );
+    });
+
+    ui.add_space(12.0);
+
+    codigo_resaltado_bloque(ui, codigo_ejemplo, syntax_set, theme, "rs");
 }
 
 pub fn boton_navegacion_codelab(

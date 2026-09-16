@@ -161,6 +161,7 @@ pub struct LessonsState {
     pub modulos_code: String,
     pub modulos_output: Arc<Mutex<String>>,
     pub modulos_tab: usize,
+    pub session_codelab_reto: usize,
 }
 
 impl LessonsState {
@@ -262,6 +263,7 @@ impl Default for LessonsState {
             modulos_code: crate::content::MODULES_CODE.to_owned(),
             modulos_output: Arc::new(Mutex::new(String::new())),
             modulos_tab: 0,
+            session_codelab_reto: 0,
         }
     }
 }
