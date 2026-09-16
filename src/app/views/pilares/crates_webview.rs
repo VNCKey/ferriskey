@@ -26,9 +26,32 @@ thread_local! {
     static WEBVIEW_STATE: RefCell<CratesWebViewState> = RefCell::new(CratesWebViewState::default());
 }
 
-pub fn mostrar_tab_crates_io_html_wry(ui: &mut egui::Ui, _state: &mut AppState) {
+pub fn mostrar_tab_crates_io_html_wry(
+    ui: &mut egui::Ui,
+    _state: &mut AppState,
+    frame: Option<&eframe::Frame>,
+) {
     WEBVIEW_STATE.with(|state_cell| {
         let mut vs = state_cell.borrow_mut();
+
+        if !vs.is_initialized && vs.webview.is_none() {
+            if let Some(f) = frame {
+                match wry::WebViewBuilder::new()
+                    .with_url(&vs.current_url)
+                    .build(f)
+                {
+                    Ok(wv) => {
+                        vs.webview = Some(wv);
+                        vs.is_initialized = true;
+                        vs.init_error = None;
+                    }
+                    Err(err) => {
+                        vs.is_initialized = true;
+                        vs.init_error = Some(format!("Error al crear WebKit WebView: {}", err));
+                    }
+                }
+            }
+        }
 
         let orange = egui::Color32::from_rgb(255, 160, 50);
         let cyan = egui::Color32::from_rgb(100, 200, 255);
@@ -99,7 +122,7 @@ pub fn mostrar_tab_crates_io_html_wry(ui: &mut egui::Ui, _state: &mut AppState) 
 
         banner_frame.show(ui, |ui| {
             ui.label(
-                egui::RichText::new("ℹ️ Enfoque 2 (wry Native WebView): Esta pestaña integra la ventana webview de wry / WebKit cargando directamente el sitio HTML5 real de https://crates.io. Puedes comparar el rendimiento y la estética visual contra la pestaña 'Crates.io API (Enfoque 1)'.")
+                egui::RichText::new("ℹ️ Enfoque 2 (wry Native WebView): Esta pestaña ejecuta el motor WebKit nativo cargando directamente el sitio HTML5 real de https://crates.io en una ventana nativa integrada.")
                     .size(12.0)
                     .color(egui::Color32::from_rgb(190, 210, 235)),
             );
@@ -120,6 +143,11 @@ pub fn mostrar_tab_crates_io_html_wry(ui: &mut egui::Ui, _state: &mut AppState) 
             ui.label(
                 egui::RichText::new(format!("⚠️ No se pudo iniciar el WebView nativo: {}", err))
                     .color(egui::Color32::from_rgb(255, 130, 130)),
+            );
+        } else if vs.webview.is_some() {
+            ui.label(
+                egui::RichText::new("✅ WebView nativo (wry WebKit) activo y visualizando https://crates.io")
+                    .color(egui::Color32::from_rgb(100, 220, 150)),
             );
         }
     });

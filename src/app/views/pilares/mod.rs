@@ -112,14 +112,18 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
     state.ui.mostrar_nav_superior = is_expanded;
 }
 
-pub fn mostrar_tutorial_cargo(ui: &mut egui::Ui, state: &mut AppState) {
+pub fn mostrar_tutorial_cargo(
+    ui: &mut egui::Ui,
+    state: &mut AppState,
+    frame: Option<&eframe::Frame>,
+) {
     // El encabezado y tabs se movieron al panel derecho global
 
     match state.lessons.pilares_step {
         0 => foundations::mostrar_ecosystem(ui, state),
         1 => anatomy::mostrar_anatomia_cargo(ui, state),
         2 => crates_io::mostrar_tab_crates_io_web(ui, state),
-        3 => crates_webview::mostrar_tab_crates_io_html_wry(ui, state),
+        3 => crates_webview::mostrar_tab_crates_io_html_wry(ui, state, frame),
         _ => foundations::mostrar_ecosystem(ui, state),
     }
 }
