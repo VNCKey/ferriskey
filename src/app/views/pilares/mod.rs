@@ -1,4 +1,5 @@
 pub mod anatomy;
+pub mod crates_io;
 pub mod entorno;
 pub mod estructura_tiempos;
 pub mod foundations;
@@ -46,7 +47,7 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
                     img_book.paint_at(ui, book_rect);
                     ui.add_space(4.0);
 
-                    let tabs_teoria = [(0, "Rust Ecosystem")];
+                    let tabs_teoria = [(0, "Rust Ecosystem"), (2, "Crates.io Web")];
                     for (indice, texto) in tabs_teoria {
                         let es_activo = state.lessons.pilares_step == indice;
                         if underline_tab(ui, texto, es_activo, cyan).clicked() {
@@ -112,6 +113,7 @@ pub fn mostrar_tutorial_cargo(ui: &mut egui::Ui, state: &mut AppState) {
     match state.lessons.pilares_step {
         0 => foundations::mostrar_ecosystem(ui, state),
         1 => anatomy::mostrar_anatomia_cargo(ui, state),
+        2 => crates_io::mostrar_tab_crates_io_web(ui, state),
         _ => foundations::mostrar_ecosystem(ui, state),
     }
 }

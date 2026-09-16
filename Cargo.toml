@@ -24,6 +24,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 directories = "6"
 object = "0.39"
 ureq = { version = "3", features = ["json"] }
+wry = "0.49"
 
 # Optimiza dependencias en desarrollo sin penalizar demasiado la compilación del código propio.
 [profile.dev.package."*"]
