@@ -36,6 +36,11 @@ pub fn mostrar_tab_crates_io_html_wry(
 
         if !vs.is_initialized && vs.webview.is_none() {
             if let Some(f) = frame {
+                #[cfg(target_os = "linux")]
+                {
+                    let _ = gtk::init();
+                }
+
                 match wry::WebViewBuilder::new()
                     .with_url(&vs.current_url)
                     .build(f)

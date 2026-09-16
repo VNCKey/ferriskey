@@ -25,6 +25,7 @@ directories = "6"
 object = "0.39"
 ureq = { version = "3", features = ["json"] }
 wry = "0.49"
+gtk = "0.18"
 
 # Optimiza dependencias en desarrollo sin penalizar demasiado la compilación del código propio.
 [profile.dev.package."*"]
