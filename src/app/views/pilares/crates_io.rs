@@ -27,6 +27,8 @@ pub struct CratesIoViewState {
     pub error_msg: Option<String>,
     pub selected_category: usize,
     pub copied_feedback: Option<String>,
+    pub selected_crate: Option<CrateApiItem>,
+    pub detail_tab: usize,
 }
 
 impl Default for CratesIoViewState {
@@ -38,20 +40,30 @@ impl Default for CratesIoViewState {
             error_msg: None,
             selected_category: 0,
             copied_feedback: None,
+            selected_crate: None,
+            detail_tab: 0,
         }
     }
 }
 
 static VIEW_STATE: Mutex<Option<CratesIoViewState>> = Mutex::new(None);
 
-pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
+pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, state: &mut AppState) {
+    let mut vs_guard = VIEW_STATE.lock().unwrap();
+    let vs = vs_guard.get_or_insert_with(CratesIoViewState::default);
+
+    if let Some(selected) = vs.selected_crate.clone() {
+        mostrar_detalle_crate(ui, &selected, vs, state);
+    } else {
+        mostrar_lista_crates(ui, vs, state);
+    }
+}
+
+fn mostrar_lista_crates(ui: &mut egui::Ui, vs: &mut CratesIoViewState, _state: &mut AppState) {
     let cargo_orange = egui::Color32::from_rgb(235, 120, 35);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let green = egui::Color32::from_rgb(100, 220, 150);
     let bg_card = egui::Color32::from_rgb(16, 22, 34);
-
-    let mut state = VIEW_STATE.lock().unwrap();
-    let vs = state.get_or_insert_with(CratesIoViewState::default);
 
     egui::ScrollArea::vertical()
         .auto_shrink([false, false])
@@ -85,11 +97,11 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         if ui
                             .button(
-                                egui::RichText::new("🔗 Abrir crates.io")
+                                egui::RichText::new("🔗 Abrir crates.io en Web")
                                     .size(12.0)
                                     .color(cyan),
                             )
-                            .on_hover_text("Abrir https://crates.io en navegador")
+                            .on_hover_text("Abrir https://crates.io en navegador del sistema")
                             .clicked()
                         {
                             ui.ctx().open_url(egui::OpenUrl::new_tab("https://crates.io"));
@@ -124,7 +136,7 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
 
                     let search_resp = ui.add(
                         egui::TextEdit::singleline(&mut vs.search_query)
-                            .hint_text("Presiona Enter para buscar paquetes (ej: serde, tokio, axum, clap, egui)...")
+                            .hint_text("Escribe el nombre de la librería (serde, tokio, axum, clap, egui)...")
                             .desired_width(500.0),
                     );
 
@@ -223,14 +235,14 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
                 ui.add_space(10.0);
             }
 
-            // Si los resultados están vacíos y no se está cargando, lanzar búsqueda inicial
+            // Si los resultados están vacíos y no se está cargando, lanzar búsqueda inicial por defecto
             if vs.results.is_empty() && !vs.is_loading && vs.error_msg.is_none() {
                 vs.search_query = "tokio".to_string();
                 ejecutar_busqueda_crates(&mut vs.search_query, &mut vs.results, &mut vs.is_loading, &mut vs.error_msg);
             }
 
-            // --- LISTADO DE CRATES ESTILO CRATES.IO ---
-            for item in &vs.results {
+            // --- LISTADO DE CRATES ---
+            for item in vs.results.clone() {
                 let mut card = egui::Frame::new();
                 card.fill = bg_card;
                 card.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(34, 46, 68));
@@ -239,12 +251,18 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
 
                 card.show(ui, |ui| {
                     ui.horizontal(|ui| {
-                        ui.heading(
-                            egui::RichText::new(&item.name)
-                                .size(17.0)
-                                .strong()
-                                .color(egui::Color32::WHITE),
-                        );
+                        if ui
+                            .button(
+                                egui::RichText::new(&item.name)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(egui::Color32::WHITE),
+                            )
+                            .on_hover_text("Ver detalles completos e integración")
+                            .clicked()
+                        {
+                            vs.selected_crate = Some(item.clone());
+                        }
 
                         ui.add_space(6.0);
 
@@ -263,6 +281,20 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
                         });
 
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui
+                                .button(
+                                    egui::RichText::new("📖 Ver Detalle")
+                                        .size(11.5)
+                                        .strong()
+                                        .color(cyan),
+                                )
+                                .clicked()
+                            {
+                                vs.selected_crate = Some(item.clone());
+                            }
+
+                            ui.add_space(6.0);
+
                             let cargo_add_cmd = format!("cargo add {}", item.name);
                             if ui
                                 .button(
@@ -276,39 +308,6 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
                             {
                                 ui.ctx().copy_text(cargo_add_cmd.clone());
                                 vs.copied_feedback = Some(format!("Comando `{}` copiado al portapapeles", cargo_add_cmd));
-                            }
-
-                            ui.add_space(6.0);
-
-                            if ui
-                                .button(
-                                    egui::RichText::new("📚 Docs.rs")
-                                        .size(11.5)
-                                        .color(cyan),
-                                )
-                                .on_hover_text("Ver documentación oficial en docs.rs")
-                                .clicked()
-                            {
-                                let docs_url = item
-                                    .documentation
-                                    .clone()
-                                    .unwrap_or_else(|| format!("https://docs.rs/{}", item.id));
-                                ui.ctx().open_url(egui::OpenUrl::new_tab(docs_url));
-                            }
-
-                            ui.add_space(6.0);
-
-                            if ui
-                                .button(
-                                    egui::RichText::new("🔗 Crates.io")
-                                        .size(11.5)
-                                        .color(egui::Color32::from_rgb(180, 200, 225)),
-                                )
-                                .on_hover_text("Abrir paquete en crates.io")
-                                .clicked()
-                            {
-                                let url = format!("https://crates.io/crates/{}", item.id);
-                                ui.ctx().open_url(egui::OpenUrl::new_tab(url));
                             }
                         });
                     });
@@ -344,7 +343,7 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
                         if let Some(repo) = &item.repository {
                             ui.add_space(14.0);
                             ui.hyperlink_to(
-                                egui::RichText::new("📁 Repositorio de Código Source")
+                                egui::RichText::new("📁 Repositorio Source")
                                     .size(11.0)
                                     .color(cyan),
                                 repo,
@@ -354,6 +353,331 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, _state: &mut AppState) {
                 });
 
                 ui.add_space(10.0);
+            }
+
+            ui.add_space(20.0);
+        });
+}
+
+fn mostrar_detalle_crate(
+    ui: &mut egui::Ui,
+    item: &CrateApiItem,
+    vs: &mut CratesIoViewState,
+    _state: &mut AppState,
+) {
+    let cargo_orange = egui::Color32::from_rgb(235, 120, 35);
+    let cyan = egui::Color32::from_rgb(100, 200, 255);
+    let green = egui::Color32::from_rgb(100, 220, 150);
+
+    egui::ScrollArea::vertical()
+        .auto_shrink([false, false])
+        .show(ui, |ui| {
+            ui.add_space(8.0);
+
+            // --- BOTÓN DE REGRESO ---
+            if ui
+                .button(
+                    egui::RichText::new("⬅ Volver a la Lista de Crates")
+                        .size(13.0)
+                        .strong()
+                        .color(cyan),
+                )
+                .clicked()
+            {
+                vs.selected_crate = None;
+                return;
+            }
+
+            ui.add_space(10.0);
+
+            // --- CABECERA DE DETALLE DEL CRATE ---
+            let mut header_frame = egui::Frame::new();
+            header_frame.fill = egui::Color32::from_rgb(20, 26, 38);
+            header_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 62, 90));
+            header_frame.corner_radius = egui::CornerRadius::same(12);
+            header_frame.inner_margin = egui::Margin::same(16);
+
+            header_frame.show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.heading(
+                        egui::RichText::new(format!("📦 {}", item.name))
+                            .size(24.0)
+                            .strong()
+                            .color(egui::Color32::WHITE),
+                    );
+
+                    ui.add_space(8.0);
+
+                    let mut tag_v = egui::Frame::new();
+                    tag_v.fill = egui::Color32::from_rgb(20, 48, 32);
+                    tag_v.corner_radius = egui::CornerRadius::same(6);
+                    tag_v.inner_margin = egui::Margin::symmetric(8, 3);
+                    tag_v.show(ui, |ui| {
+                        ui.label(
+                            egui::RichText::new(format!("v{}", item.max_version))
+                                .size(13.0)
+                                .strong()
+                                .color(green),
+                        );
+                    });
+
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        let cargo_add_cmd = format!("cargo add {}", item.name);
+                        if ui
+                            .button(
+                                egui::RichText::new("📋 Copiar `cargo add`")
+                                    .size(12.0)
+                                    .strong()
+                                    .color(cargo_orange),
+                            )
+                            .clicked()
+                        {
+                            ui.ctx().copy_text(cargo_add_cmd.clone());
+                            vs.copied_feedback = Some(format!("Comando `{}` copiado", cargo_add_cmd));
+                        }
+
+                        ui.add_space(8.0);
+
+                        if ui
+                            .button(
+                                egui::RichText::new("📚 Abrir Docs.rs")
+                                    .size(12.0)
+                                    .color(cyan),
+                            )
+                            .clicked()
+                        {
+                            let docs_url = item
+                                .documentation
+                                .clone()
+                                .unwrap_or_else(|| format!("https://docs.rs/{}", item.id));
+                            ui.ctx().open_url(egui::OpenUrl::new_tab(docs_url));
+                        }
+
+                        ui.add_space(8.0);
+
+                        if ui
+                            .button(
+                                egui::RichText::new("🔗 Ver en Crates.io")
+                                    .size(12.0)
+                                    .color(egui::Color32::from_rgb(180, 200, 225)),
+                            )
+                            .clicked()
+                        {
+                            let url = format!("https://crates.io/crates/{}", item.id);
+                            ui.ctx().open_url(egui::OpenUrl::new_tab(url));
+                        }
+                    });
+                });
+
+                ui.add_space(8.0);
+
+                if let Some(desc) = &item.description {
+                    ui.label(
+                        egui::RichText::new(desc)
+                            .size(13.5)
+                            .color(egui::Color32::from_rgb(210, 225, 245)),
+                    );
+                }
+
+                ui.add_space(10.0);
+                ui.separator();
+                ui.add_space(6.0);
+
+                ui.horizontal(|ui| {
+                    ui.label(
+                        egui::RichText::new(format!("📥 {} descargas acumuladas", formatear_numero(item.downloads)))
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(150, 170, 195)),
+                    );
+
+                    if let Some(repo) = &item.repository {
+                        ui.add_space(16.0);
+                        ui.hyperlink_to(
+                            egui::RichText::new("📁 Repositorio en GitHub / GitLab")
+                                .size(11.5)
+                                .color(cyan),
+                            repo,
+                        );
+                    }
+                });
+            });
+
+            ui.add_space(14.0);
+
+            // --- NOTIFICACIÓN FEEDBACK ---
+            if let Some(msg) = &vs.copied_feedback {
+                let mut notify_frame = egui::Frame::new();
+                notify_frame.fill = egui::Color32::from_rgb(20, 48, 32);
+                notify_frame.stroke = egui::Stroke::new(1.0, green);
+                notify_frame.corner_radius = egui::CornerRadius::same(6);
+                notify_frame.inner_margin = egui::Margin::symmetric(12, 6);
+
+                notify_frame.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(format!("✅ {}", msg))
+                            .size(12.0)
+                            .strong()
+                            .color(green),
+                    );
+                });
+                ui.add_space(10.0);
+            }
+
+            // --- PESTAÑAS DE CONTENIDO DEL DETALLE ---
+            ui.horizontal(|ui| {
+                let tabs = [
+                    (0, "📖 Integración en Cargo.toml"),
+                    (1, "💻 Ejemplo de Código de Uso"),
+                    (2, "⚙️ Características (Features)"),
+                ];
+
+                for (idx, label) in tabs {
+                    let es_activo = vs.detail_tab == idx;
+                    if ui.selectable_label(es_activo, label).clicked() {
+                        vs.detail_tab = idx;
+                    }
+                }
+            });
+
+            ui.add_space(10.0);
+
+            // --- SECCIÓN 0: CARGO.TOML INTEGRATION ---
+            if vs.detail_tab == 0 {
+                let mut cargo_frame = egui::Frame::new();
+                cargo_frame.fill = egui::Color32::from_rgb(14, 18, 26);
+                cargo_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(32, 45, 68));
+                cargo_frame.corner_radius = egui::CornerRadius::same(8);
+                cargo_frame.inner_margin = egui::Margin::same(14);
+
+                cargo_frame.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new("Añadir a tu archivo Cargo.toml:")
+                            .size(13.0)
+                            .strong()
+                            .color(cargo_orange),
+                    );
+                    ui.add_space(6.0);
+
+                    let toml_snippet = format!("[dependencies]\n{} = \"{}\"", item.name, item.max_version);
+
+                    let mut code_frame = egui::Frame::new();
+                    code_frame.fill = egui::Color32::from_rgb(8, 12, 18);
+                    code_frame.corner_radius = egui::CornerRadius::same(6);
+                    code_frame.inner_margin = egui::Margin::same(10);
+
+                    code_frame.show(ui, |ui| {
+                        ui.label(
+                            egui::RichText::new(&toml_snippet)
+                                .font(egui::FontId::monospace(13.0))
+                                .color(green),
+                        );
+                    });
+
+                    ui.add_space(8.0);
+
+                    if ui
+                        .button(
+                            egui::RichText::new("📋 Copiar Bloque TOML")
+                                .size(12.0)
+                                .strong()
+                                .color(cyan),
+                        )
+                        .clicked()
+                    {
+                        ui.ctx().copy_text(toml_snippet.clone());
+                        vs.copied_feedback = Some("Bloque TOML copiado al portapapeles".to_string());
+                    }
+                });
+            }
+
+            // --- SECCIÓN 1: EJEMPLO DE CÓDIGO ---
+            if vs.detail_tab == 1 {
+                let ejemplo = obtener_ejemplo_codigo_crate(&item.name);
+
+                let mut code_box = egui::Frame::new();
+                code_box.fill = egui::Color32::from_rgb(10, 14, 22);
+                code_box.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(30, 44, 66));
+                code_box.corner_radius = egui::CornerRadius::same(8);
+                code_box.inner_margin = egui::Margin::same(14);
+
+                code_box.show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label(
+                            egui::RichText::new(format!("Ejemplo de código con {}", item.name))
+                                .size(13.0)
+                                .strong()
+                                .color(cargo_orange),
+                        );
+
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui
+                                .button(
+                                    egui::RichText::new("📋 Copiar Código")
+                                        .size(11.5)
+                                        .color(cyan),
+                                )
+                                .clicked()
+                            {
+                                ui.ctx().copy_text(ejemplo.to_string());
+                                vs.copied_feedback = Some("Código fuente copiado al portapapeles".to_string());
+                            }
+                        });
+                    });
+
+                    ui.add_space(8.0);
+
+                    ui.label(
+                        egui::RichText::new(ejemplo)
+                            .font(egui::FontId::monospace(12.5))
+                            .color(egui::Color32::from_rgb(220, 235, 255)),
+                    );
+                });
+            }
+
+            // --- SECCIÓN 2: FEATURES POPULARES ---
+            if vs.detail_tab == 2 {
+                let features = obtener_features_populares(&item.name);
+
+                let mut feat_frame = egui::Frame::new();
+                feat_frame.fill = egui::Color32::from_rgb(14, 18, 26);
+                feat_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(30, 42, 62));
+                feat_frame.corner_radius = egui::CornerRadius::same(8);
+                feat_frame.inner_margin = egui::Margin::same(14);
+
+                feat_frame.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(format!("Características (Features) de {}", item.name))
+                            .size(13.0)
+                            .strong()
+                            .color(cargo_orange),
+                    );
+                    ui.add_space(8.0);
+
+                    for (feat_name, feat_desc) in features {
+                        ui.horizontal(|ui| {
+                            let mut feat_tag = egui::Frame::new();
+                            feat_tag.fill = egui::Color32::from_rgb(26, 38, 56);
+                            feat_tag.corner_radius = egui::CornerRadius::same(4);
+                            feat_tag.inner_margin = egui::Margin::symmetric(6, 2);
+
+                            feat_tag.show(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new(feat_name)
+                                        .font(egui::FontId::monospace(11.5))
+                                        .strong()
+                                        .color(green),
+                                );
+                            });
+
+                            ui.label(
+                                egui::RichText::new(feat_desc)
+                                    .size(12.0)
+                                    .color(egui::Color32::from_rgb(190, 205, 225)),
+                            );
+                        });
+                        ui.add_space(4.0);
+                    }
+                });
             }
 
             ui.add_space(20.0);
@@ -411,4 +735,117 @@ fn formatear_numero(n: u64) -> String {
         resultado.push(c);
     }
     resultado
+}
+
+fn obtener_ejemplo_codigo_crate(crate_name: &str) -> &'static str {
+    match crate_name.to_lowercase().as_str() {
+        "tokio" => r#"// Ejemplo de uso con Tokio (Runtime Asíncrono)
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Iniciando runtime asíncrono Tokio...");
+
+    let handle = tokio::spawn(async {
+        println!("¡Tarea asíncrona ejecutada en segundo plano!");
+    });
+
+    handle.await?;
+    Ok(())
+}"#,
+        "serde" | "serde_json" => r#"// Ejemplo de uso con Serde (Serialización JSON)
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Usuario {
+    nombre: String,
+    edad: u32,
+    es_admin: bool,
+}
+
+fn main() {
+    let u = Usuario {
+        nombre: "Ferris".to_string(),
+        edad: 10,
+        es_admin: true,
+    };
+
+    let json = serde_json::to_string_pretty(&u).unwrap();
+    println!("JSON Resultante:\n{}", json);
+}"#,
+        "axum" => r#"// Ejemplo de servidor web con Axum
+use axum::{routing::get, Router};
+
+#[tokio::main]
+async fn main() {
+    let app = Router::new().route("/", get(|| async { "¡Hola desde Axum!" }));
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    println!("Servidor escuchando en http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}"#,
+        "reqwest" => r#"// Ejemplo de cliente HTTP con Reqwest
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let resp = reqwest::get("https://httpbin.org/ip")
+        .await?
+        .text()
+        .await?;
+    println!("Respuesta HTTP:\n{}", resp);
+    Ok(())
+}"#,
+        "clap" => r#"// Ejemplo de CLI con Clap
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(version, about)]
+struct Args {
+    #[arg(short, long)]
+    name: String,
+}
+
+fn main() {
+    let args = Args::parse();
+    println!("¡Hola {}!", args.name);
+}"#,
+        "egui" | "eframe" => r#"// Ejemplo de GUI con egui / eframe
+use eframe::egui;
+
+fn main() -> eframe::Result {
+    let options = eframe::NativeOptions::default();
+    eframe::run_simple_native("Mi App egui", options, move |ctx, _frame| {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("¡Hola desde egui en Rust!");
+        });
+    })
+}"#,
+        _ => r#"// Ejemplo de integración genérica en main.rs
+fn main() {
+    println!("Librería cargada e integrada correctamente.");
+}"#,
+    }
+}
+
+fn obtener_features_populares(crate_name: &str) -> Vec<(&'static str, &'static str)> {
+    match crate_name.to_lowercase().as_str() {
+        "tokio" => vec![
+            ("full", "Habilita todas las funcionalidades del runtime de Tokio."),
+            ("rt-multi-thread", "Soporte para runtime multihilo con planificación de tareas."),
+            ("macros", "Proporciona las macros #[tokio::main] y #[tokio::test]."),
+            ("net", "Soporte para sockets TCP, UDP y Unix."),
+            ("time", "Temporizadores asíncronos (sleep, interval, timeout)."),
+        ],
+        "serde" => vec![
+            ("derive", "Habilita #[derive(Serialize, Deserialize)]."),
+            ("std", "Soporte para tipos de la biblioteca estándar (String, Vec, HashMap)."),
+            ("alloc", "Soporte para asignación de memoria sin std completo."),
+        ],
+        "reqwest" => vec![
+            ("json", "Habilita la des/serialización de payloads JSON automáticamente."),
+            ("blocking", "Proporciona API síncrona/bloqueante."),
+            ("rustls-tls", "Utiliza Rustls en lugar de OpenSSL del sistema."),
+        ],
+        _ => vec![
+            ("default", "Características activas por defecto definidas por el autor."),
+            ("std", "Soporte para la biblioteca estándar de Rust."),
+        ],
+    }
 }
