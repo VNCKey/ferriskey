@@ -72,7 +72,7 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, state: &mut AppState) {
 }
 
 fn mostrar_lista_crates(ui: &mut egui::Ui, vs: &mut CratesIoViewState, _state: &mut AppState) {
-    obtener_resumen_crates(vs);
+    lanzar_resumen_asincrono(ui.ctx().clone());
 
     let cargo_orange = egui::Color32::from_rgb(240, 130, 40);
     let cyan = egui::Color32::from_rgb(110, 205, 255);
@@ -158,7 +158,7 @@ fn mostrar_lista_crates(ui: &mut egui::Ui, vs: &mut CratesIoViewState, _state: &
                     let enter_pressed = search_resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
 
                     if ui.button(egui::RichText::new("Buscar crate").strong()).clicked() || enter_pressed {
-                        ejecutar_busqueda_crates(&mut vs.search_query, &mut vs.results, &mut vs.is_loading, &mut vs.error_msg);
+                        lanzar_busqueda_asincrona(vs.search_query.clone(), ui.ctx().clone());
                     }
 
                     if vs.is_loading {
@@ -227,7 +227,7 @@ fn mostrar_lista_crates(ui: &mut egui::Ui, vs: &mut CratesIoViewState, _state: &
                         if ui.selectable_label(es_activo, label).clicked() {
                             vs.selected_category = idx;
                             vs.search_query = query.to_string();
-                            ejecutar_busqueda_crates(&mut vs.search_query, &mut vs.results, &mut vs.is_loading, &mut vs.error_msg);
+                            lanzar_busqueda_asincrona(vs.search_query.clone(), ui.ctx().clone());
                         }
                     });
                 }
@@ -253,7 +253,7 @@ fn mostrar_lista_crates(ui: &mut egui::Ui, vs: &mut CratesIoViewState, _state: &
             // Si los resultados están vacíos y no se está cargando, lanzar búsqueda inicial por defecto
             if vs.results.is_empty() && !vs.is_loading && vs.error_msg.is_none() {
                 vs.search_query = "tokio".to_string();
-                ejecutar_busqueda_crates(&mut vs.search_query, &mut vs.results, &mut vs.is_loading, &mut vs.error_msg);
+                lanzar_busqueda_asincrona(vs.search_query.clone(), ui.ctx().clone());
             }
 
             // --- LISTADO DE CRATES ---
@@ -699,61 +699,88 @@ fn mostrar_detalle_crate(
         });
 }
 
-fn ejecutar_busqueda_crates(
-    query: &mut String,
-    results: &mut Vec<CrateApiItem>,
-    is_loading: &mut bool,
-    error_msg: &mut Option<String>,
-) {
+use std::thread;
+
+fn lanzar_busqueda_asincrona(query: String, ctx: egui::Context) {
     if query.trim().is_empty() {
         return;
     }
-    *is_loading = true;
-    *error_msg = None;
-
-    let encoded_query = query.trim().replace(' ', "+");
-    let url = format!(
-        "https://crates.io/api/v1/crates?q={}&per_page=10",
-        encoded_query
-    );
-
-    match ureq::get(&url)
-        .header(
-            "User-Agent",
-            "FerrisKey-Desktop/0.1 (learning-rust-platform)",
-        )
-        .call()
     {
-        Ok(mut resp) => {
-            if let Ok(data) = resp.body_mut().read_json::<CratesApiResponse>() {
-                *results = data.crates;
-            } else {
-                *error_msg =
-                    Some("No se pudo interpretar la respuesta JSON de Crates.io.".to_string());
+        let mut state = VIEW_STATE.lock().unwrap();
+        if let Some(vs) = state.as_mut() {
+            vs.is_loading = true;
+            vs.error_msg = None;
+        }
+    }
+
+    thread::spawn(move || {
+        let encoded_query = query.trim().replace(' ', "+");
+        let url = format!(
+            "https://crates.io/api/v1/crates?q={}&per_page=10",
+            encoded_query
+        );
+
+        let res = ureq::get(&url)
+            .header(
+                "User-Agent",
+                "FerrisKey-Desktop/0.1 (learning-rust-platform)",
+            )
+            .call();
+
+        {
+            let mut state = VIEW_STATE.lock().unwrap();
+            if let Some(vs) = state.as_mut() {
+                match res {
+                    Ok(mut resp) => {
+                        if let Ok(data) = resp.body_mut().read_json::<CratesApiResponse>() {
+                            vs.results = data.crates;
+                            vs.error_msg = None;
+                        } else {
+                            vs.error_msg = Some("No se pudo interpretar la respuesta JSON de Crates.io.".to_string());
+                        }
+                    }
+                    Err(e) => {
+                        vs.error_msg = Some(format!("{}", e));
+                    }
+                }
+                vs.is_loading = false;
             }
         }
-        Err(e) => {
-            *error_msg = Some(format!("{}", e));
-        }
-    }
-    *is_loading = false;
+        ctx.request_repaint();
+    });
 }
 
-fn obtener_resumen_crates(vs: &mut CratesIoViewState) {
-    if vs.has_fetched_summary {
-        return;
-    }
-    vs.has_fetched_summary = true;
-    let url = "https://crates.io/api/v1/summary";
-    if let Ok(mut resp) = ureq::get(url)
-        .header("User-Agent", "FerrisKey-Desktop/0.1 (learning-rust-platform)")
-        .call()
+fn lanzar_resumen_asincrono(ctx: egui::Context) {
     {
-        if let Ok(data) = resp.body_mut().read_json::<SummaryApiResponse>() {
-            vs.total_crates_count = data.num_crates;
-            vs.total_downloads_count = data.num_downloads;
+        let mut state = VIEW_STATE.lock().unwrap();
+        if let Some(vs) = state.as_mut() {
+            if vs.has_fetched_summary {
+                return;
+            }
+            vs.has_fetched_summary = true;
         }
     }
+
+    thread::spawn(move || {
+        let url = "https://crates.io/api/v1/summary";
+        let res = ureq::get(url)
+            .header(
+                "User-Agent",
+                "FerrisKey-Desktop/0.1 (learning-rust-platform)",
+            )
+            .call();
+
+        if let Ok(mut resp) = res {
+            if let Ok(data) = resp.body_mut().read_json::<SummaryApiResponse>() {
+                let mut state = VIEW_STATE.lock().unwrap();
+                if let Some(vs) = state.as_mut() {
+                    vs.total_crates_count = data.num_crates;
+                    vs.total_downloads_count = data.num_downloads;
+                }
+            }
+        }
+        ctx.request_repaint();
+    });
 }
 
 fn formatear_numero(n: u64) -> String {
