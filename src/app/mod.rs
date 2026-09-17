@@ -313,7 +313,7 @@ impl AppState {
 }
 
 impl eframe::App for AppState {
-    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.sincronizar_proyecto_terminal();
 
         // FORZAR desactivación GLOBAL de CUALQUIER modo debug (bordes rojos, etc.).
@@ -522,7 +522,7 @@ impl eframe::App for AppState {
         };
         central_panel.show(ui, |ui| match self.ui.ruta_actual {
             AppRoute::LandingPage => mostrar_landing_page(ui, self),
-            AppRoute::TutorialCargo => mostrar_tutorial_cargo(ui, self, Some(frame)),
+            AppRoute::TutorialCargo => mostrar_tutorial_cargo(ui, self),
             AppRoute::Comenzando => {
                 mostrar_comenzando(ui, self);
             }

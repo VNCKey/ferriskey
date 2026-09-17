@@ -29,13 +29,6 @@ fn main() -> eframe::Result {
 
     tracing::info!("Iniciando FerrisKey Desktop");
 
-    #[cfg(target_os = "linux")]
-    {
-        if let Err(err) = gtk::init() {
-            tracing::warn!("No se pudo inicializar GTK: {err}");
-        }
-    }
-
     // Muestra los errores críticos en la terminal antes de delegarlos al hook original.
     let default_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |panic_info| {
