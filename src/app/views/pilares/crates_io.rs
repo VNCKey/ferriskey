@@ -20,6 +20,12 @@ struct CratesApiResponse {
     crates: Vec<CrateApiItem>,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+struct SummaryApiResponse {
+    pub num_crates: u64,
+    pub num_downloads: u64,
+}
+
 pub struct CratesIoViewState {
     pub search_query: String,
     pub is_loading: bool,
@@ -29,6 +35,9 @@ pub struct CratesIoViewState {
     pub copied_feedback: Option<String>,
     pub selected_crate: Option<CrateApiItem>,
     pub detail_tab: usize,
+    pub total_crates_count: u64,
+    pub total_downloads_count: u64,
+    pub has_fetched_summary: bool,
 }
 
 impl Default for CratesIoViewState {
@@ -42,6 +51,9 @@ impl Default for CratesIoViewState {
             copied_feedback: None,
             selected_crate: None,
             detail_tab: 0,
+            total_crates_count: 335044,
+            total_downloads_count: 443732072191,
+            has_fetched_summary: false,
         }
     }
 }
@@ -60,6 +72,8 @@ pub fn mostrar_tab_crates_io_web(ui: &mut egui::Ui, state: &mut AppState) {
 }
 
 fn mostrar_lista_crates(ui: &mut egui::Ui, vs: &mut CratesIoViewState, _state: &mut AppState) {
+    obtener_resumen_crates(vs);
+
     let cargo_orange = egui::Color32::from_rgb(240, 130, 40);
     let cyan = egui::Color32::from_rgb(110, 205, 255);
     let green = egui::Color32::from_rgb(95, 215, 145);
@@ -108,14 +122,14 @@ fn mostrar_lista_crates(ui: &mut egui::Ui, vs: &mut CratesIoViewState, _state: &
                             ui.ctx().open_url(egui::OpenUrl::new_tab("https://crates.io"));
                         }
 
-                        // Badge de estadísticas
+                        // Badge de estadísticas en vivo
                         let mut badge_frame = egui::Frame::new();
                         badge_frame.fill = egui::Color32::from_rgb(12, 16, 24);
                         badge_frame.corner_radius = egui::CornerRadius::same(4);
                         badge_frame.inner_margin = egui::Margin::symmetric(8, 4);
                         badge_frame.show(ui, |ui| {
                             ui.label(
-                                egui::RichText::new("160.000+ Crates registrados")
+                                egui::RichText::new(format!("{} Crates en vivo", formatear_numero(vs.total_crates_count)))
                                     .size(11.0)
                                     .strong()
                                     .color(green),
@@ -723,6 +737,23 @@ fn ejecutar_busqueda_crates(
         }
     }
     *is_loading = false;
+}
+
+fn obtener_resumen_crates(vs: &mut CratesIoViewState) {
+    if vs.has_fetched_summary {
+        return;
+    }
+    vs.has_fetched_summary = true;
+    let url = "https://crates.io/api/v1/summary";
+    if let Ok(mut resp) = ureq::get(url)
+        .header("User-Agent", "FerrisKey-Desktop/0.1 (learning-rust-platform)")
+        .call()
+    {
+        if let Ok(data) = resp.body_mut().read_json::<SummaryApiResponse>() {
+            vs.total_crates_count = data.num_crates;
+            vs.total_downloads_count = data.num_downloads;
+        }
+    }
 }
 
 fn formatear_numero(n: u64) -> String {
