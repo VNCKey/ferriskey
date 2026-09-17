@@ -47,7 +47,7 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
                     img_book.paint_at(ui, book_rect);
                     ui.add_space(4.0);
 
-                    let tabs_teoria = [(0, "Rust Ecosystem"), (2, "Crates.io Explorer")];
+                    let tabs_teoria = [(0, "Rust Ecosystem"), (2, "Crates")];
                     for (indice, texto) in tabs_teoria {
                         let es_activo = state.lessons.pilares_step == indice;
                         if underline_tab(ui, texto, es_activo, cyan).clicked() {

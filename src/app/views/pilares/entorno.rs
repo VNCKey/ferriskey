@@ -144,7 +144,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
         egui::RichText::new("Núcleo de Construcción y Ecosistema")
             .size(18.0)
             .strong()
-            .color(egui::Color32::WHITE),
+            .color(title_color),
     );
     ui.add_space(8.0);
 
@@ -227,7 +227,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
         egui::RichText::new("Calidad, Estilo y Diagnósticos")
             .size(18.0)
             .strong()
-            .color(egui::Color32::WHITE),
+            .color(title_color),
     );
     ui.add_space(8.0);
 
@@ -303,7 +303,7 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
         egui::RichText::new("Productividad, IDE y Documentación")
             .size(18.0)
             .strong()
-            .color(egui::Color32::WHITE),
+            .color(title_color),
     );
     ui.add_space(8.0);
 
