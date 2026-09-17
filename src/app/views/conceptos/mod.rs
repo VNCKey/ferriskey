@@ -638,28 +638,42 @@ pub fn ejecutar_cargo_run_proyecto(state: &mut AppState, ctx: &egui::Context) {
 }
 
 pub fn mostrar_contenido_tipos_primitivos(ui: &mut egui::Ui, state: &mut AppState) {
-    // Selector de Categoría (Enteros, Decimales, Bool, Char, Casting)
+    let orange = egui::Color32::from_rgb(255, 160, 50);
+    let categorias = [
+        (0, "Enteros"),
+        (1, "Decimales"),
+        (2, "Booleanos"),
+        (3, "Caracteres"),
+        (4, "Casting (as)"),
+    ];
+
+    // Centrar horizontalmente los tabs de Data Types
+    let font_id = egui::FontId::proportional(13.0);
+    let h_padding = 10.0;
+    let item_spacing = ui.spacing().item_spacing.x;
+    let mut total_w = 0.0;
+    for (i, (_, cat_label)) in categorias.iter().enumerate() {
+        let galley = ui.painter().layout_no_wrap(
+            cat_label.to_string(),
+            font_id.clone(),
+            egui::Color32::WHITE,
+        );
+        total_w += galley.size().x + h_padding * 2.0;
+        if i > 0 {
+            total_w += item_spacing;
+        }
+    }
+
+    let available_w = ui.available_width();
+    let left_margin = ((available_w - total_w) / 2.0).max(0.0);
+
     ui.horizontal(|ui| {
-        for (cat_idx, (cat_label, cat_color)) in [
-            ("Enteros", egui::Color32::from_rgb(255, 160, 50)),
-            ("Decimales", egui::Color32::from_rgb(255, 160, 50)),
-            ("Booleanos", egui::Color32::from_rgb(255, 160, 50)),
-            ("Caracteres", egui::Color32::from_rgb(255, 160, 50)),
-            ("Casting (as)", egui::Color32::from_rgb(255, 160, 50)),
-        ]
-        .iter()
-        .enumerate()
-        {
+        ui.add_space(left_margin);
+        for (cat_idx, cat_label) in categorias {
             let es_sel = state.lessons.tipo_primitivo_categoria == cat_idx;
-            let text_rich = egui::RichText::new(*cat_label).strong().color(if es_sel {
-                *cat_color
-            } else {
-                egui::Color32::from_rgb(180, 190, 205)
-            });
-            if ui.add(egui::Button::new(text_rich).frame(es_sel)).clicked() {
+            if underline_tab(ui, cat_label, es_sel, orange).clicked() {
                 state.lessons.tipo_primitivo_categoria = cat_idx;
             }
-            ui.add_space(4.0);
         }
     });
 
@@ -846,7 +860,7 @@ pub fn mostrar_contenido_macros(ui: &mut egui::Ui) {
         egui::RichText::new("Categorías de Macros en Rust")
             .size(18.0)
             .strong()
-            .color(egui::Color32::WHITE),
+            .color(egui::Color32::from_rgb(255, 160, 50)),
     );
     ui.add_space(6.0);
     ui.label(
@@ -996,7 +1010,7 @@ pub fn mostrar_contenido_macros(ui: &mut egui::Ui) {
         egui::RichText::new("Depuración")
             .size(18.0)
             .strong()
-            .color(egui::Color32::WHITE),
+            .color(egui::Color32::from_rgb(255, 160, 50)),
     );
     ui.add_space(6.0);
     ui.label(
@@ -1143,7 +1157,7 @@ pub fn mostrar_contenido_macros(ui: &mut egui::Ui) {
         egui::RichText::new("Macros y atributos: cómo se relacionan")
             .size(18.0)
             .strong()
-            .color(egui::Color32::WHITE),
+            .color(egui::Color32::from_rgb(255, 160, 50)),
     );
     ui.add_space(6.0);
     ui.label("La sintaxis y la implementación son conceptos distintos: ! indica una invocación, mientras que #[...] indica un atributo. Algunos atributos activan macros procedurales.");
@@ -1701,28 +1715,12 @@ pub fn mostrar_tutorial_conceptos_basicos(ui: &mut egui::Ui, state: &mut AppStat
         6 => mostrar_seccion_documentacion(ui),
         8 => funciones::mostrar(ui, state),
         7 => {
-            ui.heading(
-                egui::RichText::new("Mecánicas Centrales de Rust")
-                    .size(24.0)
-                    .strong()
-                    .color(egui::Color32::from_rgb(100, 200, 255)),
-            );
-            ui.add_space(20.0);
-
-            // Fusión de las 3 vistas teóricas
-            mutabilidad::mostrar(ui, state);
-
-            ui.add_space(30.0);
-            ui.separator();
-            ui.add_space(30.0);
-
-            scopes::mostrar(ui, state);
-
-            ui.add_space(30.0);
-            ui.separator();
-            ui.add_space(30.0);
-
-            statements::mostrar(ui, state);
+            egui::ScrollArea::vertical()
+                .id_salt("conceptos_core_mechanics_scroll")
+                .auto_shrink([false, false])
+                .show(ui, |ui| {
+                    mutabilidad::mostrar(ui, state);
+                });
         }
         _ => {}
     }

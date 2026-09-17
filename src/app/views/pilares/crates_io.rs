@@ -209,7 +209,6 @@ fn mostrar_lista_crates(
         ui.ctx().request_repaint();
     }
 
-    let title_color = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let green = egui::Color32::from_rgb(100, 220, 150);
     let text_color = egui::Color32::from_rgb(200, 210, 225);
@@ -234,17 +233,10 @@ fn mostrar_lista_crates(
 
             // --- BARRA DE BÚSQUEDA (CARD COMPACTO Y CENTRADO) ---
             let is_loading = vs.is_loading || (vs.is_loading_summary && !vs.is_search_active);
-            let label_text = "Buscar Crate:";
-            let label_galley = ui.painter().layout_no_wrap(
-                label_text.to_string(),
-                egui::FontId::proportional(14.0),
-                title_color,
-            );
-            let label_w = label_galley.size().x;
             let spinner_w = if is_loading { 18.0 + 8.0 } else { 0.0 };
-            let btn_w: f32 = 80.0;
-            let input_w: f32 = 280.0;
-            let inner_search_w = label_w + 8.0 + input_w + 10.0 + btn_w + spinner_w;
+            let btn_w: f32 = 88.0;
+            let input_w: f32 = 300.0;
+            let inner_search_w = input_w + 10.0 + btn_w + spinner_w;
             let search_card_w = (inner_search_w + 24.0).min(available_w); // 24.0 = margin de 12px a cada lado
             let search_card_margin = ((available_w - search_card_w) / 2.0).max(0.0);
 
@@ -261,15 +253,6 @@ fn mostrar_lista_crates(
                             egui::Layout::left_to_right(egui::Align::Center),
                             |ui| {
                                 ui.spacing_mut().item_spacing.x = 0.0;
-
-                                ui.label(
-                                    egui::RichText::new(label_text)
-                                        .size(14.0)
-                                        .strong()
-                                        .color(title_color),
-                                );
-
-                                ui.add_space(8.0);
 
                                 let search_resp = ui.add_sized(
                                     egui::vec2(input_w, 24.0),
@@ -313,7 +296,7 @@ fn mostrar_lista_crates(
 
                                 ui.add_space(10.0);
 
-                                if boton_custom_cyan(ui, "Buscar", btn_w).clicked() || enter_pressed {
+                                if boton_custom_cyan_buscar(ui, btn_w).clicked() || enter_pressed {
                                     let clean = vs.search_query.trim().to_string();
                                     if !clean.is_empty() {
                                         vs.is_search_active = true;
@@ -2606,6 +2589,79 @@ fn render_detalle_utilidades_inferiores(
 }
 
 // --- BOTONES PERSONALIZADOS PINTADOS CON ILUMINACIÓN HOVER ESTILO FERRISKEY ---
+
+fn boton_custom_cyan_buscar(ui: &mut egui::Ui, width: f32) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(egui::vec2(width, 28.0), egui::Sense::click());
+
+    let hovered = response.hovered();
+    let pressed = response.is_pointer_button_down_on();
+
+    let cyan = egui::Color32::from_rgb(100, 200, 255);
+
+    let button_fill = if pressed {
+        egui::Color32::from_rgb(22, 60, 80)
+    } else if hovered {
+        egui::Color32::from_rgb(28, 75, 100)
+    } else {
+        egui::Color32::from_rgb(18, 48, 65)
+    };
+    let button_stroke = if hovered || pressed {
+        cyan
+    } else {
+        egui::Color32::from_rgb(45, 110, 140)
+    };
+
+    ui.painter().rect(
+        rect,
+        egui::CornerRadius::same(5),
+        button_fill,
+        egui::Stroke::new(1.0, button_stroke),
+        egui::StrokeKind::Inside,
+    );
+
+    let icon_color = if hovered || pressed {
+        egui::Color32::WHITE
+    } else {
+        cyan
+    };
+    let text_color = if hovered || pressed {
+        egui::Color32::WHITE
+    } else {
+        egui::Color32::from_rgb(190, 225, 255)
+    };
+
+    let text = "Buscar";
+    let font_id = egui::FontId::proportional(12.0);
+    let galley = ui.painter().layout_no_wrap(text.to_string(), font_id.clone(), text_color);
+    let text_w = galley.size().x;
+    let icon_size = 14.0;
+    let gap = 5.0;
+    let total_content_w = icon_size + gap + text_w;
+
+    let start_x = rect.center().x - total_content_w / 2.0;
+    let icon_rect = egui::Rect::from_min_size(
+        egui::pos2(start_x, rect.center().y - icon_size / 2.0),
+        egui::vec2(icon_size, icon_size),
+    );
+
+    let img_search = egui::Image::new(egui::include_image!(
+        "../../../../assets/icons/search-alt-2-svgrepo-com.svg"
+    ))
+    .fit_to_exact_size(egui::vec2(icon_size, icon_size))
+    .tint(icon_color);
+    img_search.paint_at(ui, icon_rect);
+
+    let text_pos = egui::pos2(start_x + icon_size + gap, rect.center().y);
+    ui.painter().text(
+        text_pos,
+        egui::Align2::LEFT_CENTER,
+        text,
+        font_id,
+        text_color,
+    );
+
+    response
+}
 
 fn boton_custom_cyan(ui: &mut egui::Ui, texto: &str, width: f32) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(egui::vec2(width, 28.0), egui::Sense::click());

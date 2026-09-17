@@ -2,283 +2,277 @@ use crate::app::AppState;
 use eframe::egui;
 
 pub fn mostrar(ui: &mut egui::Ui, state: &mut AppState) {
+    let elapsed = ui.input(|i| i.time) - state.ui.anim_trigger;
+    if elapsed < 2.0 {
+        ui.ctx().request_repaint();
+    }
+
+    let mut anim_delay = 0.0f64;
+
+    let anim_card = |ui: &mut egui::Ui,
+                     frame: &egui::Frame,
+                     delay: &mut f64,
+                     add_contents: &mut dyn FnMut(&mut egui::Ui)| {
+        let local = (elapsed - *delay).max(0.0);
+        *delay += 0.08;
+        let raw_t = (local / 0.5).clamp(0.0, 1.0) as f32;
+        let t = 1.0 - (1.0 - raw_t).powi(4);
+        ui.scope(|ui| {
+            ui.set_width(ui.available_width());
+            ui.multiply_opacity(t);
+            ui.add_space((1.0 - t) * 25.0);
+            frame.show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                add_contents(ui);
+            });
+        });
+    };
+
+    let title_color = egui::Color32::from_rgb(255, 160, 50);
+    let cyan = egui::Color32::from_rgb(100, 200, 255);
+    let green = egui::Color32::from_rgb(100, 220, 150);
+    let text_color = egui::Color32::from_rgb(200, 210, 225);
+
+    let mut card_frame = egui::Frame::new();
+    card_frame.fill = egui::Color32::from_rgb(14, 18, 26);
+    card_frame.inner_margin = egui::Margin::same(12);
+    card_frame.corner_radius = egui::CornerRadius::same(8);
+    card_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+
+    let mut mini_card = egui::Frame::new();
+    mini_card.fill = egui::Color32::from_rgb(14, 18, 26);
+    mini_card.inner_margin = egui::Margin::same(8);
+    mini_card.corner_radius = egui::CornerRadius::same(6);
+    mini_card.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+
+    // --- SECCIÓN 1: INTRODUCCIÓN Y FILOSOFÍA DE LAS VARIABLES ---
+    ui.heading(
+        egui::RichText::new("Mecánicas Centrales de Rust")
+            .size(24.0)
+            .strong()
+            .color(title_color),
+    );
+    ui.add_space(8.0);
+
     ui.label(
-        "En Rust, las variables son inmutables por defecto. Esto garantiza seguridad de memoria, previene errores de concurrencia y obliga a declarar explícitamente con 'mut' cuando un valor necesita cambiar.",
+        egui::RichText::new("En Rust, las variables no son simples contenedores de memoria pasivos. El lenguaje estructura el manejo de datos bajo principios estrictos de inmutabilidad por defecto, control explícito de mutabilidad y ciclo de vida determinista (RAII), garantizando que el estado de tu programa sea siempre predecible y libre de carreras de datos (Data Races).")
+            .size(15.0)
+            .color(text_color)
+            .line_height(Some(22.0)),
+    );
+    ui.add_space(8.0);
+
+    ui.label(
+        egui::RichText::new("Estos conceptos sientan las bases antes de interactuar con el Borrow Checker y el sistema de Ownership. En lugar de lidiar con efectos secundarios imprevistos, el compilador te ayuda a modelar flujos de datos limpios y seguros.")
+            .size(15.0)
+            .color(text_color)
+            .line_height(Some(22.0)),
     );
     ui.add_space(12.0);
 
-    // ==========================================
-    // MUTABILIDAD Y DECLARACIONES
-    // ==========================================
-    ui.heading(
-        egui::RichText::new("Mutabilidad y Declaraciones")
-            .size(17.0)
-            .strong()
-            .color(egui::Color32::from_rgb(255, 160, 50)),
-    );
-    ui.add_space(6.0);
-
-    let mut table_frame = egui::Frame::new();
-    table_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    table_frame.inner_margin = egui::Margin::same(12);
-    table_frame.corner_radius = egui::CornerRadius::same(8);
-    table_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    table_frame.show(ui, |ui| {
-        egui::Grid::new("tabla_declaraciones_rust")
-            .striped(true)
-            .spacing([20.0, 8.0])
-            .show(ui, |ui| {
-                // Encabezados
-                ui.label(
-                    egui::RichText::new("Declaración")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Mutabilidad")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Ejemplo de Código")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Descripción")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
-                ui.end_row();
-
-                // Fila 1: let (Inmutable)
-                let btn_color_0 = if state.ui.show_railroad_modal == Some(0) {
-                    egui::Color32::from_rgb(255, 160, 50)
-                } else {
-                    egui::Color32::from_rgb(180, 190, 205)
-                };
-
-                ui.horizontal(|ui| {
-                    ui.label(
-                        egui::RichText::new("let")
-                            .monospace()
-                            .strong()
-                            .color(egui::Color32::from_rgb(255, 160, 50)),
-                    );
-                    ui.add_space(4.0);
-                    if ui
-                        .add(
-                            egui::Button::image(
-                                egui::Image::from_bytes(
-                                    "bytes://view.svg",
-                                    include_bytes!("../../../../assets/diagramas/view.svg"),
-                                )
-                                .fit_to_exact_size(egui::vec2(18.0, 18.0))
-                                .tint(btn_color_0),
-                            )
-                            .frame(state.ui.show_railroad_modal == Some(0)),
-                        )
-                        .on_hover_text("Ver diagrama Railroad de sintaxis (let inmutable)")
-                        .clicked()
-                    {
-                        state.ui.show_railroad_modal = if state.ui.show_railroad_modal == Some(0) {
-                            None
-                        } else {
-                            Some(0)
-                        };
-                    }
-                });
-                ui.label(
-                    egui::RichText::new("No")
-                        .strong()
-                        .color(egui::Color32::from_rgb(180, 190, 205)),
-                );
-                ui.label(
-                    egui::RichText::new("let x = 5;")
-                        .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
-                );
-                ui.label("No puede reasignarse. El valor permanece fijo.");
-                ui.end_row();
-
-                // Fila 2: let mut (Mutable)
-                let btn_color_1 = if state.ui.show_railroad_modal == Some(1) {
-                    egui::Color32::from_rgb(255, 160, 50)
-                } else {
-                    egui::Color32::from_rgb(180, 190, 205)
-                };
-
-                ui.horizontal(|ui| {
-                    ui.label(
-                        egui::RichText::new("let mut")
-                            .monospace()
-                            .strong()
-                            .color(egui::Color32::from_rgb(255, 160, 50)),
-                    );
-                    ui.add_space(4.0);
-                    if ui
-                        .add(
-                            egui::Button::image(
-                                egui::Image::from_bytes(
-                                    "bytes://view.svg",
-                                    include_bytes!("../../../../assets/diagramas/view.svg"),
-                                )
-                                .fit_to_exact_size(egui::vec2(18.0, 18.0))
-                                .tint(btn_color_1),
-                            )
-                            .frame(state.ui.show_railroad_modal == Some(1)),
-                        )
-                        .on_hover_text("Ver diagrama Railroad de sintaxis (let mut mutable)")
-                        .clicked()
-                    {
-                        state.ui.show_railroad_modal = if state.ui.show_railroad_modal == Some(1) {
-                            None
-                        } else {
-                            Some(1)
-                        };
-                    }
-                });
-                ui.label(
-                    egui::RichText::new("Sí")
-                        .strong()
-                        .color(egui::Color32::from_rgb(255, 160, 50)),
-                );
-                ui.label(
-                    egui::RichText::new("let mut x = 5;\nx = 10;")
-                        .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
-                );
-                ui.label("Permite cambiar el valor de la variable de forma explícita.");
-                ui.end_row();
-
-                // Fila 3: const
-                ui.label(
-                    egui::RichText::new("const")
-                        .monospace()
-                        .strong()
-                        .color(egui::Color32::from_rgb(255, 160, 50)),
-                );
-                ui.label(
-                    egui::RichText::new("No")
-                        .strong()
-                        .color(egui::Color32::from_rgb(180, 190, 205)),
-                );
-                ui.label(
-                    egui::RichText::new("const MAX: u32 = 100;")
-                        .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
-                );
-                ui.label("Constante de compilación. Su valor debe conocerse antes de ejecutar.");
-                ui.end_row();
-
-                // Fila 4: static
-                ui.label(
-                    egui::RichText::new("static")
-                        .monospace()
-                        .strong()
-                        .color(egui::Color32::from_rgb(255, 160, 50)),
-                );
-                ui.label(
-                    egui::RichText::new("No por defecto")
-                        .strong()
-                        .color(egui::Color32::from_rgb(180, 190, 205)),
-                );
-                ui.label(
-                    egui::RichText::new("static VALOR: &str = \"OK\";")
-                        .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
-                );
-                ui.label("Dirección de memoria fija y global durante todo el programa.");
-                ui.end_row();
-
-                // Fila 5: type (Alias)
-                ui.label(
-                    egui::RichText::new("type")
-                        .monospace()
-                        .strong()
-                        .color(egui::Color32::from_rgb(255, 160, 50)),
-                );
-                ui.label(
-                    egui::RichText::new("N/A")
-                        .strong()
-                        .color(egui::Color32::from_rgb(180, 190, 205)),
-                );
-                ui.label(
-                    egui::RichText::new("type Metros = u64;")
-                        .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
-                );
-                ui.label("Crea un alias o nombre descriptivo para un tipo existente.");
-                ui.end_row();
+    // Mini-tarjetas 2x2 conceptuales (estilo Foundations)
+    ui.columns(2, |cols| {
+        cols[0].vertical(|ui| {
+            mini_card.show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.set_min_height(65.0);
+                ui.label(egui::RichText::new("Inmutabilidad por Defecto").strong().color(title_color));
+                ui.add_space(2.0);
+                ui.label(egui::RichText::new("Previene que múltiples partes del código alteren datos de forma no coordinada.").color(text_color));
             });
-    });
+            ui.add_space(8.0);
 
-    ui.add_space(18.0);
-
-    // ==========================================
-    // SHADOWING
-    // ==========================================
-    ui.heading(
-        egui::RichText::new("Shadowing")
-            .size(17.0)
-            .strong()
-            .color(egui::Color32::from_rgb(255, 160, 50)),
-    );
-    ui.add_space(6.0);
-
-    let mut shadow_frame = egui::Frame::new();
-    shadow_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    shadow_frame.inner_margin = egui::Margin::same(14);
-    shadow_frame.corner_radius = egui::CornerRadius::same(8);
-    shadow_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    shadow_frame.show(ui, |ui| {
-        ui.label(
-            "El Shadowing (ensombrecimiento) consiste en declarar una nueva variable usando la palabra clave 'let' con el mismo nombre de una variable existente. La nueva variable oculta a la anterior.",
-        );
-        ui.add_space(8.0);
-
-        ui.label(egui::RichText::new("Puntos clave de Shadowing:").strong().color(egui::Color32::WHITE));
-        ui.label("• Re-declaración con let: Cada vez que usas 'let', estás creando una nueva variable.");
-        ui.label("• Cambio de tipo: Al crear una nueva variable, se le puede asignar un tipo de dato diferente.");
-        ui.label("• Inmutabilidad conservada: El valor resultante sigue siendo inmutable salvo que se especifique 'mut'.");
-        ui.add_space(10.0);
-
-        ui.columns(2, |cols| {
-            // Columna 1: Transformación de valor
-            let mut code_box1 = egui::Frame::new();
-            code_box1.fill = egui::Color32::from_rgb(8, 12, 18);
-            code_box1.inner_margin = egui::Margin::same(10);
-            code_box1.corner_radius = egui::CornerRadius::same(6);
-            code_box1.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(35, 50, 75));
-
-            code_box1.show(&mut cols[0], |ui| {
-                ui.label(egui::RichText::new("Re-declarar y transformar valor").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.add_space(4.0);
-                ui.spacing_mut().item_spacing.y = 2.0;
-                ui.label(egui::RichText::new("let x = 5;").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("let x = x + 1; // x ahora es 6").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("let x = x * 2; // x ahora es 12").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("println!(\"{x}\"); // Imprime: 12").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+            mini_card.show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.set_min_height(65.0);
+                ui.label(egui::RichText::new("Mutabilidad Explícita (mut)").strong().color(title_color));
+                ui.add_space(2.0);
+                ui.label(egui::RichText::new("La intención de modificar un valor debe ser consciente y visible en la declaración.").color(text_color));
             });
+        });
 
-            // Columna 2: Cambio de tipo
-            let mut code_box2 = egui::Frame::new();
-            code_box2.fill = egui::Color32::from_rgb(8, 12, 18);
-            code_box2.inner_margin = egui::Margin::same(10);
-            code_box2.corner_radius = egui::CornerRadius::same(6);
-            code_box2.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(35, 50, 75));
+        cols[1].vertical(|ui| {
+            mini_card.show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.set_min_height(65.0);
+                ui.label(egui::RichText::new("Gestión Determinista (RAII)").strong().color(title_color));
+                ui.add_space(2.0);
+                ui.label(egui::RichText::new("Las variables liberan sus recursos automáticamente al salir del bloque donde fueron creadas.").color(text_color));
+            });
+            ui.add_space(8.0);
 
-            code_box2.show(&mut cols[1], |ui| {
-                ui.label(egui::RichText::new("Cambio de tipo de dato").strong().color(egui::Color32::from_rgb(255, 160, 50)));
-                ui.add_space(4.0);
-                ui.spacing_mut().item_spacing.y = 2.0;
-                ui.label(egui::RichText::new("let espacios = \"   \"; // Tipo texto (&str)").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("let espacios = 3;     // Tipo número (i32)").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
-                ui.label(egui::RichText::new("// Con 'let mut' cambiar de tipo daría error").monospace().size(12.0).color(egui::Color32::from_rgb(140, 160, 185)));
-                ui.label(egui::RichText::new("println!(\"{espacios}\"); // Imprime: 3").monospace().size(12.0).color(egui::Color32::from_rgb(100, 200, 255)));
+            mini_card.show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.set_min_height(65.0);
+                ui.label(egui::RichText::new("Orientado a Expresiones").strong().color(title_color));
+                ui.add_space(2.0);
+                ui.label(egui::RichText::new("Casi todas las construcciones sintácticas producen un valor evaluado directamente.").color(text_color));
             });
         });
     });
+
+    ui.add_space(20.0);
+
+    // --- SECCIÓN 2: DECLARACIONES Y ENLACES (BINDINGS) ---
+    ui.heading(
+        egui::RichText::new("Declaraciones y Tipos de Enlace")
+            .size(18.0)
+            .strong()
+            .color(title_color),
+    );
+    ui.add_space(8.0);
+
+    ui.columns(3, |cols| {
+        // Card 1: let
+        anim_card(&mut cols[0], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(140.0);
+            ui.horizontal(|ui| {
+                ui.heading(egui::RichText::new("let").size(17.0).monospace().strong().color(title_color));
+                ui.add_space(6.0);
+                let mut badge = egui::Frame::new();
+                badge.fill = egui::Color32::from_rgb(18, 44, 30);
+                badge.corner_radius = egui::CornerRadius::same(4);
+                badge.inner_margin = egui::Margin::symmetric(6, 2);
+                badge.show(ui, |ui| {
+                    ui.label(egui::RichText::new("Inmutable").size(11.0).strong().color(green));
+                });
+            });
+            ui.label(egui::RichText::new("Enlace Inmutable por Defecto").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Asigna un nombre a un valor en el stack local.").color(text_color));
+            ui.label(egui::RichText::new("• Una vez inicializado, el compilador prohíbe reasignaciones accidentales.").color(text_color));
+        });
+
+        // Card 2: let mut
+        anim_card(&mut cols[1], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(140.0);
+            ui.horizontal(|ui| {
+                ui.heading(egui::RichText::new("let mut").size(17.0).monospace().strong().color(title_color));
+                ui.add_space(6.0);
+                let mut badge = egui::Frame::new();
+                badge.fill = egui::Color32::from_rgb(44, 30, 18);
+                badge.corner_radius = egui::CornerRadius::same(4);
+                badge.inner_margin = egui::Margin::symmetric(6, 2);
+                badge.show(ui, |ui| {
+                    ui.label(egui::RichText::new("Mutable").size(11.0).strong().color(title_color));
+                });
+            });
+            ui.label(egui::RichText::new("Mutabilidad Controlada").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Habilita la modificación y reasignación de datos.").color(text_color));
+            ui.label(egui::RichText::new("• Exige conservar el mismo tipo de dato asignado originalmente.").color(text_color));
+        });
+
+        // Card 3: const
+        anim_card(&mut cols[2], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(140.0);
+            ui.horizontal(|ui| {
+                ui.heading(egui::RichText::new("const").size(17.0).monospace().strong().color(title_color));
+                ui.add_space(6.0);
+                let mut badge = egui::Frame::new();
+                badge.fill = egui::Color32::from_rgb(18, 30, 44);
+                badge.corner_radius = egui::CornerRadius::same(4);
+                badge.inner_margin = egui::Margin::symmetric(6, 2);
+                badge.show(ui, |ui| {
+                    ui.label(egui::RichText::new("Compile-time").size(11.0).strong().color(cyan));
+                });
+            });
+            ui.label(egui::RichText::new("Constante en Compilación").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Evaluada antes de ejecutar; requiere tipo de dato explícito obligatorio.").color(text_color));
+            ui.label(egui::RichText::new("• Puede declararse en cualquier ámbito, incluido el global del módulo.").color(text_color));
+        });
+    });
+
+    ui.add_space(10.0);
+
+    ui.columns(2, |cols| {
+        // Card 4: static
+        anim_card(&mut cols[0], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(120.0);
+            ui.horizontal(|ui| {
+                ui.heading(egui::RichText::new("static").size(17.0).monospace().strong().color(title_color));
+                ui.add_space(6.0);
+                let mut badge = egui::Frame::new();
+                badge.fill = egui::Color32::from_rgb(25, 20, 35);
+                badge.corner_radius = egui::CornerRadius::same(4);
+                badge.inner_margin = egui::Margin::symmetric(6, 2);
+                badge.show(ui, |ui| {
+                    ui.label(egui::RichText::new("Global / 'static").size(11.0).strong().color(egui::Color32::from_rgb(200, 160, 255)));
+                });
+            });
+            ui.label(egui::RichText::new("Ubicación de Memoria Global Fija").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Posee una dirección de memoria fija y vive durante toda la ejecución del programa.").color(text_color));
+            ui.label(egui::RichText::new("• Útil para buffers globales, banderas del sistema y cadenas fijas.").color(text_color));
+        });
+
+        // Card 5: type
+        anim_card(&mut cols[1], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(120.0);
+            ui.horizontal(|ui| {
+                ui.heading(egui::RichText::new("type").size(17.0).monospace().strong().color(title_color));
+                ui.add_space(6.0);
+                let mut badge = egui::Frame::new();
+                badge.fill = egui::Color32::from_rgb(18, 30, 44);
+                badge.corner_radius = egui::CornerRadius::same(4);
+                badge.inner_margin = egui::Margin::symmetric(6, 2);
+                badge.show(ui, |ui| {
+                    ui.label(egui::RichText::new("Type Alias").size(11.0).strong().color(cyan));
+                });
+            });
+            ui.label(egui::RichText::new("Alias de Tipo Descriptivo").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Crea un sinónimo legible para simplificar tipos de datos complejos.").color(text_color));
+            ui.label(egui::RichText::new("• No crea un tipo nuevo, sino un alias para mejorar la claridad del código.").color(text_color));
+        });
+    });
+
+    ui.add_space(20.0);
+
+    // --- SECCIÓN 3: TRANSFORMACIÓN, ÁMBITOS Y EVALUACIÓN ---
+    ui.heading(
+        egui::RichText::new("Shadowing, Scopes y Expresiones")
+            .size(18.0)
+            .strong()
+            .color(title_color),
+    );
+    ui.add_space(8.0);
+
+    ui.columns(3, |cols| {
+        // Shadowing
+        anim_card(&mut cols[0], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(150.0);
+            ui.heading(egui::RichText::new("Shadowing").size(17.0).strong().color(title_color));
+            ui.label(egui::RichText::new("Ensombrecimiento de Variables").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Permite re-declarar una variable con 'let' usando el mismo nombre.").color(text_color));
+            ui.label(egui::RichText::new("• Hace posible transformar un valor o cambiar su tipo sin perder la inmutabilidad.").color(text_color));
+            ui.label(egui::RichText::new("• La variable anterior queda oculta y protegida en su ámbito.").color(text_color));
+        });
+
+        // Scopes & Blocks
+        anim_card(&mut cols[1], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(150.0);
+            ui.heading(egui::RichText::new("Scopes y Bloques").size(17.0).strong().color(title_color));
+            ui.label(egui::RichText::new("Ciclo de Vida Acotado ({})").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Las llaves delimitan el alcance donde una variable es válida.").color(text_color));
+            ui.label(egui::RichText::new("• Al cerrarse el bloque, el compilador llama al destructor y libera la memoria.").color(text_color));
+            ui.label(egui::RichText::new("• Garantiza ausencia de fugas de memoria sin recolector de basura.").color(text_color));
+        });
+
+        // Expressions vs Statements
+        anim_card(&mut cols[2], &card_frame, &mut anim_delay, &mut |ui| {
+            ui.set_min_height(150.0);
+            ui.heading(egui::RichText::new("Expresiones vs Sentencias").size(17.0).strong().color(title_color));
+            ui.label(egui::RichText::new("Evaluación de Valores").strong().color(egui::Color32::WHITE));
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("• Las sentencias (con ';') ejecutan acciones sin producir un valor.").color(text_color));
+            ui.label(egui::RichText::new("• Las expresiones (sin ';') devuelven un valor evaluado inmediatamente.").color(text_color));
+            ui.label(egui::RichText::new("• Los bloques de código y las ramas de control son expresiones completas.").color(text_color));
+        });
+    });
+
+    ui.add_space(20.0);
 }
