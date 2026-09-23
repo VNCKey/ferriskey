@@ -484,9 +484,9 @@ impl eframe::App for AppState {
             AppRoute::TutorialCargo => self.lessons.pilares_step == 1,
             AppRoute::Comenzando => self.lessons.conceptos_tab == 0,
             AppRoute::TutorialOwnership | AppRoute::TutorialStrings | AppRoute::TutorialMemoria => {
-                self.lessons.strings_ownership_tab == 5
+                self.lessons.strings_ownership_tab == 2
             }
-            AppRoute::TutorialModulos => self.lessons.modulos_tab == 5,
+            AppRoute::TutorialModulos => self.lessons.modulos_tab == 6,
             AppRoute::TutorialTiposDatos | AppRoute::TutorialColecciones => {
                 self.lessons.compuestos_tab == 5
             }

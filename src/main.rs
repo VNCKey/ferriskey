@@ -53,10 +53,53 @@ fn main() -> eframe::Result {
             egui_extras::install_image_loaders(&cc.egui_ctx);
             // Instala el loader SVG con soporte para fuentes del sistema.
             svg_loader::SystemFontSvgLoader::install(&cc.egui_ctx);
+            // Añade una fuente de respaldo para símbolos Unicode y emojis como 🦀.
+            instalar_fuente_unicode_fallback(&cc.egui_ctx);
             tracing::info!("Loaders de imágenes y SVG instalados");
             let mut app = AppState::default();
             app.restaurar_sesion();
             Ok(Box::new(app))
         }),
     )
+}
+
+fn instalar_fuente_unicode_fallback(ctx: &egui::Context) {
+    let candidatos = if cfg!(target_os = "windows") {
+        vec![
+            "C:\\Windows\\Fonts\\seguiemj.ttf",
+            "C:\\Windows\\Fonts\\seguisym.ttf",
+        ]
+    } else if cfg!(target_os = "macos") {
+        vec![
+            "/System/Library/Fonts/Apple Color Emoji.ttc",
+            "/System/Library/Fonts/Apple Symbols.ttf",
+        ]
+    } else {
+        vec![
+            "/usr/share/fonts/truetype/ancient-scripts/Symbola_hint.ttf",
+            "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+        ]
+    };
+
+    let Some(bytes) = candidatos.iter().find_map(|ruta| std::fs::read(ruta).ok()) else {
+        tracing::warn!("No se encontró una fuente de respaldo para emojis Unicode");
+        return;
+    };
+
+    let mut fonts = egui::FontDefinitions::default();
+    fonts.font_data.insert(
+        "unicode_fallback".to_owned(),
+        egui::FontData::from_owned(bytes).into(),
+    );
+
+    for familia in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+        fonts
+            .families
+            .entry(familia)
+            .or_default()
+            .push("unicode_fallback".to_owned());
+    }
+
+    ctx.set_fonts(fonts);
+    tracing::info!("Fuente de respaldo Unicode cargada");
 }

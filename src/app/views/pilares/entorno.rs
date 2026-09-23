@@ -1,4 +1,5 @@
 use crate::app::AppState;
+use crate::views::pilares::anatomy::codigo_inline_chip;
 use eframe::egui;
 
 #[allow(dead_code)]
@@ -9,6 +10,9 @@ pub fn mostrar_pilares_entorno_trabajo(ui: &mut egui::Ui, state: &mut AppState) 
 }
 
 pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState) {
+    ui.set_max_width(ui.available_width());
+    ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+
     // --- SCROLL REVEAL ENGINE ---
     let elapsed = ui.input(|i| i.time) - state.ui.anim_trigger;
     if elapsed < 2.0 {
@@ -56,11 +60,16 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
     ui.add_space(8.0);
 
     ui.label(
-            egui::RichText::new("Rust es un lenguaje de programación de sistemas moderno creado en 2006 por Graydon Hoare con un objetivo claro: eliminar los frecuentes fallos de seguridad y gestión manual de memoria diseñando un compilador estricto. Su diseño permite construir software con rendimiento extremo, seguridad absoluta de memoria y concurrencia segura sin Data Races.")
-                .size(15.0)
-                .color(text_color)
-                .line_height(Some(22.0)),
-        );
+        egui::RichText::new(
+            "Rust es un lenguaje de programación de sistemas moderno creado en 2006 por Graydon Hoare con un objetivo claro: eliminar los frecuentes fallos de seguridad y gestión manual de memoria mediante un compilador estricto. Su diseño permite construir software con rendimiento extremo, seguridad de memoria y concurrencia segura sin carreras de datos.",
+        )
+        .size(15.0)
+        .color(text_color)
+        .line_height(Some(22.0)),
+    );
+    ui.horizontal_wrapped(|ui| {
+        codigo_inline_chip(ui, "Data Races");
+    });
     ui.add_space(8.0);
 
     ui.label(
@@ -81,11 +90,21 @@ pub fn mostrar_pilares_entorno_contenido(ui: &mut egui::Ui, state: &mut AppState
     ui.add_space(6.0);
 
     ui.label(
-            egui::RichText::new("Rust transforma el código fuente en un binario nativo que el sistema operativo y la CPU pueden ejecutar. En el proceso participan Cargo, rustc, LLVM y el enlazador; el resultado final puede ser un ejecutable ELF en Linux, EXE en Windows o Mach-O en macOS.")
-                .size(15.0)
-                .color(text_color)
-                .line_height(Some(22.0)),
-        );
+        egui::RichText::new(
+            "Rust transforma el código fuente en un binario nativo que el sistema operativo y la CPU pueden ejecutar. En el proceso participan varias herramientas del ecosistema y el enlazador; el resultado final puede ser un ejecutable adaptado al sistema operativo.",
+        )
+        .size(15.0)
+        .color(text_color)
+        .line_height(Some(22.0)),
+    );
+    ui.horizontal_wrapped(|ui| {
+        codigo_inline_chip(ui, "Cargo");
+        codigo_inline_chip(ui, "rustc");
+        codigo_inline_chip(ui, "LLVM");
+        codigo_inline_chip(ui, "ELF");
+        codigo_inline_chip(ui, "EXE");
+        codigo_inline_chip(ui, "Mach-O");
+    });
     ui.add_space(12.0);
 
     // Estilo de tarjeta súper compacta (sin inflar espacio)

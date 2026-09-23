@@ -1,8 +1,5 @@
-pub mod declaracion;
 pub mod estructura;
-pub mod facade;
-pub mod rutas;
-pub mod visibilidad;
+pub mod overview;
 
 use crate::app::AppState;
 use eframe::egui;
@@ -17,42 +14,50 @@ pub fn retos_modulos() -> Vec<(
 )> {
     vec![
         (
-            "Declaración de Módulos",
-            "Encapsulación",
-            "Organización jerárquica de código",
-            "Los módulos permiten encapsular código en espacios de nombres para evitar colisiones y estructurar el proyecto.",
-            "Declara un módulo utilidades con una función pública saludar() y llámala desde main.",
-            "mod utilidades {\n    pub fn saludar() {\n        println!(\"¡Hola desde el módulo utilidades!\");\n    }\n}\n\nfn main() {\n    utilidades::saludar();\n}",
+            "Declaration & Module Tree",
+            "Fundamental",
+            "mod",
+            "Un módulo agrupa código relacionado dentro de un espacio de nombres. La raíz del crate puede declarar módulos inline o conectarlos con archivos separados.",
+            "Añade el módulo al archivo del proyecto y utiliza su función mediante la ruta correspondiente.",
+            "mod utilidades {\n    pub fn saludar() {\n        println!(\"Hola desde utilidades\");\n    }\n}\n\nutilidades::saludar();",
         ),
         (
-            "Visibilidad (pub y pub(crate))",
-            "Control de Acceso",
-            "Privacidad por defecto",
-            "En Rust todos los ítems son privados por defecto. La palabra clave 'pub' expone ítems a módulos externos.",
-            "Observa el uso de 'pub fn conectar()' dentro del módulo 'red'.",
-            "mod red {\n    pub fn conectar() {\n        println!(\"Conexión establecida con éxito\");\n    }\n}\n\nfn main() {\n    red::conectar();\n}",
+            "Visibility",
+            "Fundamental",
+            "pub · pub(crate)",
+            "Los ítems son privados por defecto. pub permite exponer un ítem y pub(crate) lo hace visible dentro de todo el crate, pero no fuera de él.",
+            "Compara qué función puede llamarse desde fuera del módulo y qué función permanece privada.",
+            "mod red {\n    pub fn conectar() {}\n    pub(crate) fn diagnostico() {}\n    fn secreto() {}\n}",
         ),
         (
-            "Importación con use",
-            "Rutas de Acceso",
-            "Acortamiento de rutas en el Scope",
-            "La instrucción 'use' introduce la ruta de un ítem en el scope actual para invocarlo sin prefijos largos.",
-            "Importa la función directamente con 'use red::conectar;' antes de ejecutarla.",
-            "mod red {\n    pub fn conectar() {\n        println!(\"Conectado vía use!\");\n    }\n}\n\nuse red::conectar;\n\nfn main() {\n    conectar();\n}",
+            "Paths & Imports",
+            "Navigation",
+            "crate · self · super · use",
+            "Las rutas indican cómo llegar a un ítem del árbol de módulos. crate comienza en la raíz, self representa el módulo actual y super sube al módulo padre. use permite acortar una ruta.",
+            "Escribe una ruta completa y después crea un import con use para utilizar el mismo ítem de forma más clara.",
+            "mod red {\n    pub fn conectar() {}\n}\n\nuse crate::red::conectar;\nconectar();",
         ),
         (
-            "Re-exportación (pub use)",
-            "Facade Pattern",
-            "API Pública Limpia",
-            "Con 'pub use' un módulo re-exporta ítems internos simplificando la interfaz expuesta a los usuarios del crate.",
-            "Re-exporta la función 'procesar' desde el módulo 'interno'.",
-            "mod interno {\n    pub fn procesar() {\n        println!(\"Procesando datos internos\");\n    }\n}\n\npub use interno::procesar;\n\nfn main() {\n    procesar();\n}",
+            "Re-export & Public API",
+            "API Design",
+            "pub use",
+            "pub use expone un ítem desde otra ruta pública. Así los usuarios pueden importar una API sencilla sin conocer todas las carpetas internas.",
+            "Crea una entrada pública en la raíz y deja que la implementación permanezca dentro de un módulo interno.",
+            "mod interno {\n    pub fn procesar() {}\n}\n\npub use interno::procesar;\n\nprocesar();",
+        ),
+        (
+            "Module File Structure",
+            "Architecture",
+            "src/",
+            "Un módulo puede vivir en un archivo con su propio nombre o dentro de una carpeta con un archivo raíz. La estructura moderna evita usar mod.rs como archivo principal de cada carpeta nueva.",
+            "Abre el explorador del proyecto y relaciona cada declaración mod nombre; con el archivo que Rust busca dentro de src/.",
+            "src/\n├── main.rs\n├── red.rs\n└── red/\n    └── http.rs",
         ),
     ]
 }
 
 pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut AppState) {
-    if state.lessons.modulos_tab == 5 {
+    if state.lessons.modulos_tab == 2 {
         let retos = retos_modulos();
         let total_retos = retos.len();
         let shell_state = crate::views::pilares::anatomy::mostrar_code_lab_shell(
@@ -107,11 +112,9 @@ pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut AppState) {
             .show(ui, |ui| {
                 ui.add_space(10.0);
                 match state.lessons.modulos_tab {
-                    0 => declaracion::mostrar_tab_declaracion(ui),
-                    1 => visibilidad::mostrar_tab_visibilidad(ui),
-                    2 => rutas::mostrar_tab_rutas(ui),
-                    3 => facade::mostrar_tab_facade(ui),
-                    _ => estructura::mostrar_teoria_modulos(ui),
+                    0 => overview::mostrar(ui),
+                    1 => estructura::mostrar_teoria_modulos(ui),
+                    _ => overview::mostrar(ui),
                 }
                 ui.add_space(20.0);
             });
@@ -120,19 +123,16 @@ pub fn mostrar_tutorial_modulos(ui: &mut egui::Ui, state: &mut AppState) {
 
 pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
     let tabs = [
-        ("Declaración & Árbol", 0),
-        ("Visibilidad (pub)", 1),
-        ("Importación & Rutas", 2),
-        ("Re-exportación", 3),
-        ("Estructura de Archivos", 4),
+        ("Overview", 0),
+        ("Structure & Best Practices", 1),
     ];
     let active = state.lessons.modulos_tab;
     crate::components::navigation::mostrar_nav_superior_sesion(
         ui,
         state,
-        "Módulos y Visibilidad",
+        "Modules & Visibility",
         &tabs,
-        5,
+        2,
         active,
         |st, idx| st.lessons.modulos_tab = idx,
     );

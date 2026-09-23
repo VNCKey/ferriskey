@@ -25,9 +25,15 @@ directories = "6"
 object = "0.39"
 ureq = { version = "3", features = ["json"] }
 
-# Optimiza dependencias en desarrollo sin penalizar demasiado la compilación del código propio.
+# En desarrollo priorizamos compilaciones incrementales rápidas.
+# Las optimizaciones fuertes se mantienen en el perfil release.
 [profile.dev.package."*"]
-opt-level = 3
+opt-level = 0
+
+# Conserva información útil para depurar, pero reduce el tamaño y el tiempo
+# de enlazado del ejecutable Debug.
+[profile.dev]
+debug = 1
 
 [profile.release]
 opt-level = 3

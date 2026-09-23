@@ -1052,10 +1052,9 @@ pub fn mostrar_reto_codelab_item(
     paso_practico: &str,
     codigo_ejemplo: &str,
     orange: egui::Color32,
-    _cyan: egui::Color32,
+    cyan: egui::Color32,
 ) {
     let text_col = egui::Color32::from_rgb(205, 215, 230);
-    let bullet_col = egui::Color32::from_rgb(140, 160, 190);
     let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     let syntax_set = &state.editor.syntax_set;
 
@@ -1083,38 +1082,139 @@ pub fn mostrar_reto_codelab_item(
             );
         });
 
-        ui.add_space(4.0);
-        let mut tag_topic = egui::Frame::new();
-        tag_topic.fill = egui::Color32::from_rgb(22, 28, 38);
-        tag_topic.inner_margin = egui::Margin::symmetric(8, 2);
-        tag_topic.corner_radius = egui::CornerRadius::same(10);
-        tag_topic.show(ui, |ui| {
-            ui.label(
-                egui::RichText::new(subtitulo)
-                    .size(11.0)
-                    .color(egui::Color32::from_rgb(160, 185, 220)),
-            );
-        });
+        let tags: &[&str] = match titulo {
+            "Stack & Copy Semantics" => &["Stack", "Copy"],
+            "String, Heap & Move Semantics" => &["String", "Heap", "Move"],
+            "Ownership" => &["Ownership", "Scope"],
+            "Borrowing" => &["Borrowing", "&", "&mut"],
+            "Declaration & Module Tree" => &["mod", "crate", "Module Tree"],
+            "Visibility" => &["private", "pub", "pub(crate)"],
+            "Paths & Imports" => &["crate::", "use", "as"],
+            "Re-export & Public API" => &["pub use", "API", "Facade"],
+            "Module File Structure" => &["src/", "main.rs", "mod.rs"],
+            _ => &[subtitulo],
+        };
+        for tag in tags {
+            ui.add_space(4.0);
+            let mut tag_topic = egui::Frame::new();
+            tag_topic.fill = egui::Color32::from_rgb(22, 28, 38);
+            tag_topic.inner_margin = egui::Margin::symmetric(8, 2);
+            tag_topic.corner_radius = egui::CornerRadius::same(10);
+            tag_topic.show(ui, |ui| {
+                ui.label(
+                    egui::RichText::new(*tag)
+                        .size(11.0)
+                        .color(egui::Color32::from_rgb(160, 185, 220)),
+                );
+            });
+        }
     });
 
     ui.add_space(10.0);
 
-    ui.label(egui::RichText::new(explicacion).size(13.0).color(text_col));
+    if matches!(
+        titulo,
+        "Stack & Copy Semantics"
+            | "String, Heap & Move Semantics"
+            | "Ownership"
+            | "Borrowing"
+    ) {
+        let introduccion = if titulo == "Stack & Copy Semantics" {
+            "En esta parte aprenderás cómo Rust organiza valores simples en el Stack y qué ocurre cuando un valor puede copiarse automáticamente."
+        } else if titulo == "String, Heap & Move Semantics" {
+            "En esta parte conocerás String, la memoria dinámica del Heap y el momento en que un valor pasa a otra variable mediante Move Semantics."
+        } else if titulo == "Ownership" {
+            "En esta parte aprenderás cómo Rust determina quién es responsable de cada valor y cuándo termina esa responsabilidad."
+        } else {
+            "En esta parte aprenderás a utilizar un valor mediante una Reference sin tomar su Ownership."
+        };
+        ui.label(
+            egui::RichText::new(introduccion)
+                .size(13.5)
+                .color(text_col)
+                .line_height(Some(19.0)),
+        );
+        ui.add_space(14.0);
+
+        let conceptos: Vec<&str> = explicacion.split("\n\n").collect();
+        let titulos: &[&str] = if titulo == "Stack & Copy Semantics" {
+            &["1. Stack", "2. Copy"]
+        } else if titulo == "String, Heap & Move Semantics" {
+            &["1. String", "2. Heap", "3. Move Semantics"]
+        } else if titulo == "Ownership" {
+            &["1. Un propietario", "2. Un solo propietario", "3. Fin del Scope"]
+        } else {
+            &[
+                "1. Borrowing",
+                "2. Immutable Reference",
+                "3. Multiple References",
+                "4. Mutable Reference",
+                "5. Borrowing Rules",
+            ]
+        };
+        let ejemplos: &[&str] = if titulo == "Stack & Copy Semantics" {
+            &["let x = 42;", "let y = x;"]
+        } else if titulo == "String, Heap & Move Semantics" {
+            &[
+                "let mut texto = String::from(\"Rust\");",
+                "texto.push_str(\" en el Heap\");",
+                "let movido = texto;",
+            ]
+        } else if titulo == "Ownership" {
+            &[
+                "let mensaje = String::from(\"Rust\");",
+                "let original = String::from(\"Rust\");\nlet propietario = original;",
+                "{\n    let interno = String::from(\"Scope\");\n    println!(\"{interno}\");\n}",
+            ]
+        } else {
+            &[
+                "let texto = String::from(\"Rust\");\nlet vista = &texto;",
+                "let lectura = &texto;\nprintln!(\"{lectura}\");",
+                "let primera = &texto;\nlet segunda = &texto;",
+                "let cambio = &mut texto;\ncambio.push_str(\" seguro\");",
+                "let lectura = &texto;\n// let cambio = &mut texto; // no se mezclan durante el mismo acceso",
+            ]
+        };
+
+        for (indice, titulo_concepto) in titulos.iter().enumerate() {
+            titulo_seccion(ui, titulo_concepto, cyan);
+            ui.indent(format!("memoria_concepto_{titulo}_{indice}"), |ui| {
+                ui.add_space(4.0);
+                if let Some(concepto) = conceptos.get(indice) {
+                    ui.label(
+                        egui::RichText::new(*concepto)
+                            .size(13.0)
+                            .color(text_col)
+                            .line_height(Some(19.0)),
+                    );
+                }
+                ui.add_space(6.0);
+                if let Some(ejemplo) = ejemplos.get(indice) {
+                    codigo_resaltado_bloque(ui, ejemplo, syntax_set, theme, "rs");
+                }
+                ui.add_space(12.0);
+            });
+        }
+    } else {
+        ui.label(
+            egui::RichText::new(explicacion)
+                .size(13.0)
+                .color(text_col)
+                .line_height(Some(19.0)),
+        );
+    }
 
     ui.add_space(14.0);
 
-    titulo_seccion(ui, "Paso Práctico en el Editor", orange);
+    titulo_seccion(ui, "Tu práctica", orange);
     ui.add_space(8.0);
 
-    ui.horizontal_wrapped(|ui| {
-        punto_lista(ui, bullet_col);
-        ui.add_space(4.0);
-        ui.label(
-            egui::RichText::new(paso_practico)
-                .size(13.0)
-                .color(text_col),
-        );
-    });
+    ui.label(
+        egui::RichText::new(paso_practico)
+            .size(13.0)
+            .color(text_col)
+            .line_height(Some(19.0)),
+    );
 
     ui.add_space(12.0);
 
@@ -1299,6 +1399,25 @@ fn mostrar_acceso_terminal(
         });
 }
 
+fn etiqueta_instalacion_windows(ui: &mut egui::Ui, texto: &str) {
+    egui::Frame::new()
+        .fill(egui::Color32::from_rgb(17, 29, 44))
+        .stroke(egui::Stroke::new(
+            1.0,
+            egui::Color32::from_rgb(62, 125, 175),
+        ))
+        .corner_radius(egui::CornerRadius::same(4))
+        .inner_margin(egui::Margin::symmetric(6, 3))
+        .show(ui, |ui| {
+            ui.label(
+                egui::RichText::new(texto)
+                    .monospace()
+                    .size(11.5)
+                    .color(egui::Color32::from_rgb(175, 220, 255)),
+            );
+        });
+}
+
 pub(crate) fn codigo_terminal_bloque(ui: &mut egui::Ui, codigo: &str) {
     egui::Frame::new()
         .fill(egui::Color32::from_rgb(12, 18, 27))
@@ -1420,46 +1539,88 @@ fn mostrar_reto_1_verificacion(
     // Sección 1: Instalación del toolchain
     titulo_seccion(ui, "Instalación de Rust con rustup", cyan);
     ui.indent("reto_1_instalacion", |ui| {
-        let instalador_rust = if cfg!(target_os = "windows") {
-            "winget install --id Rustlang.Rustup -e"
-        } else {
-            "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-        };
         ui.add_space(4.0);
         ui.label(
             egui::RichText::new(
-                "Rustup es la forma recomendada de instalar y mantener Rust. También instala rustc y Cargo. El comando cambia según el sistema operativo.",
+                "Rustup es la forma recomendada de instalar y mantener Rust. También instala rustc y Cargo. El procedimiento cambia según el sistema operativo:",
             )
             .size(13.0)
             .color(text_col),
         );
         ui.add_space(6.0);
 
-        codigo_terminal_bloque(ui, instalador_rust);
+        ui.label(
+            egui::RichText::new("Windows")
+                .strong()
+                .size(13.0)
+                .color(egui::Color32::from_rgb(175, 205, 240)),
+        );
+        ui.label(
+            egui::RichText::new(
+                "1. Abre https://rust-lang.org/tools/install/\n2. Descarga rustup-init.exe\n3. Ejecuta el instalador",
+            )
+            .size(12.5)
+            .color(text_col),
+        );
+        ui.add_space(6.0);
+        ui.horizontal_wrapped(|ui| {
+            ui.label(
+                egui::RichText::new("•")
+                    .size(15.0)
+                    .strong()
+                    .color(egui::Color32::from_rgb(255, 190, 90)),
+            );
+            ui.label(
+                egui::RichText::new("En el instalador de Visual Studio selecciona")
+                    .size(12.5)
+                    .color(egui::Color32::from_rgb(160, 180, 205)),
+            );
+            ui.add_space(4.0);
+            etiqueta_instalacion_windows(ui, "Desktop development with C++");
+            ui.label(egui::RichText::new(".").size(12.5).color(text_col));
+        });
+        ui.add_space(4.0);
+        ui.horizontal_wrapped(|ui| {
+            ui.add_space(16.0);
+            ui.label(
+                egui::RichText::new("Incluye los dos componentes que Rust necesita:")
+                    .size(12.5)
+                    .color(egui::Color32::from_rgb(160, 180, 205)),
+            );
+            ui.add_space(4.0);
+            etiqueta_instalacion_windows(ui, "MSVC C++ Build Tools");
+            ui.add_space(4.0);
+            ui.label(
+                egui::RichText::new("y")
+                    .size(12.5)
+                    .color(egui::Color32::from_rgb(160, 180, 205)),
+            );
+            ui.add_space(4.0);
+            etiqueta_instalacion_windows(ui, "Windows 10/11 SDK");
+            ui.label(
+                egui::RichText::new(".")
+                    .size(12.5)
+                    .color(egui::Color32::from_rgb(160, 180, 205)),
+            );
+        });
+        ui.add_space(6.0);
+
+        ui.label(
+            egui::RichText::new("Linux y macOS")
+                .strong()
+                .size(13.0)
+                .color(egui::Color32::from_rgb(175, 205, 240)),
+        );
+        codigo_terminal_bloque(ui, "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh");
         ui.add_space(6.0);
         ui.label(
             egui::RichText::new(
-                if cfg!(target_os = "windows") {
-                    "En Windows, ejecútalo desde PowerShell y vuelve a abrir la terminal para actualizar el PATH."
-                } else {
-                    "Sigue las instrucciones del instalador y reinicia la terminal para que el PATH incluya ~/.cargo/bin."
-                },
+                "Sigue las instrucciones del instalador y reinicia la terminal para actualizar el PATH.",
             )
             .size(12.5)
             .color(egui::Color32::from_rgb(160, 180, 205)),
         );
-        ui.add_space(6.0);
 
-        ui.horizontal_wrapped(|ui| {
-            punto_lista(ui, bullet_col);
-            ui.label(
-                egui::RichText::new("Después verifica:")
-                    .size(13.0)
-                    .color(text_col),
-            );
-            codigo_inline_chip(ui, "rustc --version");
-            codigo_inline_chip(ui, "cargo --version");
-        });
         ui.add_space(14.0);
     });
 

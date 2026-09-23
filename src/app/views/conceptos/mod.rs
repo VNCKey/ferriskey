@@ -7,13 +7,13 @@ use crate::infrastructure::process::{captured_text, run_cargo};
 #[allow(unused_imports)]
 use crate::routes::AppRoute;
 use crate::views::pilares::anatomy::{
-    codigo_inline_chip, codigo_resaltado_bloque, punto_lista, titulo_seccion,
+    codigo_inline_chip, codigo_resaltado_bloque, codigo_terminal_bloque, punto_lista,
+    titulo_seccion,
 };
 pub mod primitivos;
 use self::primitivos::{
     mostrar_categoria_booleanos, mostrar_categoria_caracteres, mostrar_categoria_casting,
     mostrar_categoria_enteros_interactiva, mostrar_categoria_flotantes,
-    mostrar_enteros_interactivo,
 };
 pub mod funciones;
 pub mod globales;
@@ -689,8 +689,8 @@ pub fn mostrar_contenido_tipos_primitivos(ui: &mut egui::Ui, state: &mut AppStat
             0 => mostrar_categoria_enteros_interactiva(ui, state),
             1 => mostrar_categoria_flotantes(ui),
             2 => mostrar_categoria_booleanos(ui, state),
-            3 => mostrar_categoria_caracteres(ui),
-            _ => mostrar_categoria_casting(ui),
+            3 => mostrar_categoria_caracteres(ui, state),
+            _ => mostrar_categoria_casting(ui, state),
         });
 }
 
@@ -1635,10 +1635,8 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
                     ui.add_space(4.0);
 
                     let tabs_teoria = [
-                        (7, "Core Mechanics"),
+                        (7, "Core"),
                         (4, "Data Types"),
-                        (6, "Doc & Comentarios"),
-                        (8, "Functions"),
                     ];
                     for (indice, texto) in tabs_teoria {
                         let es_activo = state.lessons.conceptos_tab == indice;
@@ -1703,6 +1701,11 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
 }
 
 pub fn mostrar_tutorial_conceptos_basicos(ui: &mut egui::Ui, state: &mut AppState) {
+    // Estos índices pertenecían a tabs que ahora viven dentro del recorrido del Code Lab.
+    if matches!(state.lessons.conceptos_tab, 6 | 8) {
+        state.lessons.conceptos_tab = 7;
+    }
+
     if state.lessons.conceptos_tab == 0 {
         mostrar_conceptos_codelab(ui, state);
         return;
@@ -1712,8 +1715,6 @@ pub fn mostrar_tutorial_conceptos_basicos(ui: &mut egui::Ui, state: &mut AppStat
         0 => funciones::mostrar(ui, state),
         4 => mostrar_contenido_tipos_primitivos(ui, state),
         5 => mostrar_contenido_macros(ui),
-        6 => mostrar_seccion_documentacion(ui),
-        8 => funciones::mostrar(ui, state),
         7 => {
             egui::ScrollArea::vertical()
                 .id_salt("conceptos_core_mechanics_scroll")
@@ -1743,7 +1744,7 @@ fn mostrar_conceptos_codelab(ui: &mut egui::Ui, state: &mut AppState) {
             drawer_tab: state.ui.conceptos_drawer_tab,
             output_open: state.ui.conceptos_salida_abierta,
             navigation_step: state.lessons.conceptos_codelab_reto_actual,
-            navigation_total: 5,
+            navigation_total: 8,
         },
         |ui, state, orange, cyan| {
             mostrar_retos_conceptos_drawer(ui, state, orange, cyan);
@@ -1752,10 +1753,13 @@ fn mostrar_conceptos_codelab(ui: &mut egui::Ui, state: &mut AppState) {
     state.ui.mostrar_conceptos_drawer = shell_state.drawer_open;
     state.ui.conceptos_drawer_tab = shell_state.drawer_tab;
     state.ui.conceptos_salida_abierta = shell_state.output_open;
+    if state.lessons.conceptos_tab != 0 {
+        state.ui.mostrar_conceptos_drawer = false;
+    }
     crate::views::pilares::anatomy::aplicar_navegacion_codelab(
         &mut state.lessons.conceptos_codelab_reto_actual,
         shell_state.navigation_delta,
-        5,
+        8,
     );
 }
 
@@ -1775,24 +1779,36 @@ fn mostrar_retos_conceptos_drawer(
     let (title, subtitle, explanation, code) = retos[current];
     let (section_title, task) = match current {
         0 => (
-            "Declaración y Shadowing",
-            "Crea una variable, cambia su valor y prueba Shadowing.",
+            "Variables paso a paso",
+            "Practica el recorrido: let, let mut y shadowing.",
         ),
         1 => (
-            "Blocks & Scope",
-            "Crea un Block y observa qué variables puedes utilizar dentro de su Scope.",
+            "Macros",
+            "Entender println! y las macros",
         ),
         2 => (
-            "Statements & Expressions",
-            "Distingue qué líneas ejecutan una acción y qué expresiones producen un valor.",
+            "Blocks & Scope",
+            "Crea un Block y observa qué variables puedes utilizar dentro y fuera de él.",
         ),
         3 => (
-            "Data Types: enteros",
-            "Elige entre enteros con signo i o sin signo u para comparar sus bits y rangos.",
+            "Statements & Expressions",
+            "Statement y Expression",
+        ),
+        4 => (
+            "Data Types",
+            "Consulta y practica Data Types",
+        ),
+        5 => (
+            "Comments & Docs",
+            "Escribe comentarios y genera documentación con cargo doc.",
+        ),
+        6 => (
+            "Functions",
+            "Declara y utiliza Functions paso a paso.",
         ),
         _ => (
-            "Comentarios y documentación",
-            "Añade un comentario normal y documenta una función con ///.",
+            "Questions",
+            "Comprueba lo aprendido en 15 preguntas.",
         ),
     };
     let bullet_col = egui::Color32::from_rgb(140, 160, 190);
@@ -1824,100 +1840,209 @@ fn mostrar_retos_conceptos_drawer(
         });
 
         ui.add_space(4.0);
-        let mut tag_topic = egui::Frame::new();
-        tag_topic.fill = egui::Color32::from_rgb(22, 28, 38);
-        tag_topic.inner_margin = egui::Margin::symmetric(8, 2);
-        tag_topic.corner_radius = egui::CornerRadius::same(10);
-        tag_topic.show(ui, |ui| {
-            ui.label(
-                egui::RichText::new(subtitle)
-                    .size(11.5)
-                    .color(egui::Color32::from_rgb(160, 185, 220)),
-            );
-        });
+        if current == 0 {
+            for tag in ["let", "let mut", "shadowing"] {
+                let tag_topic = egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(22, 28, 38))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .corner_radius(egui::CornerRadius::same(10));
+                tag_topic.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tag)
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(160, 185, 220)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        } else if current == 1 {
+            for tag in ["Macros", "println!"] {
+                let tag_topic = egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(22, 28, 38))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .corner_radius(egui::CornerRadius::same(10));
+                tag_topic.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tag)
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(160, 185, 220)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        } else if current == 2 {
+            for tag in ["Block", "Scope"] {
+                let tag_topic = egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(22, 28, 38))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .corner_radius(egui::CornerRadius::same(10));
+                tag_topic.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tag)
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(160, 185, 220)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        } else if current == 3 {
+            for tag in ["Statement", "Expression"] {
+                let tag_topic = egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(22, 28, 38))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .corner_radius(egui::CornerRadius::same(10));
+                tag_topic.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tag)
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(160, 185, 220)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        } else if current == 5 {
+            for tag in ["Comments", "Doc Comments", "cargo doc"] {
+                let tag_topic = egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(22, 28, 38))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .corner_radius(egui::CornerRadius::same(10));
+                tag_topic.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tag)
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(160, 185, 220)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        } else if current == 6 {
+            for tag in ["fn", "Parameters", "Return value"] {
+                let tag_topic = egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(22, 28, 38))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .corner_radius(egui::CornerRadius::same(10));
+                tag_topic.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tag)
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(160, 185, 220)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        } else if current == 7 {
+            for tag in ["15 Questions", "Review"] {
+                let tag_topic = egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(22, 28, 38))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .corner_radius(egui::CornerRadius::same(10));
+                tag_topic.show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tag)
+                            .size(11.5)
+                            .color(egui::Color32::from_rgb(160, 185, 220)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        } else {
+            let tag_topic = egui::Frame::new()
+                .fill(egui::Color32::from_rgb(22, 28, 38))
+                .inner_margin(egui::Margin::symmetric(8, 2))
+                .corner_radius(egui::CornerRadius::same(10));
+            tag_topic.show(ui, |ui| {
+                ui.label(
+                    egui::RichText::new(subtitle)
+                        .size(11.5)
+                        .color(egui::Color32::from_rgb(160, 185, 220)),
+                );
+            });
+        }
     });
 
     ui.add_space(12.0);
     if current == 0 {
-        ui.horizontal_wrapped(|ui| {
-            ui.label(
-                egui::RichText::new("Una variable se declara con")
-                    .size(13.5)
-                    .color(text_col),
-            );
-            codigo_inline_chip(ui, "let");
-            ui.label(
-                egui::RichText::new(
-                    "y recibe un valor inicial. Las variables son inmutables por defecto; cuando necesites cambiar su valor, usa",
-                )
-                .size(13.5)
-                .color(text_col),
-            );
-            codigo_inline_chip(ui, "let mut");
-            ui.label(
-                egui::RichText::new(
-                    ". Si vuelves a declarar el mismo nombre, haces Shadowing.",
-                )
-                    .size(13.5)
-                    .color(text_col),
-            );
-        });
+        ui.label(
+            egui::RichText::new(
+                "En esta parte aprenderás qué son las variables, cómo declararlas y cómo utilizarlas. Después verás qué ocurre cuando necesitas modificar un valor y cómo diferenciar varias formas de declarar valores. Avanzaremos paso a paso con ejemplos pequeños.",
+            )
+            .size(13.5)
+            .color(text_col)
+            .line_height(Some(19.0)),
+        );
     } else if current == 1 {
         ui.horizontal_wrapped(|ui| {
             ui.label(
-                egui::RichText::new("Un bloque es un grupo de instrucciones rodeado por")
+                egui::RichText::new("En Rust, una macro se reconoce por el signo")
                     .size(13.5)
                     .color(text_col),
             );
-            codigo_inline_chip(ui, "{ }");
-            ui.label(egui::RichText::new(". El").size(13.5).color(text_col));
-            codigo_inline_chip(ui, "Scope");
+            codigo_inline_chip(ui, "!");
             ui.label(
-                egui::RichText::new(
-                    "es el alcance: la zona donde una variable existe y puede utilizarse.",
-                )
-                .size(13.5)
-                .color(text_col),
+                egui::RichText::new(". ")
+                    .size(13.5)
+                    .color(text_col),
+            );
+            codigo_inline_chip(ui, "println!");
+            ui.label(
+                egui::RichText::new("es una macro que muestra información en la terminal. Primero veremos cómo se usa y después por qué no es una función común.")
+                    .size(13.5)
+                    .color(text_col),
             );
         });
     } else if current == 2 {
         ui.horizontal_wrapped(|ui| {
             ui.label(egui::RichText::new("Un").size(13.5).color(text_col));
-            codigo_inline_chip(ui, "Statement");
-            ui.label(
-                egui::RichText::new("ejecuta una acción; una")
-                    .size(13.5)
-                    .color(text_col),
-            );
-            codigo_inline_chip(ui, "Expression");
-            ui.label(
-                egui::RichText::new("se evalúa y produce un valor.")
-                    .size(13.5)
-                    .color(text_col),
-            );
+            codigo_inline_chip(ui, "Block");
+            ui.label(egui::RichText::new("agrupa instrucciones entre llaves. Su").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Scope");
+            ui.label(egui::RichText::new("indica en qué parte del programa una variable puede utilizarse y cuándo deja de estar disponible.").size(13.5).color(text_col));
         });
     } else if current == 3 {
+        ui.label(
+            egui::RichText::new(
+                "En esta parte aprenderás cómo el código puede realizar acciones y cómo también puede producir resultados. Primero veremos instrucciones sencillas y después fragmentos de código que calculan o devuelven un valor.",
+            )
+            .size(13.5)
+            .color(text_col)
+            .line_height(Some(19.0)),
+        );
+    } else if current == 4 {
         ui.horizontal_wrapped(|ui| {
-            ui.label(
-                egui::RichText::new(
-                    "Los enteros no tienen parte decimal. Rust ofrece tipos con signo, como",
-                )
-                .size(13.5)
-                .color(text_col),
-            );
-            codigo_inline_chip(ui, "i32");
-            ui.label(
-                egui::RichText::new("o sin signo, como")
-                    .size(13.5)
-                    .color(text_col),
-            );
-            codigo_inline_chip(ui, "u32");
-            ui.label(
-                egui::RichText::new(". Elige una familia para ver su tabla.")
-                    .size(13.5)
-                    .color(text_col),
-            );
+            codigo_inline_chip(ui, "Data Types");
+            ui.label(egui::RichText::new("indican qué clase de valor puede guardar una variable y qué operaciones son válidas. Aquí veremos un ejemplo breve; la pestaña").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Data Types");
+            ui.label(egui::RichText::new("contiene las tablas y la explicación completa de cada tipo.").size(13.5).color(text_col));
         });
+    } else if current == 5 {
+        ui.horizontal_wrapped(|ui| {
+            ui.label(egui::RichText::new("En esta parte aprenderás a dejar").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Comments");
+            ui.label(egui::RichText::new("útiles en el código y a convertir explicaciones de tus APIs en").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Doc Comments");
+            ui.label(egui::RichText::new("consultables. Terminaremos generando documentación del proyecto.").size(13.5).color(text_col));
+        });
+    } else if current == 6 {
+        ui.horizontal_wrapped(|ui| {
+            ui.label(egui::RichText::new("Una").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Function");
+            ui.label(egui::RichText::new("reúne instrucciones bajo un nombre. Avanzaremos desde una").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Function");
+            ui.label(egui::RichText::new("sencilla hasta sus").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Parameters");
+            ui.label(egui::RichText::new("y el valor que puede").size(13.5).color(text_col));
+            codigo_inline_chip(ui, "Return");
+            ui.label(egui::RichText::new(".").size(13.5).color(text_col));
+        });
+    } else if current == 7 {
+        ui.label(
+            egui::RichText::new(
+                "Esta evaluación repasa los conceptos principales de la sesión. Lee cada pregunta, elige una respuesta y revisa el resultado antes de continuar.",
+            )
+            .size(13.5)
+            .color(text_col)
+            .line_height(Some(19.0)),
+        );
     } else {
         ui.label(
             egui::RichText::new(explanation)
@@ -1929,15 +2054,18 @@ fn mostrar_retos_conceptos_drawer(
     ui.add_space(14.0);
 
     if current == 0 {
-        titulo_seccion(ui, "Declaración de una variable", cyan);
+        titulo_seccion(ui, "1. Declarar una variable con let", cyan);
         ui.indent("conceptos_variable_let", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
                 ui.label(egui::RichText::new("Usa").size(13.0).color(text_col));
+                ui.add_space(4.0);
                 codigo_inline_chip(ui, "let");
+                ui.add_space(4.0);
                 ui.label(
-                    egui::RichText::new("para crear una variable y darle un valor inicial.")
+                    egui::RichText::new(
+                        "para crear una variable y darle un valor inicial. En Rust, su valor queda protegido por defecto, por lo que no puede cambiar por accidente. Más adelante veremos cómo permitir cambios de manera explícita.",
+                    )
                         .size(13.0)
                         .color(text_col),
                 );
@@ -1947,11 +2075,10 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "Mutabilidad y reasignación", cyan);
+        titulo_seccion(ui, "2. Cambiar un valor con let mut", cyan);
         ui.indent("conceptos_variable_mut", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
                 ui.label(
                     egui::RichText::new("Las variables son inmutables por defecto. Usa")
                         .size(13.0)
@@ -1975,11 +2102,10 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "Nueva declaración con el mismo nombre", cyan);
+        titulo_seccion(ui, "3. Crear una nueva variable con Shadowing", cyan);
         ui.indent("conceptos_shadowing_nueva_declaracion", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
                 ui.label(
                     egui::RichText::new("Con Shadowing vuelves a escribir")
                         .size(13.0)
@@ -2005,11 +2131,10 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "Shadowing vs reasignación", cyan);
+        titulo_seccion(ui, "4. Shadowing y reasignación no son lo mismo", cyan);
         ui.indent("conceptos_shadowing_comparacion", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
                 ui.label(
                     egui::RichText::new("Shadowing crea otra variable usando")
                         .size(13.0)
@@ -2028,7 +2153,6 @@ fn mostrar_retos_conceptos_drawer(
             );
             ui.add_space(8.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
                 ui.label(
                     egui::RichText::new("Para poder reasignar el valor, declara la variable con")
                         .size(13.0)
@@ -2047,66 +2171,272 @@ fn mostrar_retos_conceptos_drawer(
             );
             ui.add_space(12.0);
         });
-    } else if current == 1 {
-        titulo_seccion(ui, "Blocks: un grupo de instrucciones", cyan);
-        ui.indent("conceptos_blocks_definicion", |ui| {
+
+        titulo_seccion(ui, "5. const: un valor fijo", cyan);
+        ui.indent("conceptos_const_intro", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
-                ui.label(
-                    egui::RichText::new("Un bloque agrupa instrucciones entre las llaves")
-                        .size(13.0)
-                        .color(text_col),
-                );
-                codigo_inline_chip(ui, "{ }");
-                ui.label(egui::RichText::new(".").size(13.0).color(text_col));
+                ui.label(egui::RichText::new("Una").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "const");
+                ui.label(egui::RichText::new("representa un valor que no cambia y debe conocerse durante el").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Compile time");
+                ui.label(egui::RichText::new(". A diferencia de una variable común, siempre necesita un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Data Type");
+                ui.label(egui::RichText::new("explícito.").size(13.0).color(text_col));
             });
             ui.add_space(6.0);
-            codigo_resaltado_bloque(ui, code, &state.editor.syntax_set, &theme, "rs");
+            codigo_resaltado_bloque(
+                ui,
+                "const MAX_INTENTOS: u32 = 3;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "Scope: el alcance de una variable", cyan);
-        ui.indent("conceptos_scope_alcance", |ui| {
+        titulo_seccion(ui, "6. static: un valor global", cyan);
+        ui.indent("conceptos_static_intro", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
-                codigo_inline_chip(ui, "exterior");
-                ui.label(
-                    egui::RichText::new(
-                        "puede utilizarse dentro del bloque porque fue creada afuera.",
-                    )
-                    .size(13.0)
-                    .color(text_col),
-                );
+                codigo_inline_chip(ui, "static");
+                ui.label(egui::RichText::new("declara un valor global que permanece disponible durante toda la ejecución del programa. Por ahora basta con reconocer su duración y su ubicación global.").size(13.0).color(text_col));
             });
-            ui.add_space(5.0);
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "static PUERTO_SERVICIO: u16 = 8080;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "7. type: un alias legible", cyan);
+        ui.indent("conceptos_type_intro", |ui| {
+            ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
-                codigo_inline_chip(ui, "interior");
-                ui.label(
-                    egui::RichText::new(
-                        "solo existe dentro del bloque; al cerrarse, termina su Scope.",
-                    )
+                codigo_inline_chip(ui, "type");
+                ui.label(egui::RichText::new("crea un nombre alternativo para un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Data Type");
+                ui.label(egui::RichText::new("existente. No crea un tipo nuevo; ayuda a expresar mejor la intención del código.").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "type Puntos = u32;\nlet total: Puntos = 100;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "8. Comparar let, let mut, const y static", orange);
+        ui.indent("conceptos_variables_comparacion", |ui| {
+            ui.add_space(4.0);
+            ui.label(
+                egui::RichText::new("Todos pueden guardar valores, pero no significan lo mismo. La siguiente comparación resume su función.")
                     .size(13.0)
                     .color(text_col),
+            );
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "let intentos = 3;\nlet mut contador = 0;\nconst MAX_INTENTOS: u32 = 3;\nstatic PUERTO_SERVICIO: u16 = 8080;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(6.0);
+            for (nombre, descripcion) in [
+                ("let", "variable inmutable por defecto"),
+                ("let mut", "variable que puede cambiar"),
+                ("const", "valor fijo conocido en Compile time"),
+                ("static", "valor global disponible durante la ejecución"),
+            ] {
+                ui.horizontal_wrapped(|ui| {
+                    codigo_inline_chip(ui, nombre);
+                    ui.label(
+                        egui::RichText::new(descripcion)
+                            .size(12.5)
+                            .color(text_col),
+                    );
+                });
+                ui.add_space(3.0);
+            }
+            ui.add_space(12.0);
+        });
+    } else if current == 1 {
+        titulo_seccion(ui, "1. Declarative macros", cyan);
+        ui.indent("conceptos_macros_definicion", |ui| {
+            ui.add_space(4.0);
+            ui.label(
+                egui::RichText::new(
+                    "También se conocen como macros por reglas. Funcionan buscando patrones y sustituyéndolos por código antes de compilar.",
+                )
+                .size(13.0)
+                .color(text_col),
+            );
+            ui.add_space(6.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(
+                    egui::RichText::new("Se crean normalmente con")
+                        .size(13.0)
+                        .color(text_col),
                 );
+                ui.add_space(4.0);
+                codigo_inline_chip(ui, "macro_rules!");
+                ui.label(egui::RichText::new(".").size(13.0).color(text_col));
             });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "println!(\"Hola, Rust!\");",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.label(
+                egui::RichText::new(
+                    "println! es una macro declarativa de la biblioteca estándar. El signo ! indica que no llamamos a una función normal, sino a una macro.",
+                )
+                .size(13.0)
+                .color(text_col),
+            );
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "println!(\"Hola\");\nprintln!(\"Resultado: {}\", 2 + 3);",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "2. Procedural macros", cyan);
+        ui.indent("conceptos_macros_procedurales", |ui| {
+            ui.add_space(4.0);
+            ui.label(
+                egui::RichText::new(
+                    "Las Procedural macros reciben código, lo analizan y generan código nuevo durante la compilación. Son más avanzadas y pueden aparecer como macros function-like, derive o attribute. Por ahora basta con reconocer que pertenecen a una segunda categoría de macros.",
+                )
+                .size(13.0)
+                .color(text_col)
+                .line_height(Some(19.0)),
+            );
+            ui.add_space(7.0);
+            for (tipo, descripcion) in [
+                (
+                    "Function-like macros",
+                    "se invocan con una sintaxis parecida a una función y terminan en !.",
+                ),
+                (
+                    "Derive macros",
+                    "generan implementaciones para un struct o enum mediante #[derive(...)].",
+                ),
+                (
+                    "Attribute macros",
+                    "aplican instrucciones especiales sobre una función, struct o módulo.",
+                ),
+            ] {
+                ui.horizontal_wrapped(|ui| {
+                    punto_lista(ui, bullet_col);
+                    codigo_inline_chip(ui, tipo);
+                    ui.label(
+                        egui::RichText::new(descripcion)
+                            .size(12.5)
+                            .color(text_col),
+                    );
+                });
+                ui.add_space(3.0);
+            }
             ui.add_space(12.0);
         });
     } else if current == 2 {
+        titulo_seccion(ui, "1. Block: agrupar instrucciones", cyan);
+        ui.indent("conceptos_blocks_definicion", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Block");
+                ui.label(egui::RichText::new("es una zona de código delimitada por").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "{ }");
+                ui.label(
+                    egui::RichText::new(". Dentro puede contener variables e instrucciones.")
+                        .size(13.0)
+                        .color(text_col),
+                );
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "{\n    let interior = 20;\n}",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "2. Scope: alcance de una variable", cyan);
+        ui.indent("conceptos_scope_alcance", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Scope");
+                ui.label(egui::RichText::new("indica dónde puede utilizarse una variable. Es una regla del lenguaje.").size(13.0).color(text_col));
+            });
+            ui.add_space(7.0);
+            codigo_resaltado_bloque(
+                ui,
+                "let exterior = 10;\n\n{\n    let interior = 20;\n\n    println!(\"{}\", exterior); // válido\n    println!(\"{}\", interior); // válido\n}\n\nprintln!(\"{}\", exterior); // válido\n// println!(\"{}\", interior); // error: está fuera de su Scope",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(6.0);
+            ui.label(
+                egui::RichText::new(
+                    "El Block interior puede utilizar exterior porque fue creada afuera. En cambio, interior solo está disponible entre sus llaves; después del Block, su nombre queda fuera de su Scope.",
+                )
+                .size(13.0)
+                .color(text_col),
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "3. RAII: limpiar al salir del Scope", cyan);
+        ui.indent("conceptos_raii_scope", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                codigo_inline_chip(ui, "RAII");
+                ui.label(egui::RichText::new("indica que un valor adquiere su recurso al crearse y Rust lo limpia automáticamente cuando sale de su").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Scope");
+                ui.label(egui::RichText::new(". Más adelante relacionaremos esta regla con").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Ownership");
+                ui.label(egui::RichText::new(".").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "{\n    let recurso = String::from(\"Hola\");\n} // Rust limpia el recurso al salir del Scope",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+    } else if current == 3 {
         titulo_seccion(ui, "Statement: una instrucción", cyan);
         ui.indent("conceptos_statements_definicion", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
-                ui.label(
-                    egui::RichText::new(
-                        "Un Statement realiza una acción, como declarar una variable. Normalmente termina con",
-                    )
-                    .size(13.0)
-                    .color(text_col),
-                );
+                ui.label(egui::RichText::new("Un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Statement");
+                ui.label(egui::RichText::new("realiza una acción, como declarar una variable. Normalmente termina con").size(13.0).color(text_col));
                 codigo_inline_chip(ui, ";");
                 ui.label(egui::RichText::new(".").size(13.0).color(text_col));
             });
@@ -2125,14 +2455,9 @@ fn mostrar_retos_conceptos_drawer(
         ui.indent("conceptos_expressions_definicion", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                punto_lista(ui, bullet_col);
-                ui.label(
-                    egui::RichText::new(
-                        "Una Expression se evalúa y produce un valor. La última expresión de un bloque puede devolver ese resultado si no lleva",
-                    )
-                    .size(13.0)
-                    .color(text_col),
-                );
+                ui.label(egui::RichText::new("Una").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Expression");
+                ui.label(egui::RichText::new("se evalúa y produce un valor. La última expresión de un bloque puede devolver ese resultado si no lleva").size(13.0).color(text_col));
                 codigo_inline_chip(ui, ";");
                 ui.label(egui::RichText::new(".").size(13.0).color(text_col));
             });
@@ -2146,11 +2471,249 @@ fn mostrar_retos_conceptos_drawer(
             );
             ui.add_space(12.0);
         });
-    } else if current == 3 {
-        titulo_seccion(ui, section_title, cyan);
-        ui.indent("conceptos_data_types_enteros", |ui| {
-            mostrar_enteros_interactivo(ui, state, false);
+    } else if current == 4 {
+        titulo_seccion(ui, "1. Data Types: describir un valor", cyan);
+        ui.indent("conceptos_data_types_intro", |ui| {
+            ui.add_space(4.0);
+            ui.label(
+                egui::RichText::new(
+                    "Una variable puede guardar distintos tipos de valores. La anotación de tipo ayuda a Rust a comprobar que el valor y las operaciones son correctos.",
+                )
+                .size(13.0)
+                .color(text_col),
+            );
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "let edad: u32 = 26;\nlet temperatura: i32 = -5;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(6.0);
+            ui.label(
+                egui::RichText::new(
+                    "Para consultar todos los tipos, sus rangos y sus usos, abre la pestaña de referencia Data Types.",
+                )
+                .size(12.5)
+                .color(egui::Color32::from_rgb(160, 180, 205)),
+            );
+            ui.add_space(12.0);
         });
+
+        titulo_seccion(ui, "2. Type annotation y Type inference", cyan);
+        ui.indent("conceptos_data_types_formas", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Puedes indicar el").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Data Type");
+                ui.label(egui::RichText::new("de forma explícita o dejar que Rust lo deduzca a partir del valor. Ambas formas pertenecen al lenguaje y el compilador comprueba que sean coherentes.").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "let edad: u32 = 26;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(5.0);
+            codigo_resaltado_bloque(
+                ui,
+                "let puntos = 100;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(6.0);
+            ui.label(
+                egui::RichText::new(
+                    "En el primer ejemplo el tipo está escrito; en el segundo, Rust lo infiere automáticamente.",
+                )
+                .size(12.5)
+                .color(egui::Color32::from_rgb(160, 180, 205)),
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "3. Consulta Data Types", orange);
+        ui.indent("conceptos_data_types_referencia", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("La pestaña").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Data Types");
+                ui.label(egui::RichText::new("contiene las tablas, rangos y ejemplos completos de cada tipo. Úsala como referencia mientras pruebas tus propios valores en el editor.").size(13.0).color(text_col));
+            });
+            ui.add_space(10.0);
+            if boton_abrir_data_types(ui, cyan) {
+                state.lessons.conceptos_tab = 4;
+                state.ui.mostrar_conceptos_drawer = false;
+                state.ui.conceptos_drawer_tab = 0;
+            }
+            ui.add_space(14.0);
+        });
+    } else if current == 5 {
+        titulo_seccion(ui, "1. Comments: dejar una nota", cyan);
+        ui.indent("conceptos_comments", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Comment");
+                ui.label(egui::RichText::new("ayuda a explicar una decisión o una parte del código para que otra persona pueda entenderla más fácilmente.").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "// Explica qué hace esta parte del código.",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "2. Doc Comments: documentar una API", cyan);
+        ui.indent("conceptos_doc_comments", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Doc Comment");
+                ui.label(egui::RichText::new("empieza con").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "///");
+                ui.label(egui::RichText::new("y se coloca justo encima del elemento que quieres documentar. Por ahora observa su forma; en la siguiente sesión lo aplicaremos a").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Functions");
+                ui.label(egui::RichText::new(".").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "/// Describe el propósito de este elemento del proyecto.",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "3. cargo doc: generar documentación", orange);
+        ui.indent("conceptos_cargo_doc", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Cargo recoge los").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Doc Comments");
+                ui.label(egui::RichText::new("y genera una página HTML que puedes consultar en el navegador.").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_terminal_bloque(ui, "cargo doc --open");
+            ui.add_space(12.0);
+        });
+    } else if current == 6 {
+        titulo_seccion(ui, "1. Declarar una Function", cyan);
+        ui.indent("conceptos_functions_declarar", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(
+                    egui::RichText::new("Usa")
+                        .size(13.0)
+                        .color(text_col),
+                );
+                codigo_inline_chip(ui, "fn");
+                ui.label(
+                    egui::RichText::new("para declarar una")
+                    .size(13.0)
+                    .color(text_col),
+                );
+                codigo_inline_chip(ui, "Function");
+                ui.label(
+                    egui::RichText::new(". Su nombre indica qué tarea realiza y sus llaves contienen las instrucciones.")
+                        .size(13.0)
+                        .color(text_col),
+                );
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "fn saludar() {\n    println!(\"Hola, Rust!\");\n}",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "2. Ejecutar una Function", cyan);
+        ui.indent("conceptos_functions_llamada", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Declarar una").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Function");
+                ui.label(egui::RichText::new("no la ejecuta. Para utilizarla, escribe su nombre seguido de paréntesis.").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "saludar();",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "3. Recibir datos con Parameters", cyan);
+        ui.indent("conceptos_functions_parameters", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Los").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Parameters");
+                ui.label(egui::RichText::new("permiten que una").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Function");
+                ui.label(egui::RichText::new("reciba valores. Cada").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Parameter");
+                ui.label(egui::RichText::new("tiene un nombre y un").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Data Type");
+                ui.label(egui::RichText::new(".").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "fn mostrar_edad(edad: u32) {\n    println!(\"Edad: {}\", edad);\n}",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "4. Return value", cyan);
+        ui.indent("conceptos_functions_return", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Una").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Function");
+                ui.label(egui::RichText::new("puede devolver un valor. Después de la flecha se escribe el").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Data Type");
+                ui.label(egui::RichText::new("del resultado; la última").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Expression");
+                ui.label(egui::RichText::new("del").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Block");
+                ui.label(egui::RichText::new("se convierte en ese").size(13.0).color(text_col));
+                codigo_inline_chip(ui, "Return value");
+                ui.label(egui::RichText::new("cuando no termina en punto y coma.").size(13.0).color(text_col));
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "fn sumar(a: i32, b: i32) -> i32 {\n    a + b\n}",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(12.0);
+        });
+    } else if current == 7 {
+        titulo_seccion(ui, "Comprueba lo aprendido", orange);
+        mostrar_preguntas_conceptos(ui, state, orange, text_col);
     } else {
         titulo_seccion(ui, section_title, cyan);
         ui.indent(format!("conceptos_reto_{current}"), |ui| {
@@ -2180,66 +2743,376 @@ fn mostrar_retos_conceptos_drawer(
         });
     }
 
-    titulo_seccion(ui, "Tu práctica", orange);
-    ui.indent(format!("conceptos_tarea_{current}"), |ui| {
-        ui.add_space(6.0);
-        if current == 0 {
+    if current != 7 {
+        titulo_seccion(ui, "Tu práctica", orange);
+        ui.indent(format!("conceptos_tarea_{current}"), |ui| {
+            ui.add_space(6.0);
+            if current == 0 {
+                for paso in [
+                    "1. Declara una variable usando let.",
+                    "2. Declara otra variable con let mut y reasigna su valor.",
+                    "3. Declara nuevamente un nombre con let para practicar Shadowing.",
+                    "4. Declara una const y escribe su Data Type.",
+                    "5. Declara un static usando un entero.",
+                    "6. Explica con tus palabras la diferencia entre let, let mut, const y static.",
+                ] {
+                    ui.label(egui::RichText::new(paso).size(13.0).color(text_col));
+                    ui.add_space(4.0);
+                }
+            } else {
+                ui.label(egui::RichText::new(task).size(13.0).color(text_col));
+            }
+            ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
+                punto_lista(ui, bullet_col);
                 ui.label(
-                    egui::RichText::new("Crea una variable y cambia su valor usando")
+                    egui::RichText::new("Escribe o adapta el ejemplo en el editor central y ejecútalo cuando tengas un proyecto Cargo seleccionado.")
                         .size(13.0)
                         .color(text_col),
                 );
-                codigo_inline_chip(ui, "let mut");
-                ui.label(egui::RichText::new(".").size(13.0).color(text_col));
             });
-        } else {
-            ui.label(egui::RichText::new(task).size(13.0).color(text_col));
-        }
-        ui.add_space(4.0);
-        ui.horizontal_wrapped(|ui| {
-            punto_lista(ui, bullet_col);
-            ui.label(
-                egui::RichText::new("Escribe o adapta el ejemplo en el editor central y ejecútalo cuando tengas un proyecto Cargo seleccionado.")
-                    .size(13.0)
-                    .color(text_col),
-            );
+            ui.add_space(10.0);
         });
-        ui.add_space(10.0);
-    });
+    }
 }
 
-fn retos_conceptos() -> [(&'static str, &'static str, &'static str, &'static str); 5] {
+fn mostrar_preguntas_conceptos(
+    ui: &mut egui::Ui,
+    state: &mut AppState,
+    orange: egui::Color32,
+    text_col: egui::Color32,
+) {
+    let preguntas = [
+        (
+            "1. ¿Qué palabra declara una variable en Rust?",
+            ["let", "var", "define"],
+            0,
+        ),
+        (
+            "2. ¿Qué permite let mut?",
+            [
+                "Cambiar el valor de una variable",
+                "Crear una constante global",
+                "Generar documentación",
+            ],
+            0,
+        ),
+        (
+            "3. ¿Qué sucede con Shadowing?",
+            [
+                "Se crea una nueva variable con el mismo nombre",
+                "Se borra todo el Block",
+                "Se cambia el sistema operativo",
+            ],
+            0,
+        ),
+        (
+            "4. ¿Qué describe mejor una const?",
+            [
+                "Un valor fijo conocido durante Compile time",
+                "Un valor que cambia en cada llamada",
+                "Una función sin Parameters",
+            ],
+            0,
+        ),
+        (
+            "5. ¿Qué caracteriza a static?",
+            [
+                "Es un valor global disponible durante la ejecución",
+                "Solo existe dentro de un Block",
+                "Es una macro de impresión",
+            ],
+            0,
+        ),
+        (
+            "6. ¿Para qué sirve type?",
+            [
+                "Para crear un alias legible de un Data Type",
+                "Para ejecutar una Function",
+                "Para cerrar un Scope",
+            ],
+            0,
+        ),
+        (
+            "7. ¿Qué indica un Scope?",
+            [
+                "Dónde puede utilizarse una variable",
+                "Cuánto pesa el ejecutable",
+                "Qué versión de Cargo está instalada",
+            ],
+            0,
+        ),
+        (
+            "8. ¿Qué explica RAII?",
+            [
+                "Los recursos se limpian al salir de su Scope",
+                "Las macros se ejecutan después del programa",
+                "Los Data Types no necesitan comprobación",
+            ],
+            0,
+        ),
+        (
+            "9. ¿Qué indica el signo ! en println!?",
+            [
+                "Que se está invocando una macro",
+                "Que la línea es un Comment",
+                "Que la variable es mutable",
+            ],
+            0,
+        ),
+        (
+            "10. ¿Qué hace un Statement?",
+            [
+                "Realiza una acción",
+                "Siempre devuelve un String",
+                "Solo documenta una API",
+            ],
+            0,
+        ),
+        (
+            "11. ¿Qué produce una Expression?",
+            [
+                "Un valor que puede utilizarse",
+                "Un archivo Cargo.lock",
+                "Un nuevo toolchain",
+            ],
+            0,
+        ),
+        (
+            "12. ¿Qué es una Type annotation?",
+            [
+                "Escribir explícitamente el Data Type de un valor",
+                "Cambiar el nombre de una Function",
+                "Añadir un Comment al final de una línea",
+            ],
+            0,
+        ),
+        (
+            "13. ¿Qué símbolo inicia un Comment de una línea?",
+            ["//", "///", "##"],
+            0,
+        ),
+        (
+            "14. ¿Qué permite cargo doc?",
+            [
+                "Generar documentación HTML desde los Doc Comments",
+                "Cambiar una variable a mutable",
+                "Crear un Block automáticamente",
+            ],
+            0,
+        ),
+        (
+            "15. ¿Qué palabra declara una Function?",
+            ["fn", "func", "method"],
+            0,
+        ),
+    ];
+
+    for (index, (pregunta, opciones, correcta)) in preguntas.iter().enumerate() {
+        ui.label(
+            egui::RichText::new(*pregunta)
+                .strong()
+                .size(13.0)
+                .color(text_col),
+        );
+        ui.add_space(4.0);
+
+        for (opcion_index, opcion) in opciones.iter().enumerate() {
+            let seleccionada =
+                state.lessons.conceptos_preguntas_respuestas[index] == Some(opcion_index);
+            let (opcion_rect, respuesta) = ui.allocate_exact_size(
+                egui::vec2(ui.available_width(), 25.0),
+                egui::Sense::click(),
+            );
+            let hovered = respuesta.hovered();
+            let opcion_fill = if seleccionada {
+                egui::Color32::from_rgba_unmultiplied(255, 160, 50, 32)
+            } else if hovered {
+                egui::Color32::from_rgba_unmultiplied(255, 160, 50, 18)
+            } else {
+                egui::Color32::from_rgb(15, 20, 30)
+            };
+            let opcion_stroke = if seleccionada {
+                orange
+            } else if hovered {
+                egui::Color32::from_rgba_unmultiplied(255, 180, 80, 150)
+            } else {
+                egui::Color32::from_rgb(35, 48, 70)
+            };
+            ui.painter().rect(
+                opcion_rect,
+                egui::CornerRadius::same(4),
+                opcion_fill,
+                egui::Stroke::new(if seleccionada { 1.2 } else { 1.0 }, opcion_stroke),
+                egui::StrokeKind::Inside,
+            );
+            ui.painter().text(
+                egui::pos2(opcion_rect.left() + 10.0, opcion_rect.center().y),
+                egui::Align2::LEFT_CENTER,
+                *opcion,
+                egui::FontId::proportional(12.5),
+                if seleccionada { orange } else { text_col },
+            );
+            if respuesta.clicked() {
+                state.lessons.conceptos_preguntas_respuestas[index] = Some(opcion_index);
+            }
+            ui.add_space(3.0);
+        }
+
+        if let Some(respuesta) = state.lessons.conceptos_preguntas_respuestas[index] {
+            let es_correcta = respuesta == *correcta;
+            ui.label(
+                egui::RichText::new(if es_correcta {
+                    "Correcto"
+                } else {
+                    "Revisa este concepto y vuelve a intentarlo"
+                })
+                .size(11.5)
+                .color(if es_correcta {
+                    egui::Color32::from_rgb(255, 180, 80)
+                } else {
+                    egui::Color32::from_rgb(255, 150, 100)
+                }),
+            );
+        }
+        ui.add_space(10.0);
+    }
+
+    let respondidas = state
+        .lessons
+        .conceptos_preguntas_respuestas
+        .iter()
+        .filter(|respuesta| respuesta.is_some())
+        .count();
+    let correctas = preguntas
+        .iter()
+        .enumerate()
+        .filter(|(index, (_, _, correcta))| {
+            state.lessons.conceptos_preguntas_respuestas[*index] == Some(*correcta)
+        })
+        .count();
+    let completada = respondidas == preguntas.len() && correctas == preguntas.len();
+
+    titulo_seccion(
+        ui,
+        if completada {
+            "Sesión completada"
+        } else {
+            "Progreso de la evaluación"
+        },
+        orange,
+    );
+    ui.label(
+        egui::RichText::new(if completada {
+            "¡Excelente! Has respondido correctamente las 15 preguntas."
+                .to_owned()
+        } else {
+            format!("Respuestas correctas: {correctas}/15 · Respondidas: {respondidas}/15")
+        })
+        .size(13.0)
+        .color(if completada {
+            orange
+        } else {
+            text_col
+        }),
+    );
+}
+
+fn boton_abrir_data_types(ui: &mut egui::Ui, cyan: egui::Color32) -> bool {
+    let (button_rect, response) =
+        ui.allocate_exact_size(egui::vec2(190.0, 30.0), egui::Sense::click());
+    let hovered = response.hovered();
+    let pressed = response.is_pointer_button_down_on();
+
+    if hovered || pressed {
+        ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+    }
+
+    let button_fill = if pressed {
+        egui::Color32::from_rgb(24, 67, 88)
+    } else if hovered {
+        egui::Color32::from_rgb(27, 82, 108)
+    } else {
+        egui::Color32::from_rgb(20, 58, 78)
+    };
+    let button_stroke = if hovered || pressed {
+        cyan
+    } else {
+        egui::Color32::from_rgb(55, 125, 155)
+    };
+    let text_color = if hovered || pressed {
+        egui::Color32::WHITE
+    } else {
+        egui::Color32::from_rgb(220, 235, 245)
+    };
+
+    ui.painter().rect(
+        button_rect,
+        egui::CornerRadius::same(5),
+        button_fill,
+        egui::Stroke::new(1.0, button_stroke),
+        egui::StrokeKind::Inside,
+    );
+    ui.painter().text(
+        button_rect.center(),
+        egui::Align2::CENTER_CENTER,
+        "Abrir pestaña Data Types",
+        egui::FontId::proportional(12.0),
+        text_color,
+    );
+
+    response.clicked()
+}
+
+fn retos_conceptos() -> [(&'static str, &'static str, &'static str, &'static str); 8] {
     [
         (
-            "Variables y Shadowing",
-            "let · mut · shadowing",
-            "Una variable se declara con let y recibe un valor inicial. Las variables son inmutables por defecto; usa let mut cuando necesites cambiar su valor. Si vuelves a declarar el mismo nombre, haces Shadowing.",
+            "Variables paso a paso",
+            "Variables",
+            "Primero declararás variables con let, después aprenderás a cambiar sus valores con let mut y al final conocerás el Shadowing.",
             "let x = 5;",
         ),
         (
+            "Macros",
+            "Macros y println!",
+            "Una macro puede adaptar o generar código antes de compilar. En Rust, el signo ! indica una invocación de macro; println! muestra información en la terminal.",
+            "println!(\"Hola, Rust!\");",
+        ),
+        (
             "Blocks & Scope",
-            "{ } · duración y visibilidad",
-            "Un Block agrupa instrucciones entre llaves. Su Scope es el alcance donde sus variables existen y pueden utilizarse: desde su declaración hasta la llave de cierre. Los bloques interiores pueden leer variables creadas en bloques exteriores.",
+            "Block y Scope",
+            "Un Block agrupa instrucciones entre llaves. Su Scope indica dónde existen sus variables y pueden utilizarse: desde su declaración hasta la llave de cierre. Los bloques interiores pueden leer variables creadas en bloques exteriores.",
             "let exterior = 10;\n{\n    let interior = 20;\n    let resultado = exterior + interior;\n}\n",
         ),
         (
             "Statements & Expressions",
-            "acción · valor · punto y coma",
+            "Statement y Expression",
             "Un Statement ejecuta una acción, mientras una Expression se evalúa y produce un valor. La última expresión de un bloque puede convertirse en su resultado si no termina en punto y coma.",
             "let base = 6;\nlet total = {\n    base * 2\n};",
         ),
         (
             "Data Types",
-            "enteros · i · u · bits",
-            "Los enteros no tienen parte decimal. La familia i admite valores negativos y la familia u solo admite cero y positivos. Selecciona una familia para revisar sus bits, rangos y ejemplos.",
-            "let x = 5;",
+            "Data Types",
+            "Los Data Types indican qué clase de valor puede guardar una variable. Consulta la pestaña Data Types para revisar todos los tipos con detalle.",
+            "let edad: u32 = 26;",
         ),
         (
             "Comments & Docs",
-            "// · /// · cargo doc",
+            "Comments, Doc Comments y cargo doc",
             "Los comentarios normales ayudan a leer el código. Los Doc Comments describen APIs y Cargo puede convertirlos en documentación HTML con Markdown.",
-            "// Nota interna\n/// Calcula el doble de un número.\nfn doble(x: i32) -> i32 { x * 2 }\n\n// cargo doc --open",
+            "// Nota interna\n/// Describe el propósito de este elemento del proyecto.",
+        ),
+        (
+            "Functions",
+            "fn, Parameters y Return value",
+            "Una Function reúne instrucciones bajo un nombre. Puede recibir Parameters y devolver un Return value para que otra parte del programa utilice el resultado.",
+            "fn sumar(a: i32, b: i32) -> i32 {\n    a + b\n}",
+        ),
+        (
+            "Questions",
+            "15 Questions",
+            "La evaluación repasa los conceptos principales de la sesión y se completa cuando respondes correctamente todas las preguntas.",
+            "",
         ),
     ]
 }

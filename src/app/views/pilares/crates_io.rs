@@ -1,6 +1,4 @@
 use eframe::egui;
-use serde::Deserialize;
-use std::collections::BTreeMap;
 use std::sync::Mutex;
 use std::thread;
 
@@ -8,105 +6,7 @@ use crate::app::AppState;
 use crate::components::navigation::underline_tab;
 use crate::utils::helpers::formatear_tamano_bytes;
 
-#[derive(Clone, Debug, Deserialize)]
-pub struct CrateApiItem {
-    pub id: String,
-    pub name: String,
-    #[serde(default)]
-    pub max_version: String,
-    pub description: Option<String>,
-    #[serde(default)]
-    pub downloads: u64,
-    #[serde(default)]
-    pub recent_downloads: Option<u64>,
-    pub repository: Option<String>,
-    pub documentation: Option<String>,
-    pub created_at: Option<String>,
-    pub updated_at: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-struct CratesApiResponse {
-    crates: Vec<CrateApiItem>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct SummaryApiResponse {
-    #[serde(default)]
-    pub new_crates: Vec<CrateApiItem>,
-    #[serde(default)]
-    pub most_downloaded: Vec<CrateApiItem>,
-    #[serde(default)]
-    pub just_updated: Vec<CrateApiItem>,
-    #[serde(default)]
-    pub most_recently_downloaded: Vec<CrateApiItem>,
-    #[serde(default)]
-    pub popular_keywords: Vec<KeywordItem>,
-    #[serde(default)]
-    pub popular_categories: Vec<CategoryItem>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct CrateFullDetailResponse {
-    #[serde(rename = "crate")]
-    pub krate: CrateMetadata,
-    #[serde(default)]
-    pub categories: Vec<CategoryItem>,
-    #[serde(default)]
-    pub keywords: Vec<KeywordItem>,
-    #[serde(default)]
-    pub versions: Vec<VersionItem>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct CrateMetadata {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub downloads: u64,
-    pub recent_downloads: Option<u64>,
-    pub max_version: String,
-    pub max_stable_version: Option<String>,
-    pub documentation: Option<String>,
-    pub repository: Option<String>,
-    pub homepage: Option<String>,
-    pub created_at: Option<String>,
-    pub updated_at: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct CategoryItem {
-    pub id: String,
-    pub category: String,
-    pub slug: Option<String>,
-    pub description: Option<String>,
-    #[serde(default)]
-    pub crates_cnt: u64,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct KeywordItem {
-    pub id: String,
-    pub keyword: String,
-    #[serde(default)]
-    pub crates_cnt: u64,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct VersionItem {
-    pub id: Option<u64>,
-    pub num: String,
-    pub license: Option<String>,
-    pub edition: Option<String>,
-    pub rust_version: Option<String>,
-    pub crate_size: Option<u64>,
-    #[serde(default)]
-    pub downloads: u64,
-    pub created_at: Option<String>,
-    pub yanked: Option<bool>,
-    #[serde(default)]
-    pub features: BTreeMap<String, Vec<String>>,
-}
+use crate::domain::crate_registry::*;
 
 #[derive(Clone, Debug)]
 pub struct CratesIoViewState {

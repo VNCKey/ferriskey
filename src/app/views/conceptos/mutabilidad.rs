@@ -1,7 +1,11 @@
 use crate::app::AppState;
+use crate::views::pilares::anatomy::codigo_inline_chip;
 use eframe::egui;
 
 pub fn mostrar(ui: &mut egui::Ui, state: &mut AppState) {
+    ui.set_max_width(ui.available_width());
+    ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+
     let elapsed = ui.input(|i| i.time) - state.ui.anim_trigger;
     if elapsed < 2.0 {
         ui.ctx().request_repaint();
@@ -55,19 +59,50 @@ pub fn mostrar(ui: &mut egui::Ui, state: &mut AppState) {
     ui.add_space(8.0);
 
     ui.label(
-        egui::RichText::new("En Rust, las variables no son simples contenedores de memoria pasivos. El lenguaje estructura el manejo de datos bajo principios estrictos de inmutabilidad por defecto, control explícito de mutabilidad y ciclo de vida determinista (RAII), garantizando que el estado de tu programa sea siempre predecible y libre de carreras de datos (Data Races).")
-            .size(15.0)
-            .color(text_color)
-            .line_height(Some(22.0)),
+        egui::RichText::new(
+            "En Rust, las variables no son simples contenedores de memoria pasivos. El lenguaje estructura el manejo de datos bajo principios estrictos de inmutabilidad por defecto, control explícito de mutabilidad y ciclo de vida determinista. Esto ayuda a mantener el estado del programa predecible y libre de carreras de datos.",
+        )
+        .size(15.0)
+        .color(text_color)
+        .line_height(Some(22.0)),
     );
+    ui.horizontal_wrapped(|ui| {
+        codigo_inline_chip(ui, "RAII");
+        codigo_inline_chip(ui, "Data Races");
+    });
     ui.add_space(8.0);
 
     ui.label(
-        egui::RichText::new("Estos conceptos sientan las bases antes de interactuar con el Borrow Checker y el sistema de Ownership. En lugar de lidiar con efectos secundarios imprevistos, el compilador te ayuda a modelar flujos de datos limpios y seguros.")
-            .size(15.0)
-            .color(text_color)
-            .line_height(Some(22.0)),
+        egui::RichText::new(
+            "Estos conceptos sientan las bases antes de interactuar con el sistema que verifica los préstamos y con las reglas de propiedad. En lugar de lidiar con efectos secundarios imprevistos, el compilador te ayuda a modelar flujos de datos limpios y seguros.",
+        )
+        .size(15.0)
+        .color(text_color)
+        .line_height(Some(22.0)),
     );
+    ui.horizontal_wrapped(|ui| {
+        codigo_inline_chip(ui, "Borrow Checker");
+        codigo_inline_chip(ui, "Ownership");
+    });
+    ui.add_space(12.0);
+
+    ui.label(
+        egui::RichText::new(
+            "Core resume el recorrido completo de esta sesión. El Code Lab desarrolla cada tema paso a paso con ejemplos pequeños y práctica.",
+        )
+        .size(14.0)
+        .color(text_color)
+        .line_height(Some(21.0)),
+    );
+    ui.horizontal_wrapped(|ui| {
+        codigo_inline_chip(ui, "Blocks & Scope");
+        codigo_inline_chip(ui, "Statements & Expressions");
+        codigo_inline_chip(ui, "Data Types");
+        codigo_inline_chip(ui, "Comments");
+        codigo_inline_chip(ui, "Doc Comments");
+        codigo_inline_chip(ui, "Functions");
+        codigo_inline_chip(ui, "Code Lab");
+    });
     ui.add_space(12.0);
 
     // Mini-tarjetas 2x2 conceptuales (estilo Foundations)

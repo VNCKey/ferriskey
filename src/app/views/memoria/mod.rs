@@ -1,6 +1,7 @@
 pub mod borrowing;
 pub mod heap_move;
 pub mod ownership;
+pub mod overview;
 pub mod stack_copy;
 pub mod strings;
 
@@ -18,35 +19,35 @@ pub fn retos_memoria() -> Vec<(
     vec![
         (
             "Stack & Copy Semantics",
-            "Fundamentos",
-            "Copias implícitas bit a bit",
-            "Los tipos primitivos enteros implementan el Trait Copy. Al asignarse a una nueva variable, el valor se duplica en el stack sin perder el dueño original.",
-            "Ejecuta el código en la terminal y observa cómo ambas variables 'x' e 'y' permanecen válidas simultáneamente.",
-            "fn main() {\n    let x = 42;\n    let y = x; // Copia implícita en Stack\n\n    println!(\"x sigue siendo válido: {}\", x);\n    println!(\"y contiene una copia: {}\", y);\n}",
+            "Fundamental",
+            "Stack",
+            "Es una zona de memoria rápida y organizada donde Rust guarda muchos valores locales de tamaño conocido.\n\nEs un comportamiento que permite copiar automáticamente un valor al asignarlo a otra variable, sin que la variable original deje de estar disponible.",
+            "Añade este fragmento al archivo del proyecto y observa que las dos variables siguen disponibles después de copiarse.",
+            "let x = 42;\nlet y = x; // Copy: x sigue siendo válido\n\nprintln!(\"x = {x}\");\nprintln!(\"y = {y}\");",
         ),
         (
-            "Heap & Ownership Move",
+            "String, Heap & Move Semantics",
+            "Fundamental",
+            "String",
+            "String es un tipo de texto que puede cambiar de tamaño y conservar su contenido mientras el programa lo utiliza.\n\nEl Heap es una zona de memoria destinada a datos dinámicos. Puede reservar espacio adicional cuando un valor necesita crecer; por eso String utiliza el Heap para guardar sus caracteres y push_str puede añadir más texto.\n\nMove Semantics ocurre cuando un valor pasa a otra variable y la variable anterior deja de estar disponible.",
+            "Añade el fragmento al archivo del proyecto. Observa cómo String puede crecer y cómo el valor pasa a 'movido' sin volver a utilizar 'texto'.",
+            "let mut texto = String::from(\"Rust\");\ntexto.push_str(\" en el Heap\");\n\nlet movido = texto; // Move: el valor pasa a movido\nprintln!(\"{movido}\");",
+        ),
+        (
             "Ownership",
-            "Transferencia de propiedad",
-            "Tipos dinámicos como String almacenan su contenido en el Heap. Al asignar 's1' a 's2', Rust desplaza (Move) la propiedad para evitar doble liberación de memoria.",
-            "Descomenta la línea del println!(s1) y compila con Ctrl+S para observar el error del Borrow Checker.",
-            "fn main() {\n    let s1 = String::from(\"FerrisKey\");\n    let s2 = s1; // Move semantics: Ownership transferida\n\n    // println!(\"{}\", s1); // ❌ Error: use of moved value `s1`\n    println!(\"s2 es el único dueño activo: {}\", s2);\n}",
+            "Fundamental",
+            "Ownership",
+            "Cada valor tiene una variable responsable: su propietario.\n\nUn valor solo puede tener un propietario activo a la vez; cuando pasa a otra variable, la responsabilidad también cambia.\n\nCuando el propietario sale de su Scope, Rust libera automáticamente el valor que ya no se necesita.",
+            "Añade el fragmento y observa cómo una variable recibe la responsabilidad del valor. Después identifica qué ocurre cuando el propietario sale de su Scope.",
+            "let original = String::from(\"Rust\");\nlet propietario = original;\n\nprintln!(\"{propietario}\");",
         ),
         (
-            "Préstamos Mutables (&mut T)",
             "Borrowing",
-            "Préstamo mutable exclusivo",
-            "Para modificar un valor sin transferir ownership, pasamos una referencia mutable (&mut T). Solo puede existir un préstamo mutable a la vez.",
-            "Observa cómo la función 'agregar_sufijo' modifica la variable 'mensaje' in-place.",
-            "fn agregar_sufijo(texto: &mut String) {\n    texto.push_str(\" - Aprende Rust sin errores\");\n}\n\nfn main() {\n    let mut mensaje = String::from(\"FerrisKey\");\n    agregar_sufijo(&mut mensaje);\n    println!(\"Resultado: {}\", mensaje);\n}",
-        ),
-        (
-            "Préstamo Inmutable vs Mutable",
-            "Borrow Checker",
-            "Aliasing & Mutabilidad",
-            "Pueden existir múltiples referencias inmutables (&T), pero no se puede tener un préstamo mutable (&mut T) mientras existan lectores activos.",
-            "Analiza las Non-Lexical Lifetimes (NLL) que permiten a 'r3' coexistir tras el último uso de 'r1' y 'r2'.",
-            "fn main() {\n    let mut datos = String::from(\"Rust\");\n    let r1 = &datos;\n    let r2 = &datos;\n    println!(\"Lectores: {}, {}\", r1, r2);\n\n    let r3 = &mut datos; // Válido tras NLL\n    r3.push_str(\" 2026\");\n    println!(\"Modificado: {}\", r3);\n}",
+            "Fundamental",
+            "Borrowing",
+            "Borrowing permite utilizar un valor sin tomar su Ownership.\n\nUna Immutable Reference permite leer el valor y el propietario continúa siendo responsable.\n\nPuedes tener varias Immutable References al mismo tiempo.\n\nUna Mutable Reference permite modificar el valor, pero solo puede existir una durante ese acceso.\n\nLas reglas de Borrowing impiden mezclar una Reference de lectura con una Mutable Reference activa, y una Reference no puede superar la vida del valor que utiliza.",
+            "Añade el fragmento y observa cómo se pueden realizar lecturas compartidas y después una modificación exclusiva, respetando el orden de los accesos.",
+            "let mut texto = String::from(\"Rust\");\n\n{\n    let lectura_a = &texto;\n    let lectura_b = &texto;\n    println!(\"{lectura_a} y {lectura_b}\");\n}\n\nlet escritura = &mut texto;\nescritura.push_str(\" seguro\");\nprintln!(\"{escritura}\");",
         ),
         (
             "String vs &str",
@@ -60,7 +61,7 @@ pub fn retos_memoria() -> Vec<(
 }
 
 pub fn mostrar_tutorial_strings_ownership(ui: &mut egui::Ui, state: &mut AppState) {
-    if state.lessons.strings_ownership_tab == 5 {
+    if state.lessons.strings_ownership_tab == 2 {
         let retos = retos_memoria();
         let total_retos = retos.len();
         let shell_state = crate::views::pilares::anatomy::mostrar_code_lab_shell(
@@ -115,11 +116,9 @@ pub fn mostrar_tutorial_strings_ownership(ui: &mut egui::Ui, state: &mut AppStat
             .show(ui, |ui| {
                 ui.add_space(10.0);
                 match state.lessons.strings_ownership_tab {
-                    0 => stack_copy::mostrar_tab_stack_copy(ui, state),
-                    1 => heap_move::mostrar_tab_heap_move(ui, state),
-                    2 => ownership::mostrar_tab_ownership(ui),
-                    3 => borrowing::mostrar_tab_borrowing(ui),
-                    _ => strings::mostrar_teoria_string_y_str(ui, state),
+                    0 => overview::mostrar(ui),
+                    1 => strings::mostrar_teoria_string_y_str(ui, state),
+                    _ => overview::mostrar(ui),
                 }
                 ui.add_space(20.0);
             });
@@ -128,19 +127,16 @@ pub fn mostrar_tutorial_strings_ownership(ui: &mut egui::Ui, state: &mut AppStat
 
 pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
     let tabs = [
-        ("Stack Copy", 0),
-        ("Heap Move", 1),
-        ("Ownership", 2),
-        ("Borrowing", 3),
-        ("String vs &str", 4),
+        ("Overview", 0),
+        ("String vs &str", 1),
     ];
     let active = state.lessons.strings_ownership_tab;
     crate::components::navigation::mostrar_nav_superior_sesion(
         ui,
         state,
-        "Memoria y Ownership",
+        "Memory & Ownership",
         &tabs,
-        5,
+        2,
         active,
         |st, idx| st.lessons.strings_ownership_tab = idx,
     );

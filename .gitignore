@@ -1,3 +1,11 @@
 /target
 repos_ref/
 *.py
+
+# Documentación de investigación y notas locales sin seguimiento
+docs/codigo-legible/
+docs/desarrollo-dirigido-por-datos/
+docs/libros-de-referencia/
+docs/metodologia-de-investigacion/
+docs/refactorizacion-rust/
+docs/sistemas-intensivos-en-datos/

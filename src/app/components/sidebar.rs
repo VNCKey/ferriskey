@@ -95,15 +95,15 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
                 // 3. Memoria (reglas de memoria + String/&str)
                 let es_memoria = state.ui.ruta_actual == AppRoute::TutorialOwnership
                     || state.ui.ruta_actual == AppRoute::TutorialStrings;
-                if nav_item_sidebar(ui, "Memoria", es_memoria).clicked() {
+                if nav_item_sidebar(ui, "Memory & Ownership", es_memoria).clicked() {
                     state.ui.ruta_actual = AppRoute::TutorialOwnership;
                 }
                 ui.add_space(2.0);
 
-                // 4. Módulos
+                // 4. Modules & Visibility
                 if nav_item_sidebar(
                     ui,
-                    "Módulos",
+                    "Modules & Visibility",
                     state.ui.ruta_actual == AppRoute::TutorialModulos,
                 )
                 .clicked()

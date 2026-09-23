@@ -1,12 +1,102 @@
 use crate::app::AppState;
 use eframe::egui;
 
+fn tabla_metodos_string(
+    ui: &mut egui::Ui,
+    id: &str,
+    titulo: &str,
+    subtitulo: &str,
+    filas: &[(&str, &str, &str)],
+) {
+    let naranja = egui::Color32::from_rgb(255, 160, 50);
+    let cyan = egui::Color32::from_rgb(100, 200, 255);
+    let texto = egui::Color32::from_rgb(205, 215, 230);
+    let ejemplo_color = egui::Color32::from_rgb(180, 220, 180);
+
+    let mut frame = egui::Frame::new();
+    frame.fill = egui::Color32::from_rgb(14, 18, 26);
+    frame.inner_margin = egui::Margin::same(12);
+    frame.corner_radius = egui::CornerRadius::same(8);
+    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+
+    frame.show(ui, |ui| {
+        ui.label(
+            egui::RichText::new(titulo)
+                .strong()
+                .size(15.0)
+                .color(naranja),
+        );
+        ui.add_space(2.0);
+        ui.label(
+            egui::RichText::new(subtitulo)
+                .size(12.5)
+                .color(egui::Color32::from_rgb(160, 175, 195)),
+        );
+        ui.add_space(10.0);
+
+        egui::Grid::new(id)
+            .striped(true)
+            .min_col_width(120.0)
+            .spacing([20.0, 8.0])
+            .show(ui, |ui| {
+                ui.label(
+                    egui::RichText::new("Método")
+                        .strong()
+                        .size(12.0)
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Descripción / Comportamiento")
+                        .strong()
+                        .size(12.0)
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(
+                    egui::RichText::new("Ejemplo de uso")
+                        .strong()
+                        .size(12.0)
+                        .color(egui::Color32::WHITE),
+                );
+                ui.end_row();
+
+                for (metodo, desc, ejemplo) in filas {
+                    ui.label(
+                        egui::RichText::new(*metodo)
+                            .monospace()
+                            .strong()
+                            .color(cyan),
+                    );
+                    ui.label(
+                        egui::RichText::new(*desc)
+                            .size(13.0)
+                            .color(texto),
+                    );
+                    ui.label(
+                        egui::RichText::new(*ejemplo)
+                            .monospace()
+                            .size(12.0)
+                            .color(ejemplo_color),
+                    );
+                    ui.end_row();
+                }
+            });
+    });
+}
+
 /// Sección teórica completa sobre String y &str en Rust
 pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
+    let naranja = egui::Color32::from_rgb(255, 160, 50);
+    let texto = egui::Color32::from_rgb(205, 215, 230);
+
     ui.label(
-        "String es el tipo de texto dinámico y modificable por excelencia en Rust. Se almacena como un vector de bytes UTF-8 en el Heap y gestiona su memoria automáticamente sin recolector de basura.",
+        egui::RichText::new(
+            "String es el tipo de texto dinámico y modificable por excelencia en Rust. Se almacena como un vector de bytes UTF-8 en el Heap y gestiona su memoria automáticamente sin recolector de basura.",
+        )
+        .size(14.0)
+        .color(texto)
+        .line_height(Some(20.0)),
     );
-    ui.add_space(10.0);
+    ui.add_space(12.0);
 
     // Tabla 1: Anatomía de Memoria de String
     let mut table_mem = egui::Frame::new();
@@ -22,13 +112,13 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
                     "Estructura Interna en Memoria (24 Bytes en Stack + Buffer en Heap)",
                 )
                 .strong()
-                .size(14.0)
-                .color(egui::Color32::from_rgb(255, 160, 50)),
+                .size(15.0)
+                .color(naranja),
             );
             ui.add_space(8.0);
 
             let btn_color = if state.ui.show_railroad_modal == Some(7) {
-                egui::Color32::from_rgb(255, 160, 50)
+                naranja
             } else {
                 egui::Color32::from_rgb(180, 190, 205)
             };
@@ -58,6 +148,7 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
 
         egui::Grid::new("tabla_string_memoria_anatomia")
             .striped(true)
+            .min_col_width(90.0)
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
                 ui.label(
@@ -115,7 +206,7 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
                 ui.label(
                     egui::RichText::new("Buffer UTF-8")
                         .strong()
-                        .color(egui::Color32::from_rgb(255, 160, 50)),
+                        .color(naranja),
                 );
                 ui.label("Heap");
                 ui.label("Dinámico (cap bytes)");
@@ -124,225 +215,177 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
             });
     });
 
+    ui.add_space(18.0);
+
+    ui.heading(
+        egui::RichText::new("Arsenal de Métodos Directos de String")
+            .size(18.0)
+            .strong()
+            .color(naranja),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new(
+            "Colección de operaciones integradas para consultar, modificar y transformar texto directamente sin necesidad de iteradores.",
+        )
+        .size(13.5)
+        .color(texto),
+    );
+    ui.add_space(12.0);
+
+    // =========================================================
+    // TABLA 1: Inspección y Búsqueda (Solo lectura)
+    // =========================================================
+    let filas_inspeccion = [
+        (
+            ".len()",
+            "Devuelve la longitud del texto en bytes (no en caracteres).",
+            "texto.len() // usize",
+        ),
+        (
+            ".capacity()",
+            "Memoria RAM (en bytes) reservada actualmente en el Heap.",
+            "texto.capacity()",
+        ),
+        (
+            ".is_empty()",
+            "Devuelve true si la longitud es 0 (\"\").",
+            "\"\".is_empty() // true",
+        ),
+        (
+            ".contains(str)",
+            "Comprueba si una palabra o letra existe dentro del texto.",
+            "texto.contains(\"Rust\")",
+        ),
+        (
+            ".starts_with(str)",
+            "Verifica si el texto comienza con el prefijo indicado.",
+            "texto.starts_with(\"Al\")",
+        ),
+        (
+            ".ends_with(str)",
+            "Verifica si el texto termina con el sufijo indicado.",
+            "texto.ends_with(\".\")",
+        ),
+        (
+            ".find(str)",
+            "Busca el texto y devuelve la posición (byte) de su inicio.",
+            "texto.find(\"a\") // Option",
+        ),
+        (
+            ".rfind(str)",
+            "Igual que .find(), pero busca desde el final hacia el inicio.",
+            "texto.rfind(\"a\")",
+        ),
+    ];
+
+    tabla_metodos_string(
+        ui,
+        "grid_inspeccion_string",
+        "1. Inspección y Búsqueda (Solo Lectura)",
+        "Métodos que consultan propiedades del buffer sin modificar su contenido ni reservar nueva memoria.",
+        &filas_inspeccion,
+    );
+
     ui.add_space(14.0);
 
-    // Tabla 2: El Arsenal Completo de String
-    let mut table_methods = egui::Frame::new();
-    table_methods.fill = egui::Color32::from_rgb(14, 18, 26);
-    table_methods.inner_margin = egui::Margin::same(12);
-    table_methods.corner_radius = egui::CornerRadius::same(8);
-    table_methods.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    // =========================================================
+    // TABLA 2: Modificación en Memoria (Requieren let mut)
+    // =========================================================
+    let filas_modificacion = [
+        (
+            ".push(char)",
+            "Añade un solo carácter al final del texto.",
+            "texto.push('!')",
+        ),
+        (
+            ".push_str(&str)",
+            "Añade una cadena de texto completa al final.",
+            "texto.push_str(\" Hola\")",
+        ),
+        (
+            ".insert(idx, char)",
+            "Inserta un carácter en una posición de byte específica.",
+            "texto.insert(0, '¡')",
+        ),
+        (
+            ".insert_str(idx, &str)",
+            "Inserta una frase en una posición de byte específica.",
+            "texto.insert_str(5, \"amigo\")",
+        ),
+        (
+            ".remove(idx)",
+            "Borra el carácter en esa posición exacta y lo devuelve.",
+            "texto.remove(0) // char",
+        ),
+        (
+            ".pop()",
+            "Elimina el último carácter del final y lo devuelve.",
+            "texto.pop() // Option",
+        ),
+        (
+            ".truncate(n)",
+            "Corta el texto conservando solo los primeros n bytes.",
+            "texto.truncate(4)",
+        ),
+        (
+            ".clear()",
+            "Vacía el contenido del texto dejando su longitud en 0.",
+            "texto.clear()",
+        ),
+    ];
 
-    table_methods.show(ui, |ui| {
-        ui.label(
-            egui::RichText::new("El Arsenal Completo de Métodos Directos de String")
-                .strong()
-                .size(16.0)
-                .color(egui::Color32::from_rgb(255, 160, 50)),
-        );
-        ui.label(
-            egui::RichText::new(
-                "Todo lo que puedes hacer con texto sin necesidad de usar Iteradores.",
-            )
-            .color(egui::Color32::from_rgb(180, 180, 180)),
-        );
-        ui.add_space(10.0);
+    tabla_metodos_string(
+        ui,
+        "grid_modificacion_string",
+        "2. Modificación en Memoria (Requieren let mut)",
+        "Operaciones in-place que alteran directamente el buffer en el Heap. Los índices son posiciones en bytes.",
+        &filas_modificacion,
+    );
 
-        let draw_row = |ui: &mut egui::Ui, metodo: &str, hace: &str, ejemplo: &str| {
-            ui.label(
-                egui::RichText::new(metodo)
-                    .monospace()
-                    .color(egui::Color32::from_rgb(100, 200, 255)),
-            );
-            ui.label(hace);
-            ui.label(
-                egui::RichText::new(ejemplo)
-                    .monospace()
-                    .color(egui::Color32::from_rgb(180, 220, 180)),
-            );
-            ui.end_row();
-        };
+    ui.add_space(14.0);
 
-        // 1. INSPECCION Y BUSQUEDA
-        ui.label(
-            egui::RichText::new("1. Inspección y Búsqueda (Solo leen)")
-                .strong()
-                .color(egui::Color32::WHITE),
-        );
-        ui.end_row();
-        egui::Grid::new("grid_inspeccion_string")
-            .striped(true)
-            .spacing([20.0, 8.0])
-            .show(ui, |ui| {
-                draw_row(
-                    ui,
-                    ".len()",
-                    "Devuelve el tamaño del texto en bytes (no en letras).",
-                    "texto.len() // usize",
-                );
-                draw_row(
-                    ui,
-                    ".capacity()",
-                    "Memoria RAM (en bytes) reservada actualmente en el Heap.",
-                    "texto.capacity()",
-                );
-                draw_row(
-                    ui,
-                    ".is_empty()",
-                    "Devuelve true si la longitud es 0 (\"\").",
-                    "\"\".is_empty() // true",
-                );
-                draw_row(
-                    ui,
-                    ".contains(str)",
-                    "Busca si una palabra o letra existe dentro.",
-                    "texto.contains(\"Rust\")",
-                );
-                draw_row(
-                    ui,
-                    ".starts_with(str)",
-                    "Verifica si empieza exactamente con ese texto.",
-                    "texto.starts_with(\"Al\")",
-                );
-                draw_row(
-                    ui,
-                    ".ends_with(str)",
-                    "Verifica si termina exactamente con ese texto.",
-                    "texto.ends_with(\".\")",
-                );
-                draw_row(
-                    ui,
-                    ".find(str)",
-                    "Busca el texto y devuelve la posición (byte) inicial.",
-                    "texto.find(\"a\") // Option",
-                );
-                draw_row(
-                    ui,
-                    ".rfind(str)",
-                    "Igual que find, pero busca desde el final hacia atrás.",
-                    "texto.rfind(\"a\")",
-                );
-            });
+    // =========================================================
+    // TABLA 3: Transformación y Formato (Nuevos valores)
+    // =========================================================
+    let filas_transformacion = [
+        (
+            ".trim()",
+            "Elimina espacios en blanco y saltos de línea en ambos extremos.",
+            "texto.trim() // &str",
+        ),
+        (
+            ".to_uppercase()",
+            "Crea un nuevo String con todo el texto en MAYÚSCULAS.",
+            "texto.to_uppercase() // String",
+        ),
+        (
+            ".to_lowercase()",
+            "Crea un nuevo String con todo el texto en minúsculas.",
+            "texto.to_lowercase() // String",
+        ),
+        (
+            ".replace(a, b)",
+            "Busca todas las apariciones de 'a' y las reemplaza por 'b'.",
+            "texto.replace(\"key\", \"kay\")",
+        ),
+        (
+            ".replacen(a, b, n)",
+            "Igual que .replace(), pero solo para las primeras n ocurrencias.",
+            "texto.replacen(\"o\", \"a\", 2)",
+        ),
+        (
+            ".repeat(n)",
+            "Genera un nuevo String duplicando el texto n veces consecutivas.",
+            "\"Ja\".repeat(3) // \"JaJaJa\"",
+        ),
+    ];
 
-        ui.add_space(15.0);
-
-        // 2. MODIFICACION
-        ui.label(
-            egui::RichText::new("2. Modificación (Requieren let mut)")
-                .strong()
-                .color(egui::Color32::from_rgb(255, 100, 100)),
-        );
-        ui.label(
-            egui::RichText::new(
-                "Alteran la memoria original. Cuidado con los índices (¡son en bytes!).",
-            )
-            .small()
-            .color(egui::Color32::GRAY),
-        );
-        ui.end_row();
-        egui::Grid::new("grid_modificacion_string")
-            .striped(true)
-            .spacing([20.0, 8.0])
-            .show(ui, |ui| {
-                draw_row(
-                    ui,
-                    ".push(char)",
-                    "Añade un solo carácter al final del texto.",
-                    "texto.push('!')",
-                );
-                draw_row(
-                    ui,
-                    ".push_str(&str)",
-                    "Añade una frase/texto al final del texto.",
-                    "texto.push_str(\" Hola\")",
-                );
-                draw_row(
-                    ui,
-                    ".insert(idx, char)",
-                    "Inserta un carácter en una posición (byte) específica.",
-                    "texto.insert(0, '¡')",
-                );
-                draw_row(
-                    ui,
-                    ".insert_str(idx, &str)",
-                    "Inserta una frase en una posición (byte) específica.",
-                    "texto.insert_str(5, \"amigo\")",
-                );
-                draw_row(
-                    ui,
-                    ".remove(idx)",
-                    "Borra el carácter en esa posición exacta y te lo devuelve.",
-                    "texto.remove(0) // char",
-                );
-                draw_row(
-                    ui,
-                    ".pop()",
-                    "Borra el último carácter del final y te lo devuelve.",
-                    "texto.pop() // Option",
-                );
-                draw_row(
-                    ui,
-                    ".truncate(N)",
-                    "Corta el texto, dejando solo los primeros N bytes.",
-                    "texto.truncate(4)",
-                );
-                draw_row(
-                    ui,
-                    ".clear()",
-                    "Vacía todo el texto (lo deja con longitud 0).",
-                    "texto.clear()",
-                );
-            });
-
-        ui.add_space(15.0);
-
-        // 3. TRANSFORMACION
-        ui.label(
-            egui::RichText::new("3. Transformación (Devuelven un texto nuevo)")
-                .strong()
-                .color(egui::Color32::from_rgb(100, 255, 100)),
-        );
-        ui.end_row();
-        egui::Grid::new("grid_transformacion_string")
-            .striped(true)
-            .spacing([20.0, 8.0])
-            .show(ui, |ui| {
-                draw_row(
-                    ui,
-                    ".trim()",
-                    "Elimina espacios en blanco y saltos de línea en los extremos.",
-                    "texto.trim() // &str",
-                );
-                draw_row(
-                    ui,
-                    ".to_uppercase()",
-                    "Convierte todo el texto a MAYÚSCULAS.",
-                    "texto.to_uppercase() // String",
-                );
-                draw_row(
-                    ui,
-                    ".to_lowercase()",
-                    "Convierte todo el texto a minúsculas.",
-                    "texto.to_lowercase() // String",
-                );
-                draw_row(
-                    ui,
-                    ".replace(A, B)",
-                    "Busca A y reemplaza TODAS sus apariciones por B.",
-                    "texto.replace(\"key\", \"kay\")",
-                );
-                draw_row(
-                    ui,
-                    ".replacen(A, B, n)",
-                    "Igual que replace, pero solo las primeras n veces.",
-                    "texto.replacen(\"o\", \"a\", 2)",
-                );
-                draw_row(
-                    ui,
-                    ".repeat(n)",
-                    "Copia el texto n veces seguidas.",
-                    "\"Ja\".repeat(3) // \"JaJaJa\"",
-                );
-            });
-    });
+    tabla_metodos_string(
+        ui,
+        "grid_transformacion_string",
+        "3. Transformación y Formato (Nuevos Valores)",
+        "Operaciones que no mutan el original, sino que generan una nueva vista prestada (&str) o un nuevo String en Heap.",
+        &filas_transformacion,
+    );
 }

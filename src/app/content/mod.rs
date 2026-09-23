@@ -45,27 +45,7 @@ pub const CONTROL_FLUJO_CODE: &str = r#"fn main() {
 }
 "#;
 
-pub const OWNERSHIP_CODE: &str = r#"fn main() {
-    // &str: vista (a menudo al binario o prestada)
-    let saludo: &str = "Hola";
-
-    // String: dueño en el Heap (puede crecer)
-    let mut s1 = String::from("Rust");
-    s1.push_str(" Ownership");
-
-    // MOVE: s1 deja de ser válido
-    let s2 = s1;
-    // println!("{}", s1); // error: value moved
-
-    // BORROW: prestamos sin regalar el dueño
-    imprimir_len(&s2);
-    println!("saludo={}, s2={}", saludo, s2);
-}
-
-fn imprimir_len(texto: &str) {
-    println!("len = {}", texto.len());
-}
-"#;
+pub const OWNERSHIP_CODE: &str = "";
 
 pub const STRUCTS_CODE: &str = r#"struct ServidorWeb {
     puerto: u16,
@@ -279,14 +259,4 @@ pub const TUPLES_CODE: &str = r#"fn main() {
 }
 "#;
 
-pub const MODULES_CODE: &str = r#"// Módulos en Rust
-mod redes {
-    pub fn conectar() {
-        println!("Conectado a la red!");
-    }
-}
-
-fn main() {
-    redes::conectar();
-}
-"#;
+pub const MODULES_CODE: &str = "";

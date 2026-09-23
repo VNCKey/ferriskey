@@ -118,7 +118,7 @@ impl LessonCatalog {
         );
         catalog.registrar(
             AppRoute::TutorialModulos,
-            "Módulos",
+            "Modules & Visibility",
             crate::content::MODULES_CODE,
         );
 
@@ -224,6 +224,7 @@ pub struct LessonsState {
     pub estructura_tab: usize,
     pub conceptos_tab: usize,
     pub conceptos_codelab_reto_actual: usize,
+    pub conceptos_preguntas_respuestas: [Option<usize>; 15],
     pub controlflujo_tab: usize,
     pub controlflujo_is_practica: bool,
     pub conceptos_code: String,
@@ -329,6 +330,7 @@ impl Default for LessonsState {
             estructura_tab: 0,
             conceptos_tab: 7,
             conceptos_codelab_reto_actual: 0,
+            conceptos_preguntas_respuestas: [None; 15],
             controlflujo_tab: 0,
             controlflujo_is_practica: false,
             conceptos_code: String::new(),

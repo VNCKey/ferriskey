@@ -3,7 +3,7 @@ use crate::components::code_editor::mostrar_editor_interactivo;
 use crate::execution::ejecutar_codigo_rust;
 use crate::views::conceptos::mostrar_selector_proyectos_estandar_con_archivos;
 use crate::views::control_flujo::card_frame_tutorial;
-use crate::views::pilares::anatomy::{codigo_inline_chip, punto_lista};
+use crate::views::pilares::anatomy::{codigo_inline_chip, codigo_resaltado_bloque, punto_lista};
 use eframe::egui;
 use std::sync::Arc;
 
@@ -1639,7 +1639,7 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
     });
 }
 
-pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
+pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui, state: &AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let text = egui::Color32::from_rgb(205, 215, 230);
@@ -1799,17 +1799,7 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
     );
     ui.add_space(8.0);
 
-    let mut frame_code = egui::Frame::new();
-    frame_code.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame_code.inner_margin = egui::Margin::same(12);
-    frame_code.corner_radius = egui::CornerRadius::same(8);
-    frame_code.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    frame_code.show(ui, |ui| {
-        ui.set_width(ui.available_width());
-        ui.label(
-            egui::RichText::new(
-                "fn main() {
+    let codigo_unicode = "fn main() {
     let letra: char = '🦀';
     let numero_crudo = letra as u32; // Casting a entero de 32 bits: 129408 (0x1F980)
 
@@ -1818,18 +1808,16 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui) {
 
     println!(\"Unicode de '🦀': {} [U+{:X}]\", numero_crudo, numero_crudo);
     println!(\"Recuperado: {}\", volver);
-}",
-            )
-            .monospace()
-            .color(cyan),
-        );
-    });
+}";
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+    codigo_resaltado_bloque(ui, codigo_unicode, &state.editor.syntax_set, theme, "rs");
 }
 
-pub fn mostrar_categoria_casting(ui: &mut egui::Ui) {
+pub fn mostrar_categoria_casting(ui: &mut egui::Ui, state: &AppState) {
     let naranja = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let text = egui::Color32::from_rgb(205, 215, 230);
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
 
     ui.heading(
         egui::RichText::new("Conversiones de Tipo (Casting con as)")
@@ -1936,7 +1924,7 @@ pub fn mostrar_categoria_casting(ui: &mut egui::Ui) {
                 egui::RichText::new("Coerción Implícita (Prohibida)")
                     .strong()
                     .size(15.0)
-                    .color(egui::Color32::from_rgb(255, 120, 120)),
+                    .color(naranja),
             );
             ui.add_space(6.0);
             ui.label(
@@ -1946,18 +1934,13 @@ pub fn mostrar_categoria_casting(ui: &mut egui::Ui) {
             );
             ui.add_space(8.0);
 
-            let mut code_box = egui::Frame::new();
-            code_box.fill = egui::Color32::from_rgb(8, 12, 18);
-            code_box.inner_margin = egui::Margin::same(10);
-            code_box.corner_radius = egui::CornerRadius::same(6);
-            code_box.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(35, 50, 75));
-
-            code_box.show(ui, |ui| {
-                ui.spacing_mut().item_spacing.y = 3.0;
-                ui.label(egui::RichText::new("let x: i32 = 10;").monospace().size(12.0).color(cyan));
-                ui.label(egui::RichText::new("let y: f64 = 2.5;").monospace().size(12.0).color(cyan));
-                ui.label(egui::RichText::new("// let z = x + y; // ERROR: mismatched types").monospace().size(12.0).color(egui::Color32::from_rgb(255, 120, 120)));
-            });
+            codigo_resaltado_bloque(
+                ui,
+                "let x: i32 = 10;\nlet y: f64 = 2.5;\n// let z = x + y; // ERROR: mismatched types",
+                &state.editor.syntax_set,
+                theme,
+                "rs",
+            );
         });
 
         let mut card_ok = egui::Frame::new();
@@ -1981,18 +1964,13 @@ pub fn mostrar_categoria_casting(ui: &mut egui::Ui) {
             );
             ui.add_space(8.0);
 
-            let mut code_box = egui::Frame::new();
-            code_box.fill = egui::Color32::from_rgb(8, 12, 18);
-            code_box.inner_margin = egui::Margin::same(10);
-            code_box.corner_radius = egui::CornerRadius::same(6);
-            code_box.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(35, 50, 75));
-
-            code_box.show(ui, |ui| {
-                ui.spacing_mut().item_spacing.y = 3.0;
-                ui.label(egui::RichText::new("let x: i32 = 10;").monospace().size(12.0).color(cyan));
-                ui.label(egui::RichText::new("let y: f64 = 2.5;").monospace().size(12.0).color(cyan));
-                ui.label(egui::RichText::new("let z = (x as f64) + y; // Válido -> 12.5").monospace().size(12.0).color(egui::Color32::from_rgb(140, 220, 180)));
-            });
+            codigo_resaltado_bloque(
+                ui,
+                "let x: i32 = 10;\nlet y: f64 = 2.5;\nlet z = (x as f64) + y; // Válido: 12.5",
+                &state.editor.syntax_set,
+                theme,
+                "rs",
+            );
         });
     });
 }
