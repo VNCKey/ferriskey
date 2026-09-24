@@ -662,7 +662,5 @@ impl eframe::App for AppState {
         mostrar_modal_railroad_let(ui.ctx(), self);
         crate::components::modals::mostrar_modal_codigo(ui.ctx(), self);
 
-        // Request continuous repaint for animations
-        ui.ctx().request_repaint();
     }
 }

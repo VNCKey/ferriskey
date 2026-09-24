@@ -1,11 +1,55 @@
 use eframe::egui;
-use std::sync::{Arc, Mutex};
+use std::collections::{HashMap, hash_map::DefaultHasher};
+use std::hash::{Hash, Hasher};
+use std::sync::{Arc, Mutex, OnceLock};
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{Style, Theme};
 use syntect::parsing::{SyntaxDefinition, SyntaxSet};
 use syntect::util::LinesWithEndings;
 
 use super::console_output::formatear_salida_consola;
+
+const MAX_HIGHLIGHT_CACHE_ENTRIES: usize = 512;
+
+#[derive(Clone)]
+struct CachedHighlight {
+    source: String,
+    extension: String,
+    font_size_bits: u32,
+    theme_signature: u64,
+    job: egui::text::LayoutJob,
+}
+
+#[derive(Default)]
+struct HighlightCache {
+    entries: HashMap<u64, CachedHighlight>,
+    computations: usize,
+}
+
+static HIGHLIGHT_CACHE: OnceLock<Mutex<HighlightCache>> = OnceLock::new();
+
+fn highlight_cache() -> &'static Mutex<HighlightCache> {
+    HIGHLIGHT_CACHE.get_or_init(|| Mutex::new(HighlightCache::default()))
+}
+
+fn theme_signature(theme: &Theme) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    theme.name.hash(&mut hasher);
+    theme.author.hash(&mut hasher);
+    theme.scopes.len().hash(&mut hasher);
+    theme.settings.foreground.hash(&mut hasher);
+    theme.settings.background.hash(&mut hasher);
+    hasher.finish()
+}
+
+fn highlight_key(source: &str, extension: &str, font_size: f32, theme_signature: u64) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    source.hash(&mut hasher);
+    extension.hash(&mut hasher);
+    font_size.to_bits().hash(&mut hasher);
+    theme_signature.hash(&mut hasher);
+    hasher.finish()
+}
 
 /// Carga la paleta de sintaxis de la aplicación y añade TOML a los lenguajes
 /// predeterminados de syntect, que no lo incluye en su dump estándar.
@@ -61,6 +105,62 @@ pub fn syntax_layouter_with_font_size(
     extension: &str,
     font_size: f32,
 ) -> std::sync::Arc<egui::Galley> {
+    let mut job = cached_highlight_job(string, syntax_set, theme, extension, font_size);
+    job.wrap.max_width = wrap_width;
+    ui.painter().layout_job(job)
+}
+
+fn cached_highlight_job(
+    string: &str,
+    syntax_set: &SyntaxSet,
+    theme: &Theme,
+    extension: &str,
+    font_size: f32,
+) -> egui::text::LayoutJob {
+    let theme_signature = theme_signature(theme);
+    let key = highlight_key(string, extension, font_size, theme_signature);
+    let font_size_bits = font_size.to_bits();
+    let mut cache = highlight_cache()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+
+    if let Some(cached) = cache.entries.get(&key)
+        && cached.source == string
+        && cached.extension == extension
+        && cached.font_size_bits == font_size_bits
+        && cached.theme_signature == theme_signature
+    {
+        return cached.job.clone();
+    }
+
+    let job = build_highlight_job(string, syntax_set, theme, extension, font_size);
+    cache.computations += 1;
+
+    if cache.entries.len() >= MAX_HIGHLIGHT_CACHE_ENTRIES {
+        cache.entries.clear();
+    }
+
+    cache.entries.insert(
+        key,
+        CachedHighlight {
+            source: string.to_owned(),
+            extension: extension.to_owned(),
+            font_size_bits,
+            theme_signature,
+            job: job.clone(),
+        },
+    );
+
+    job
+}
+
+fn build_highlight_job(
+    string: &str,
+    syntax_set: &SyntaxSet,
+    theme: &Theme,
+    extension: &str,
+    font_size: f32,
+) -> egui::text::LayoutJob {
     let mut job = egui::text::LayoutJob::default();
 
     let syntax = syntax_set
@@ -82,8 +182,7 @@ pub fn syntax_layouter_with_font_size(
         job.text.pop();
     }
 
-    job.wrap.max_width = wrap_width;
-    ui.painter().layout_job(job)
+    job
 }
 
 pub fn mostrar_editor_interactivo<F>(
@@ -247,5 +346,32 @@ mod tests {
         let colores: HashSet<_> = ranges.iter().map(|(style, _)| style.foreground).collect();
 
         assert!(colores.len() >= 3, "TOML debe mostrar colores semánticos");
+    }
+
+    #[test]
+    fn cache_reutiliza_el_resaltado_estatico_entre_frames() {
+        let syntax_set = cargar_syntax_set();
+        let theme_set = syntect::highlighting::ThemeSet::load_defaults();
+        let theme = &theme_set.themes["base16-ocean.dark"];
+        let source = "let ferriskey_cache_test: u32 = 42;";
+
+        {
+            let mut cache = highlight_cache()
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            cache.entries.clear();
+            cache.computations = 0;
+        }
+
+        for _ in 0..120 {
+            let job = cached_highlight_job(source, &syntax_set, theme, "rs", 12.0);
+            assert_eq!(job.text, source);
+        }
+
+        let cache = highlight_cache()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        assert_eq!(cache.computations, 1);
+        assert_eq!(cache.entries.len(), 1);
     }
 }

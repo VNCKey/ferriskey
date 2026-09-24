@@ -248,6 +248,10 @@ fn dibujar_icono_etapa(
 }
 
 pub fn mostrar_tutorial_compilacion(ui: &mut egui::Ui, state: &mut AppState) {
+    // Esta vista contiene indicadores orbitales animados. Mantener el repintado
+    // local evita obligar al resto de FerrisKey a renderizar continuamente.
+    ui.ctx().request_repaint();
+
     const DURACION: f32 = 7.5;
     const ETAPAS: [EtapaCompilacion; 5] = [
         EtapaCompilacion {
