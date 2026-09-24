@@ -41,6 +41,26 @@ pub fn syntax_layouter(
     theme: &Theme,
     extension: &str,
 ) -> std::sync::Arc<egui::Galley> {
+    syntax_layouter_with_font_size(
+        ui,
+        string,
+        wrap_width,
+        syntax_set,
+        theme,
+        extension,
+        14.0,
+    )
+}
+
+pub fn syntax_layouter_with_font_size(
+    ui: &egui::Ui,
+    string: &str,
+    wrap_width: f32,
+    syntax_set: &SyntaxSet,
+    theme: &Theme,
+    extension: &str,
+    font_size: f32,
+) -> std::sync::Arc<egui::Galley> {
     let mut job = egui::text::LayoutJob::default();
 
     let syntax = syntax_set
@@ -53,7 +73,7 @@ pub fn syntax_layouter(
         for (style, text) in ranges {
             let color =
                 egui::Color32::from_rgb(style.foreground.r, style.foreground.g, style.foreground.b);
-            let font_id = egui::FontId::monospace(14.0);
+            let font_id = egui::FontId::monospace(font_size);
             job.append(text, 0.0, egui::TextFormat::simple(font_id, color));
         }
     }

@@ -3,204 +3,94 @@ use crate::components::code_editor::mostrar_editor_interactivo;
 use crate::execution::ejecutar_codigo_rust;
 use crate::views::conceptos::mostrar_selector_proyectos_estandar_con_archivos;
 use crate::views::control_flujo::card_frame_tutorial;
-use crate::views::pilares::anatomy::{codigo_inline_chip, codigo_resaltado_bloque, punto_lista};
+use crate::views::pilares::anatomy::{codigo_resaltado_bloque, punto_lista};
+use crate::app::ui::{
+    card, centered_grid, cell_centered, cell_centered_horizontal, texto_con_chips_inline, EducationalTable, inline_code_chip, inline_code_chip_color, table_code_snippet,
+    section_heading, session_title, Colors, Typography,
+};
 use eframe::egui;
 use std::sync::Arc;
 
+fn codigo_rust_tabla(ui: &mut egui::Ui, codigo: &str, state: &AppState) {
+    table_code_snippet(
+        ui,
+        codigo,
+        &state.editor.syntax_set,
+        &state.editor.theme_set.themes["base16-ocean.dark"],
+        "rs",
+    );
+}
+
 fn mostrar_tabla_metodos(
     ui: &mut egui::Ui,
+    state: &AppState,
     id: &str,
     titulo: &str,
     introduccion: &str,
     filas: &[(&str, &str, &str, &str)],
 ) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let text = egui::Color32::from_rgb(205, 215, 230);
-
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new(titulo)
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, titulo);
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(introduccion)
-            .size(13.5)
-            .color(text)
+            .font(Typography::body())
+            .color(Colors::TEXT_PRIMARY)
             .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
-    let mut frame = egui::Frame::new();
-    frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame.inner_margin = egui::Margin::same(12);
-    frame.corner_radius = egui::CornerRadius::same(8);
-    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    frame.show(ui, |ui| {
-        egui::Grid::new(id)
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Método / operación", "Qué hace", "Ejemplo", "Resultado"] {
-                    ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
-                    );
-                }
-                ui.end_row();
-
-                for (metodo, descripcion, ejemplo, resultado) in filas {
-                    codigo_chip_color(ui, metodo, naranja);
-                    texto_con_chips_inline(ui, descripcion, text, cyan);
-                    codigo_chip_color(ui, ejemplo, cyan);
-                    codigo_chip_color(ui, resultado, egui::Color32::from_rgb(140, 220, 180));
-                    ui.end_row();
-                }
-            });
-    });
+    EducationalTable::new(id, &["Método / operación", "Ejemplo", "Resultado", "Qué hace"])
+        .min_col_width(90.0)
+        .spacing(18.0, 6.0)
+        .show(ui, |body| {
+            for (metodo, descripcion, ejemplo, resultado) in filas {
+                body.row(|ui| {
+                    cell_centered(ui, |ui| inline_code_chip_color(ui, metodo, Colors::ORANGE_RUST));
+                    codigo_rust_tabla(ui, ejemplo, state);
+                    cell_centered(ui, |ui| inline_code_chip_color(ui, resultado, Colors::TEXT_PRIMARY));
+                    texto_con_chips_inline(ui, descripcion, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
+                });
+            }
+        });
 }
 
 fn mostrar_tabla_constantes(
     ui: &mut egui::Ui,
+    state: &AppState,
     id: &str,
     titulo: &str,
     introduccion: &str,
     filas: &[(&str, &str, &str, &str)],
 ) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let text = egui::Color32::from_rgb(205, 215, 230);
-
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new(titulo)
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, titulo);
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(introduccion)
-            .size(13.5)
-            .color(text)
+            .font(Typography::body())
+            .color(Colors::TEXT_PRIMARY)
             .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
-    let mut frame = egui::Frame::new();
-    frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame.inner_margin = egui::Margin::same(12);
-    frame.corner_radius = egui::CornerRadius::same(8);
-    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    frame.show(ui, |ui| {
-        egui::Grid::new(id)
-            .striped(true)
-            .min_col_width(100.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Constante", "Qué representa", "Ejemplo", "Valor"] {
-                    ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
-                    );
-                }
-                ui.end_row();
-
-                for (constante, descripcion, ejemplo, valor) in filas {
-                    codigo_chip_color(ui, constante, naranja);
-                    texto_con_chips_inline(ui, descripcion, text, cyan);
-                    codigo_chip_color(ui, ejemplo, cyan);
-                    codigo_chip_color(ui, valor, egui::Color32::from_rgb(140, 220, 180));
-                    ui.end_row();
-                }
-            });
-    });
+    EducationalTable::new(id, &["Constante", "Ejemplo", "Valor", "Qué representa"])
+        .min_col_width(100.0)
+        .spacing(18.0, 6.0)
+        .show(ui, |body| {
+            for (constante, descripcion, ejemplo, valor) in filas {
+                body.row(|ui| {
+                    cell_centered(ui, |ui| inline_code_chip_color(ui, constante, Colors::ORANGE_RUST));
+                    codigo_rust_tabla(ui, ejemplo, state);
+                    cell_centered(ui, |ui| inline_code_chip_color(ui, valor, Colors::TEXT_PRIMARY));
+                    texto_con_chips_inline(ui, descripcion, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
+                });
+            }
+        });
 }
 
 fn codigo_chip_color(ui: &mut egui::Ui, code: &str, color: egui::Color32) {
-    ui.horizontal(|ui| {
-        let mut chip = egui::Frame::new();
-        chip.fill = egui::Color32::from_rgb(26, 32, 44);
-        chip.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(50, 65, 90));
-        chip.corner_radius = egui::CornerRadius::same(3);
-        chip.inner_margin = egui::Margin::symmetric(6, 2);
-
-        chip.show(ui, |ui| {
-            ui.add(
-                egui::Label::new(
-                    egui::RichText::new(code)
-                        .monospace()
-                        .size(12.0)
-                        .color(color),
-                )
-                .wrap_mode(egui::TextWrapMode::Extend),
-            );
-        });
-    });
-}
-
-fn texto_con_chips_inline(
-    ui: &mut egui::Ui,
-    texto: &str,
-    text_color: egui::Color32,
-    chip_color: egui::Color32,
-) {
-    ui.horizontal(|ui| {
-        ui.horizontal_wrapped(|ui| {
-            ui.set_max_width(340.0);
-            ui.spacing_mut().item_spacing.x = 4.0;
-            ui.spacing_mut().item_spacing.y = 4.0;
-
-            let mut in_code = false;
-            for part in texto.split('`') {
-                if part.is_empty() {
-                    in_code = !in_code;
-                    continue;
-                }
-                if in_code {
-                    let mut chip = egui::Frame::new();
-                    chip.fill = egui::Color32::from_rgb(26, 32, 44);
-                    chip.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(50, 65, 90));
-                    chip.corner_radius = egui::CornerRadius::same(3);
-                    chip.inner_margin = egui::Margin::symmetric(6, 2);
-
-                    chip.show(ui, |ui| {
-                        ui.add(
-                            egui::Label::new(
-                                egui::RichText::new(part)
-                                    .monospace()
-                                    .size(12.0)
-                                    .color(chip_color),
-                            )
-                            .wrap_mode(egui::TextWrapMode::Extend),
-                        );
-                    });
-                } else {
-                    for word in part.split_whitespace() {
-                        ui.add(
-                            egui::Label::new(
-                                egui::RichText::new(word)
-                                    .size(12.0)
-                                    .color(text_color),
-                            )
-                            .wrap_mode(egui::TextWrapMode::Extend),
-                        );
-                    }
-                }
-                in_code = !in_code;
-            }
-        });
-    });
+    inline_code_chip_color(ui, code, color);
 }
 
 pub fn mostrar_categoria_enteros_interactiva(ui: &mut egui::Ui, state: &mut AppState) {
@@ -209,62 +99,53 @@ pub fn mostrar_categoria_enteros_interactiva(ui: &mut egui::Ui, state: &mut AppS
 
 pub(crate) fn mostrar_enteros_interactivo(
     ui: &mut egui::Ui,
-    _state: &mut AppState,
+    state: &mut AppState,
     mostrar_encabezado: bool,
 ) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let text = egui::Color32::from_rgb(205, 215, 230);
-
     if mostrar_encabezado {
-        ui.heading(
-            egui::RichText::new("Enteros")
-                .size(22.0)
-                .strong()
-                .color(naranja),
-        );
+        session_title(ui, "Tipos Primitivos: Enteros");
         ui.add_space(8.0);
     }
     ui.label(
         egui::RichText::new(
             "Un entero es un tipo de dato primitivo que representa números exactos sin fracciones ni parte decimal.",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
     ui.horizontal_wrapped(|ui| {
-        punto_lista(ui, naranja);
-        codigo_chip_color(ui, "i", naranja);
+        punto_lista(ui, Colors::ORANGE_RUST);
+        inline_code_chip_color(ui, "i", Colors::ORANGE_RUST);
         ui.label(
             egui::RichText::new(":")
                 .strong()
                 .size(13.5)
-                .color(naranja),
+                .color(Colors::ORANGE_RUST),
         );
         ui.label(
             egui::RichText::new("Representa un entero con signo que admite valores negativos, cero y positivos.")
-                .size(13.5)
-                .color(text),
+                .font(Typography::body())
+                .color(Colors::TEXT_PRIMARY),
         );
     });
     ui.add_space(3.0);
 
     ui.horizontal_wrapped(|ui| {
-        punto_lista(ui, cyan);
-        codigo_chip_color(ui, "u", cyan);
+        punto_lista(ui, Colors::CYAN_ACCENT);
+        inline_code_chip_color(ui, "u", Colors::CYAN_ACCENT);
         ui.label(
             egui::RichText::new(":")
                 .strong()
                 .size(13.5)
-                .color(cyan),
+                .color(Colors::CYAN_ACCENT),
         );
         ui.label(
             egui::RichText::new("Representa un entero sin signo que solo admite el cero y valores positivos.")
-                .size(13.5)
-                .color(text),
+                .font(Typography::body())
+                .color(Colors::TEXT_PRIMARY),
         );
     });
     ui.add_space(14.0);
@@ -273,126 +154,113 @@ pub(crate) fn mostrar_enteros_interactivo(
     ui.columns(2, |columns| {
         // --- COLUMNA 1 (IZQUIERDA): ENTEROS i ---
         columns[0].vertical(|ui| {
-            let mut frame_i = egui::Frame::new();
-            frame_i.fill = egui::Color32::from_rgb(14, 18, 26);
-            frame_i.inner_margin = egui::Margin::same(12);
-            frame_i.corner_radius = egui::CornerRadius::same(8);
-            frame_i.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-            frame_i.show(ui, |ui| {
+            card(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(
-                        egui::RichText::new("Enteros")
-                            .size(15.0)
+                        egui::RichText::new("Enteros con signo")
+                            .font(Typography::card_title())
                             .strong()
-                            .color(naranja),
+                            .color(Colors::ORANGE_RUST),
                     );
-                    codigo_chip_color(ui, "i", naranja);
+                    inline_code_chip_color(ui, "i", Colors::ORANGE_RUST);
                 });
                 ui.add_space(8.0);
 
-                egui::Grid::new("grid_enteros_con_signo")
-                    .striped(true)
-                    .spacing([14.0, 9.0])
-                    .show(ui, |ui| {
+                centered_grid(ui, "grid_enteros_con_signo_layout", |ui| {
+                    egui::Grid::new("grid_enteros_con_signo")
+                        .striped(true)
+                        .spacing([14.0, 9.0])
+                        .show(ui, |ui| {
                         for encabezado in ["Tipo", "Bits", "Rango Mínimo .. Máximo"] {
-                        ui.label(
-                            egui::RichText::new(encabezado)
-                                .strong()
-                                .size(12.0)
-                                .color(egui::Color32::WHITE),
-                        );
-                    }
-                    ui.end_row();
-
-                    let datos_con_signo = [
-                        ("i8", "8", "-128 .. 127"),
-                        ("i16", "16", "-32,768 .. 32,767"),
-                        (
-                            "i32",
-                            "32",
-                            "-2,147,483,648 .. 2,147,483,647 (default)",
-                        ),
-                        (
-                            "i64",
-                            "64",
-                            "-9.22×10¹⁸ .. 9.22×10¹⁸",
-                        ),
-                        (
-                            "i128",
-                            "128",
-                            "-1.70×10³⁸ .. 1.70×10³⁸",
-                        ),
-                        (
-                            "isize",
-                            "32/64",
-                            "Depende de la CPU (punteros)",
-                        ),
-                    ];
-
-                    for (tipo, bits, rango) in datos_con_signo {
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                egui::RichText::new(tipo)
-                                    .monospace()
-                                    .strong()
-                                    .size(12.5)
-                                    .color(naranja),
-                            );
-                        });
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                egui::RichText::new(bits)
-                                    .monospace()
-                                    .size(12.0)
-                                    .color(egui::Color32::from_rgb(180, 190, 205)),
-                            );
-                        });
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                egui::RichText::new(rango)
-                                    .monospace()
-                                    .size(11.5)
-                                    .color(egui::Color32::from_rgb(180, 190, 205)),
-                            );
-                        });
+                            cell_centered(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new(encabezado)
+                                        .strong()
+                                        .size(12.0)
+                                        .color(Colors::TEXT_WHITE),
+                                );
+                            });
+                        }
                         ui.end_row();
-                    }
+
+                        let datos_con_signo = [
+                            ("i8", "8", "-128 .. 127"),
+                            ("i16", "16", "-32,768 .. 32,767"),
+                            (
+                                "i32",
+                                "32",
+                                "-2,147,483,648 .. 2,147,483,647 (default)",
+                            ),
+                            (
+                                "i64",
+                                "64",
+                                "-9.22×10¹⁸ .. 9.22×10¹⁸",
+                            ),
+                            (
+                                "i128",
+                                "128",
+                                "-1.70×10³⁸ .. 1.70×10³⁸",
+                            ),
+                            (
+                                "isize",
+                                "32/64",
+                                "Depende de la CPU (punteros)",
+                            ),
+                        ];
+
+                        for (tipo, bits, rango) in datos_con_signo {
+                            cell_centered(ui, |ui| inline_code_chip_color(ui, tipo, Colors::ORANGE_RUST));
+                            cell_centered(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new(bits)
+                                        .monospace()
+                                        .size(12.0)
+                                        .color(Colors::TEXT_MUTED),
+                                );
+                            });
+                            cell_centered(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new(rango)
+                                        .monospace()
+                                        .size(11.5)
+                                        .color(Colors::TEXT_MUTED),
+                                );
+                            });
+                            ui.end_row();
+                        }
+                        })
                 });
             });
         });
 
         // --- COLUMNA 2 (DERECHA): ENTEROS u ---
         columns[1].vertical(|ui| {
-            let mut frame_u = egui::Frame::new();
-            frame_u.fill = egui::Color32::from_rgb(14, 18, 26);
-            frame_u.inner_margin = egui::Margin::same(12);
-            frame_u.corner_radius = egui::CornerRadius::same(8);
-            frame_u.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-            frame_u.show(ui, |ui| {
+            card(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(
-                        egui::RichText::new("Enteros")
-                            .size(15.0)
+                        egui::RichText::new("Enteros sin signo")
+                            .font(Typography::card_title())
                             .strong()
-                            .color(cyan),
+                            .color(Colors::CYAN_ACCENT),
                     );
-                    codigo_chip_color(ui, "u", cyan);
+                    inline_code_chip_color(ui, "u", Colors::CYAN_ACCENT);
                 });
                 ui.add_space(8.0);
 
-                egui::Grid::new("grid_enteros_sin_signo")
-                    .striped(true)
-                    .spacing([14.0, 9.0])
-                    .show(ui, |ui| {
+                centered_grid(ui, "grid_enteros_sin_signo_layout", |ui| {
+                    egui::Grid::new("grid_enteros_sin_signo")
+                        .striped(true)
+                        .spacing([14.0, 9.0])
+                        .show(ui, |ui| {
                         for encabezado in ["Tipo", "Bits", "Rango Mínimo .. Máximo"] {
-                            ui.label(
-                                egui::RichText::new(encabezado)
-                                    .strong()
-                                    .size(12.0)
-                                    .color(egui::Color32::WHITE),
-                            );
+                            cell_centered(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new(encabezado)
+                                        .strong()
+                                        .size(12.0)
+                                        .color(Colors::TEXT_WHITE),
+                                );
+                            });
                         }
                         ui.end_row();
 
@@ -418,487 +286,408 @@ pub(crate) fn mostrar_enteros_interactivo(
                         ];
 
                         for (tipo, bits, rango) in datos_sin_signo {
-                            ui.horizontal(|ui| {
-                                ui.label(
-                                    egui::RichText::new(tipo)
-                                        .monospace()
-                                        .strong()
-                                        .size(12.5)
-                                        .color(cyan),
-                                );
-                            });
-                            ui.horizontal(|ui| {
+                            cell_centered(ui, |ui| inline_code_chip_color(ui, tipo, Colors::CYAN_ACCENT));
+                            cell_centered(ui, |ui| {
                                 ui.label(
                                     egui::RichText::new(bits)
                                         .monospace()
                                         .size(12.0)
-                                        .color(egui::Color32::from_rgb(180, 190, 205)),
+                                        .color(Colors::TEXT_MUTED),
                                 );
                             });
-                            ui.horizontal(|ui| {
+                            cell_centered(ui, |ui| {
                                 ui.label(
                                     egui::RichText::new(rango)
                                         .monospace()
                                         .size(11.5)
-                                        .color(egui::Color32::from_rgb(180, 190, 205)),
+                                        .color(Colors::TEXT_MUTED),
                                 );
                             });
                             ui.end_row();
                         }
-                    });
+                        })
+                });
             });
         });
     });
 
     ui.add_space(10.0);
 
-    let mut note_frame = egui::Frame::new();
-    note_frame.fill = egui::Color32::from_rgb(18, 24, 36);
-    note_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 65, 95));
-    note_frame.corner_radius = egui::CornerRadius::same(6);
-    note_frame.inner_margin = egui::Margin::same(12);
-
-    note_frame.show(ui, |ui| {
+    card(ui, |ui| {
         ui.label(
-            egui::RichText::new("Nota")
+            egui::RichText::new("Nota: Inferencia de Tipo por Defecto")
+                .font(Typography::card_title())
                 .strong()
-                .size(13.5)
-                .color(naranja),
+                .color(Colors::ORANGE_RUST),
         );
         ui.add_space(5.0);
 
         ui.horizontal_wrapped(|ui| {
             ui.label(
                 egui::RichText::new("En Rust, cuando escribes un número entero literal sin especificar su tipo como en")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
-            codigo_inline_chip(ui, "let x = 5;");
+            inline_code_chip(ui, "let x = 5;");
             ui.label(
                 egui::RichText::new(", el compilador lo infiere automáticamente como")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
-            codigo_inline_chip(ui, "i32");
+            inline_code_chip_color(ui, "i32", Colors::ORANGE_RUST);
             ui.label(
                 egui::RichText::new("por defecto (equivalente a")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
-            codigo_inline_chip(ui, "let x: i32 = 5;");
+            inline_code_chip(ui, "let x: i32 = 5;");
             ui.label(
                 egui::RichText::new("), por ser el tipo más eficiente y equilibrado en la mayoría de procesadores modernos.")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
         });
     });
 
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new("Formas de Definir y Escribir Enteros")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, "Formas de Definir y Escribir Enteros");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "Rust ofrece gran flexibilidad sintáctica para declarar enteros mediante anotaciones de tipo, sufijos literales, separadores visuales y diferentes bases numéricas:",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
-    let mut literal_frame = egui::Frame::new();
-    literal_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    literal_frame.inner_margin = egui::Margin::same(12);
-    literal_frame.corner_radius = egui::CornerRadius::same(8);
-    literal_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    EducationalTable::new(
+        "grid_formas_definir_enteros",
+        &[
+            "Forma de Definición",
+            "Ejemplo de Código",
+            "Tipo / Valor",
+            "Descripción",
+        ],
+    )
+    .min_col_width(110.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let formas_enteros: [(&str, Option<&str>, &str, &str, &str); 7] = [
+            (
+                "Tipo explícito",
+                None,
+                "let x: u32 = 1000;",
+                "u32 (1000)",
+                "Anotación de tipo tradicional después del nombre.",
+            ),
+            (
+                "Sufijo de tipo",
+                None,
+                "let x = 1000u32;",
+                "u32 (1000)",
+                "El tipo se añade directamente al final del número como `57u8` o `100i64`.",
+            ),
+            (
+                "Separador visual",
+                Some("_"),
+                "let x = 1_000_000;",
+                "i32 (1000000)",
+                "Los guiones bajos mejoran la legibilidad sin alterar el valor numérico.",
+            ),
+            (
+                "Hexadecimal",
+                Some("0x"),
+                "let x = 0xff;",
+                "i32 (255)",
+                "Base 16, ideal para representar direcciones, colores o máscaras de bytes.",
+            ),
+            (
+                "Octal",
+                Some("0o"),
+                "let x = 0o77;",
+                "i32 (63)",
+                "Base 8, común en configuración de permisos de archivos Unix.",
+            ),
+            (
+                "Binario",
+                Some("0b"),
+                "let x = 0b1111_0000;",
+                "i32 (240)",
+                "Base 2, esencial para operaciones a nivel de bits (bitwise flags).",
+            ),
+            (
+                "Literal de Byte",
+                Some("b'...'"),
+                "let x = b'A';",
+                "u8 (65)",
+                "Representa el valor numérico ASCII de un caracter como byte `u8`.",
+            ),
+        ];
 
-    literal_frame.show(ui, |ui| {
-        egui::Grid::new("grid_formas_definir_enteros")
-            .striped(true)
-            .min_col_width(110.0)
-            .spacing([22.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in [
-                    "Forma de Definición",
-                    "Ejemplo de Código",
-                    "Tipo / Valor",
-                    "Descripción",
-                ] {
-                    ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
-                    );
-                }
-                ui.end_row();
-
-                let formas_enteros: [(&str, Option<&str>, &str, &str, &str); 7] = [
-                    (
-                        "Tipo explícito",
-                        None,
-                        "let x: u32 = 1000;",
-                        "u32 (1000)",
-                        "Anotación de tipo tradicional después del nombre.",
-                    ),
-                    (
-                        "Sufijo de tipo",
-                        None,
-                        "let x = 1000u32;",
-                        "u32 (1000)",
-                        "El tipo se añade directamente al final del número como `57u8` o `100i64`.",
-                    ),
-                    (
-                        "Separador visual",
-                        Some("_"),
-                        "let x = 1_000_000;",
-                        "i32 (1000000)",
-                        "Los guiones bajos mejoran la legibilidad sin alterar el valor numérico.",
-                    ),
-                    (
-                        "Hexadecimal",
-                        Some("0x"),
-                        "let x = 0xff;",
-                        "i32 (255)",
-                        "Base 16, ideal para representar direcciones, colores o máscaras de bytes.",
-                    ),
-                    (
-                        "Octal",
-                        Some("0o"),
-                        "let x = 0o77;",
-                        "i32 (63)",
-                        "Base 8, común en configuración de permisos de archivos Unix.",
-                    ),
-                    (
-                        "Binario",
-                        Some("0b"),
-                        "let x = 0b1111_0000;",
-                        "i32 (240)",
-                        "Base 2, esencial para operaciones a nivel de bits (bitwise flags).",
-                    ),
-                    (
-                        "Literal de Byte",
-                        Some("b'...'"),
-                        "let x = b'A';",
-                        "u8 (65)",
-                        "Representa el valor numérico ASCII de un caracter como byte `u8`.",
-                    ),
-                ];
-
-                for (forma, chip_tag, ej_codigo, valor, desc) in formas_enteros {
-                    if let Some(tag) = chip_tag {
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                egui::RichText::new(forma)
-                                    .strong()
-                                    .size(12.5)
-                                    .color(naranja),
-                            );
-                            codigo_chip_color(ui, tag, naranja);
-                        });
-                    } else {
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                egui::RichText::new(forma)
-                                    .strong()
-                                    .size(12.5)
-                                    .color(naranja),
-                            );
-                        });
-                    }
-                    codigo_chip_color(ui, ej_codigo, cyan);
-                    ui.horizontal(|ui| {
+        for (forma, chip_tag, ej_codigo, valor, desc) in formas_enteros {
+            body.row(|ui| {
+                if let Some(tag) = chip_tag {
+                    cell_centered_horizontal(ui, |ui| {
                         ui.label(
-                            egui::RichText::new(valor)
-                                .monospace()
-                                .size(12.0)
-                                .color(egui::Color32::from_rgb(180, 190, 205)),
+                            egui::RichText::new(forma)
+                                .strong()
+                                .size(12.5)
+                                .color(Colors::ORANGE_RUST),
+                        );
+                        inline_code_chip_color(ui, tag, Colors::ORANGE_RUST);
+                    });
+                } else {
+                    cell_centered(ui, |ui| {
+                        ui.label(
+                            egui::RichText::new(forma)
+                                .strong()
+                                .size(12.5)
+                                .color(Colors::ORANGE_RUST),
                         );
                     });
-                    texto_con_chips_inline(ui, desc, text, cyan);
-                    ui.end_row();
                 }
+                codigo_rust_tabla(ui, ej_codigo, state);
+                codigo_rust_tabla(ui, valor, state);
+                texto_con_chips_inline(ui, desc, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
             });
+        }
     });
 
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new("Operaciones Aritméticas Básicas")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, "Operaciones Aritméticas Básicas");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "Rust proporciona los operadores aritméticos estándar para realizar cálculos entre números enteros:",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
-    let mut arith_frame = egui::Frame::new();
-    arith_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    arith_frame.inner_margin = egui::Margin::same(12);
-    arith_frame.corner_radius = egui::CornerRadius::same(8);
-    arith_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    EducationalTable::new(
+        "grid_aritmetica_enteros",
+        &["Operación", "Operador", "Ejemplo de Código", "Resultado", "Descripción"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let operaciones = [
+            (
+                "Suma",
+                "+",
+                "let x = 10 + 5;",
+                "15",
+                "Suma aritmética de ambos operandos.",
+            ),
+            (
+                "Resta",
+                "-",
+                "let x = 20 - 7;",
+                "13",
+                "Resta o diferencia entre dos valores.",
+            ),
+            (
+                "Multiplicación",
+                "*",
+                "let x = 6 * 7;",
+                "42",
+                "Producto aritmético de los factores.",
+            ),
+            (
+                "División entera",
+                "/",
+                "let x = 14 / 4;",
+                "3",
+                "Trunca hacia cero; descarta cualquier parte decimal.",
+            ),
+            (
+                "Módulo / Resto",
+                "%",
+                "let x = 14 % 4;",
+                "2",
+                "Obtiene el resto o residuo de la división entera.",
+            ),
+            (
+                "Negación unaria",
+                "-",
+                "let x = -10i32;",
+                "-10",
+                "Invierte el signo (solo en tipos con signo `i8` a `i128`).",
+            ),
+        ];
 
-    arith_frame.show(ui, |ui| {
-        egui::Grid::new("grid_aritmetica_enteros")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Operación", "Operador", "Ejemplo de Código", "Resultado", "Descripción"] {
+        for (op, simbolo, ej, res, desc) in operaciones {
+            body.row(|ui| {
+                cell_centered(ui, |ui| {
                     ui.label(
-                        egui::RichText::new(encabezado)
+                        egui::RichText::new(op)
                             .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
+                            .size(12.5)
+                            .color(Colors::ORANGE_RUST),
                     );
-                }
-                ui.end_row();
-
-                let operaciones = [
-                    (
-                        "Suma",
-                        "+",
-                        "let x = 10 + 5;",
-                        "15",
-                        "Suma aritmética de ambos operandos.",
-                    ),
-                    (
-                        "Resta",
-                        "-",
-                        "let x = 20 - 7;",
-                        "13",
-                        "Resta o diferencia entre dos valores.",
-                    ),
-                    (
-                        "Multiplicación",
-                        "*",
-                        "let x = 6 * 7;",
-                        "42",
-                        "Producto aritmético de los factores.",
-                    ),
-                    (
-                        "División entera",
-                        "/",
-                        "let x = 14 / 4;",
-                        "3",
-                        "Trunca hacia cero; descarta cualquier parte decimal.",
-                    ),
-                    (
-                        "Módulo / Resto",
-                        "%",
-                        "let x = 14 % 4;",
-                        "2",
-                        "Obtiene el resto o residuo de la división entera.",
-                    ),
-                    (
-                        "Negación unaria",
-                        "-",
-                        "let x = -10i32;",
-                        "-10",
-                        "Invierte el signo (solo en tipos con signo `i8` a `i128`).",
-                    ),
-                ];
-
-                for (op, simbolo, ej, res, desc) in operaciones {
-                    ui.horizontal(|ui| {
-                        ui.label(
-                            egui::RichText::new(op)
-                                .strong()
-                                .size(12.5)
-                                .color(naranja),
-                        );
-                    });
-                    codigo_chip_color(ui, simbolo, naranja);
-                    codigo_chip_color(ui, ej, cyan);
-                    codigo_chip_color(ui, res, egui::Color32::from_rgb(140, 220, 180));
-                    texto_con_chips_inline(ui, desc, text, cyan);
-                    ui.end_row();
-                }
+                });
+                cell_centered(ui, |ui| inline_code_chip_color(ui, simbolo, Colors::ORANGE_RUST));
+                codigo_rust_tabla(ui, ej, state);
+                cell_centered(ui, |ui| inline_code_chip_color(ui, res, Colors::TEXT_PRIMARY));
+                texto_con_chips_inline(ui, desc, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
             });
+        }
     });
 
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new("Métodos útiles de los enteros")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, "Métodos Útiles de los Enteros");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "Además de almacenar números, los tipos enteros ofrecen métodos para realizar cálculos, comparaciones, operaciones a nivel de bits y conversiones de bytes:",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
-    let mut methods_frame = egui::Frame::new();
-    methods_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    methods_frame.inner_margin = egui::Margin::same(12);
-    methods_frame.corner_radius = egui::CornerRadius::same(8);
-    methods_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    EducationalTable::new(
+        "grid_metodos_enteros",
+        &["Categoría", "Método", "Ejemplo", "Resultado", "Qué hace"],
+    )
+    .min_col_width(100.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let metodos: [(&str, &str, &str, &str, &str); 15] = [
+            (
+                "Matemáticas",
+                "pow",
+                "Calcula una potencia con un exponente entero.",
+                "3u32.pow(4)",
+                "81",
+            ),
+            (
+                "Matemáticas",
+                "abs",
+                "Obtiene el valor absoluto de un entero con signo.",
+                "(-8i32).abs()",
+                "8",
+            ),
+            (
+                "Matemáticas",
+                "signum",
+                "Devuelve `-1`, `0` o `1` según el signo del entero.",
+                "(-8i32).signum()",
+                "-1",
+            ),
+            (
+                "Matemáticas",
+                "min / max",
+                "Devuelve el menor o el mayor entre dos valores.",
+                "10u8.max(20)",
+                "20",
+            ),
+            (
+                "Matemáticas",
+                "clamp",
+                "Limita un valor dentro de un mínimo y un máximo.",
+                "50u8.clamp(0, 10)",
+                "10",
+            ),
+            (
+                "Matemáticas",
+                "div_euclid",
+                "Realiza una división euclidiana, útil con negativos.",
+                "(-7i32).div_euclid(3)",
+                "-3",
+            ),
+            (
+                "Matemáticas",
+                "rem_euclid",
+                "Obtiene el resto euclidiano no negativo.",
+                "(-7i32).rem_euclid(3)",
+                "2",
+            ),
+            (
+                "Matemáticas",
+                "is_power_of_two",
+                "Indica si el entero es una potencia de dos.",
+                "16u32.is_power_of_two()",
+                "true",
+            ),
+            (
+                "Matemáticas",
+                "next_power_of_two",
+                "Obtiene la siguiente potencia de dos igual o mayor.",
+                "10u32.next_power_of_two()",
+                "16",
+            ),
+            (
+                "Matemáticas",
+                "ilog2 / ilog10",
+                "Calcula el logaritmo entero en base 2 o 10.",
+                "100u32.ilog10()",
+                "2",
+            ),
+            (
+                "Comparaciones",
+                "is_positive",
+                "Indica si el entero es estrictamente positivo.",
+                "8i32.is_positive()",
+                "true",
+            ),
+            (
+                "Comparaciones",
+                "is_negative",
+                "Indica si el entero es estrictamente negativo.",
+                "(-8i32).is_negative()",
+                "true",
+            ),
+            (
+                "Bits",
+                "count_ones",
+                "Cuenta cuántos bits están en 1.",
+                "0b1011u8.count_ones()",
+                "3",
+            ),
+            (
+                "Bits",
+                "leading_zeros",
+                "Cuenta los ceros al comienzo de la representación binaria.",
+                "8u8.leading_zeros()",
+                "5",
+            ),
+            (
+                "Bytes",
+                "to_le_bytes",
+                "Convierte el entero en bytes little-endian.",
+                "0x1234u16.to_le_bytes()",
+                "[0x34, 0x12]",
+            ),
+        ];
 
-    methods_frame.show(ui, |ui| {
-        egui::Grid::new("grid_metodos_enteros")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Categoría", "Método", "Qué hace", "Ejemplo", "Resultado"] {
+        for (categoria, metodo, descripcion, ejemplo, resultado) in metodos {
+            body.row(|ui| {
+                cell_centered(ui, |ui| {
                     ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
+                        egui::RichText::new(categoria)
                             .size(12.0)
-                            .color(egui::Color32::WHITE),
+                            .color(Colors::TEXT_MUTED),
                     );
-                }
-                ui.end_row();
-
-                let metodos: [(&str, &str, &str, &str, &str); 15] = [
-                    (
-                        "Matemáticas",
-                        "pow",
-                        "Calcula una potencia con un exponente entero.",
-                        "3u32.pow(4)",
-                        "81",
-                    ),
-                    (
-                        "Matemáticas",
-                        "abs",
-                        "Obtiene el valor absoluto de un entero con signo.",
-                        "(-8i32).abs()",
-                        "8",
-                    ),
-                    (
-                        "Matemáticas",
-                        "signum",
-                        "Devuelve `-1`, `0` o `1` según el signo del entero.",
-                        "(-8i32).signum()",
-                        "-1",
-                    ),
-                    (
-                        "Matemáticas",
-                        "min / max",
-                        "Devuelve el menor o el mayor entre dos valores.",
-                        "10u8.max(20)",
-                        "20",
-                    ),
-                    (
-                        "Matemáticas",
-                        "clamp",
-                        "Limita un valor dentro de un mínimo y un máximo.",
-                        "50u8.clamp(0, 10)",
-                        "10",
-                    ),
-                    (
-                        "Matemáticas",
-                        "div_euclid",
-                        "Realiza una división euclidiana, útil con negativos.",
-                        "(-7i32).div_euclid(3)",
-                        "-3",
-                    ),
-                    (
-                        "Matemáticas",
-                        "rem_euclid",
-                        "Obtiene el resto euclidiano no negativo.",
-                        "(-7i32).rem_euclid(3)",
-                        "2",
-                    ),
-                    (
-                        "Matemáticas",
-                        "is_power_of_two",
-                        "Indica si el entero es una potencia de dos.",
-                        "16u32.is_power_of_two()",
-                        "true",
-                    ),
-                    (
-                        "Matemáticas",
-                        "next_power_of_two",
-                        "Obtiene la siguiente potencia de dos igual o mayor.",
-                        "10u32.next_power_of_two()",
-                        "16",
-                    ),
-                    (
-                        "Matemáticas",
-                        "ilog2 / ilog10",
-                        "Calcula el logaritmo entero en base 2 o 10.",
-                        "100u32.ilog10()",
-                        "2",
-                    ),
-                    (
-                        "Comparaciones",
-                        "is_positive",
-                        "Indica si el entero es estrictamente positivo.",
-                        "8i32.is_positive()",
-                        "true",
-                    ),
-                    (
-                        "Comparaciones",
-                        "is_negative",
-                        "Indica si el entero es estrictamente negativo.",
-                        "(-8i32).is_negative()",
-                        "true",
-                    ),
-                    (
-                        "Bits",
-                        "count_ones",
-                        "Cuenta cuántos bits están en 1.",
-                        "0b1011u8.count_ones()",
-                        "3",
-                    ),
-                    (
-                        "Bits",
-                        "leading_zeros",
-                        "Cuenta los ceros al comienzo de la representación binaria.",
-                        "8u8.leading_zeros()",
-                        "5",
-                    ),
-                    (
-                        "Bytes",
-                        "to_le_bytes",
-                        "Convierte el entero en bytes little-endian.",
-                        "0x1234u16.to_le_bytes()",
-                        "[0x34, 0x12]",
-                    ),
-                ];
-
-                for (categoria, metodo, descripcion, ejemplo, resultado) in metodos {
-                    ui.horizontal(|ui| {
-                        ui.label(
-                            egui::RichText::new(categoria)
-                                .size(12.0)
-                                .color(egui::Color32::from_rgb(180, 190, 205)),
-                        );
-                    });
-                    codigo_chip_color(ui, metodo, naranja);
-                    texto_con_chips_inline(ui, descripcion, text, cyan);
-                    codigo_chip_color(ui, ejemplo, cyan);
-                    codigo_chip_color(ui, resultado, egui::Color32::from_rgb(140, 220, 180));
-                    ui.end_row();
-                }
+                });
+                cell_centered(ui, |ui| inline_code_chip_color(ui, metodo, Colors::ORANGE_RUST));
+                codigo_rust_tabla(ui, ejemplo, state);
+                cell_centered(ui, |ui| inline_code_chip_color(ui, resultado, Colors::TEXT_PRIMARY));
+                texto_con_chips_inline(ui, descripcion, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
             });
+        }
     });
 
     mostrar_tabla_constantes(
         ui,
+        state,
         "grid_constantes_enteros",
-        "Constantes asociadas a los enteros",
+        "Constantes Asociadas a los Enteros",
         "Cada tipo entero conoce sus propios límites y características:",
         &[
             (
@@ -928,320 +717,267 @@ pub fn mostrar_categoria_enteros(ui: &mut egui::Ui) {
     mostrar_enteros_interactivo(ui, &mut state, true);
 }
 
-pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let text = egui::Color32::from_rgb(205, 215, 230);
-
-    ui.heading(
-        egui::RichText::new("Decimales")
-            .size(22.0)
-            .strong()
-            .color(naranja),
-    );
+pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui, state: &AppState) {
+    session_title(ui, "Tipos Primitivos: Decimales (Flotantes)");
     ui.add_space(8.0);
     ui.label(
         egui::RichText::new(
             "Los tipos de coma flotante representan números reales con parte decimal bajo el estándar IEEE-754.",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
     ui.horizontal_wrapped(|ui| {
-        punto_lista(ui, naranja);
-        codigo_chip_color(ui, "f32", naranja);
+        punto_lista(ui, Colors::ORANGE_RUST);
+        inline_code_chip_color(ui, "f32", Colors::ORANGE_RUST);
         ui.label(
             egui::RichText::new(":")
                 .strong()
                 .size(13.5)
-                .color(naranja),
+                .color(Colors::ORANGE_RUST),
         );
         ui.label(
             egui::RichText::new("Ideal para gráficos 3D, simulaciones físicas y ahorro de memoria.")
-                .size(13.5)
-                .color(text),
+                .font(Typography::body())
+                .color(Colors::TEXT_PRIMARY),
         );
     });
     ui.add_space(3.0);
 
     ui.horizontal_wrapped(|ui| {
-        punto_lista(ui, cyan);
-        codigo_chip_color(ui, "f64", cyan);
+        punto_lista(ui, Colors::CYAN_ACCENT);
+        inline_code_chip_color(ui, "f64", Colors::CYAN_ACCENT);
         ui.label(
             egui::RichText::new(":")
                 .strong()
                 .size(13.5)
-                .color(cyan),
+                .color(Colors::CYAN_ACCENT),
         );
         ui.label(
             egui::RichText::new("Tipo por defecto en Rust para decimales. Alta precisión matemática.")
-                .size(13.5)
-                .color(text),
+                .font(Typography::body())
+                .color(Colors::TEXT_PRIMARY),
         );
     });
     ui.add_space(14.0);
 
-    let mut frame = egui::Frame::new();
-    frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame.inner_margin = egui::Margin::same(12);
-    frame.corner_radius = egui::CornerRadius::same(8);
-    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    EducationalTable::new(
+        "grid_tipos_flotantes",
+        &["Tipo", "Precisión", "Tamaño", "Ejemplo de Código"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let datos_flotantes = [
+            (
+                "f32",
+                "Simple (~6-9 dígitos)",
+                "32 bits (4 bytes)",
+                "let pi: f32 = 3.14159;",
+            ),
+            (
+                "f64",
+                "Doble (~15-17 dígitos)",
+                "64 bits (8 bytes)",
+                "let pi: f64 = 3.141592653589793;",
+            ),
+        ];
 
-    frame.show(ui, |ui| {
-        egui::Grid::new("grid_tipos_flotantes")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Tipo", "Precisión", "Tamaño", "Ejemplo de Código"] {
+        for (tipo, precision, tamano, ej) in datos_flotantes {
+            body.row(|ui| {
+                let col = if tipo == "f32" { Colors::ORANGE_RUST } else { Colors::CYAN_ACCENT };
+                cell_centered(ui, |ui| inline_code_chip_color(ui, tipo, col));
+                cell_centered(ui, |ui| {
                     ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
+                        egui::RichText::new(precision)
                             .size(12.0)
-                            .color(egui::Color32::WHITE),
+                            .color(Colors::TEXT_MUTED),
                     );
-                }
-                ui.end_row();
-
-                let datos_flotantes = [
-                    (
-                        "f32",
-                        "Simple (~6-9 dígitos)",
-                        "32 bits (4 bytes)",
-                        "let pi: f32 = 3.14159;",
-                    ),
-                    (
-                        "f64",
-                        "Doble (~15-17 dígitos)",
-                        "64 bits (8 bytes)",
-                        "let pi: f64 = 3.141592653589793;",
-                    ),
-                ];
-
-                for (tipo, precision, tamano, ej) in datos_flotantes {
-                    let col = if tipo == "f32" { naranja } else { cyan };
-                    codigo_chip_color(ui, tipo, col);
-                    ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(precision).size(12.0).color(egui::Color32::from_rgb(180, 190, 205)));
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(tamano).monospace().size(12.0).color(egui::Color32::from_rgb(180, 190, 205)));
-                    });
-                    codigo_chip_color(ui, ej, cyan);
-                    ui.end_row();
-                }
+                });
+                cell_centered(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(tamano)
+                            .monospace()
+                            .size(12.0)
+                            .color(Colors::TEXT_MUTED),
+                    );
+                });
+                codigo_rust_tabla(ui, ej, state);
             });
+        }
     });
 
     ui.add_space(10.0);
 
-    let mut note_frame = egui::Frame::new();
-    note_frame.fill = egui::Color32::from_rgb(18, 24, 36);
-    note_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 65, 95));
-    note_frame.corner_radius = egui::CornerRadius::same(6);
-    note_frame.inner_margin = egui::Margin::same(12);
-
-    note_frame.show(ui, |ui| {
+    card(ui, |ui| {
         ui.label(
-            egui::RichText::new("Nota")
+            egui::RichText::new("Nota: Inferencia de f64 por Defecto")
+                .font(Typography::card_title())
                 .strong()
-                .size(13.5)
-                .color(naranja),
+                .color(Colors::ORANGE_RUST),
         );
         ui.add_space(5.0);
 
         ui.horizontal_wrapped(|ui| {
             ui.label(
                 egui::RichText::new("En Rust, cuando escribes un número decimal literal sin especificar su tipo como en")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
-            codigo_inline_chip(ui, "let x = 3.14;");
+            inline_code_chip(ui, "let x = 3.14;");
             ui.label(
                 egui::RichText::new(", el compilador lo infiere automáticamente como")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
-            codigo_inline_chip(ui, "f64");
+            inline_code_chip_color(ui, "f64", Colors::ORANGE_RUST);
             ui.label(
                 egui::RichText::new("por defecto (equivalente a")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
-            codigo_inline_chip(ui, "let x: f64 = 3.14;");
+            inline_code_chip(ui, "let x: f64 = 3.14;");
             ui.label(
                 egui::RichText::new("), ya que en CPUs modernas ofrece mayor precisión con un rendimiento prácticamente idéntico a f32.")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
         });
     });
 
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new("Formas de Definir y Escribir Decimales")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, "Formas de Definir y Escribir Decimales");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "Rust permite definir flotantes mediante anotaciones de tipo, sufijos literales, separadores visuales y notación científica:",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(8.0);
 
-    let mut literal_frame = egui::Frame::new();
-    literal_frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    literal_frame.inner_margin = egui::Margin::same(12);
-    literal_frame.corner_radius = egui::CornerRadius::same(8);
-    literal_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    EducationalTable::new(
+        "grid_formas_definir_flotantes",
+        &[
+            "Forma de Definición",
+            "Ejemplo de Código",
+            "Tipo / Valor",
+            "Descripción",
+        ],
+    )
+    .min_col_width(110.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let formas_flotantes: [(&str, Option<&str>, &str, &str, &str); 5] = [
+            (
+                "Tipo explícito",
+                None,
+                "let x: f64 = 3.1415;",
+                "f64 (3.1415)",
+                "Anotación de tipo tradicional después del nombre.",
+            ),
+            (
+                "Sufijo de tipo",
+                None,
+                "let x = 3.14f32;",
+                "f32 (3.14)",
+                "El tipo se añade directamente al final del número como `f32` o `f64`.",
+            ),
+            (
+                "Separador visual",
+                Some("_"),
+                "let x = 1_000.500_25;",
+                "f64 (1000.50025)",
+                "Los guiones bajos mejoran la legibilidad sin alterar el valor numérico.",
+            ),
+            (
+                "Notación científica",
+                Some("e / E"),
+                "let x = 2.5e3;",
+                "f64 (2500.0)",
+                "Exponente en base 10 (`2.5 * 10³`). También admite exponentes negativos como `1e-4`.",
+            ),
+            (
+                "Punto flotante implícito",
+                Some("."),
+                "let x = 5.0;",
+                "f64 (5.0)",
+                "El punto decimal indica al compilador que se trata de un número flotante.",
+            ),
+        ];
 
-    literal_frame.show(ui, |ui| {
-        egui::Grid::new("grid_formas_definir_flotantes")
-            .striped(true)
-            .min_col_width(110.0)
-            .spacing([22.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in [
-                    "Forma de Definición",
-                    "Ejemplo de Código",
-                    "Tipo / Valor",
-                    "Descripción",
-                ] {
-                    ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
-                    );
-                }
-                ui.end_row();
-
-                let formas_flotantes: [(&str, Option<&str>, &str, &str, &str); 5] = [
-                    (
-                        "Tipo explícito",
-                        None,
-                        "let x: f64 = 3.1415;",
-                        "f64 (3.1415)",
-                        "Anotación de tipo tradicional después del nombre.",
-                    ),
-                    (
-                        "Sufijo de tipo",
-                        None,
-                        "let x = 3.14f32;",
-                        "f32 (3.14)",
-                        "El tipo se añade directamente al final del número como `f32` o `f64`.",
-                    ),
-                    (
-                        "Separador visual",
-                        Some("_"),
-                        "let x = 1_000.500_25;",
-                        "f64 (1000.50025)",
-                        "Los guiones bajos mejoran la legibilidad sin alterar el valor numérico.",
-                    ),
-                    (
-                        "Notación científica",
-                        Some("e / E"),
-                        "let x = 2.5e3;",
-                        "f64 (2500.0)",
-                        "Exponente en base 10 (`2.5 * 10³`). También admite exponentes negativos como `1e-4`.",
-                    ),
-                    (
-                        "Punto flotante implícito",
-                        Some("."),
-                        "let x = 5.0;",
-                        "f64 (5.0)",
-                        "El punto decimal indica al compilador que se trata de un número flotante.",
-                    ),
-                ];
-
-                for (forma, chip_tag, ej_codigo, valor, desc) in formas_flotantes {
-                    if let Some(tag) = chip_tag {
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                egui::RichText::new(forma)
-                                    .strong()
-                                    .size(12.5)
-                                    .color(naranja),
-                            );
-                            codigo_chip_color(ui, tag, naranja);
-                        });
-                    } else {
-                        ui.horizontal(|ui| {
-                            ui.label(
-                                egui::RichText::new(forma)
-                                    .strong()
-                                    .size(12.5)
-                                    .color(naranja),
-                            );
-                        });
-                    }
-                    codigo_chip_color(ui, ej_codigo, cyan);
-                    ui.horizontal(|ui| {
+        for (forma, chip_tag, ej_codigo, valor, desc) in formas_flotantes {
+            body.row(|ui| {
+                if let Some(tag) = chip_tag {
+                    cell_centered_horizontal(ui, |ui| {
                         ui.label(
-                            egui::RichText::new(valor)
-                                .monospace()
-                                .size(12.0)
-                                .color(egui::Color32::from_rgb(180, 190, 205)),
+                            egui::RichText::new(forma)
+                                .strong()
+                                .size(12.5)
+                                .color(Colors::ORANGE_RUST),
+                        );
+                        inline_code_chip_color(ui, tag, Colors::ORANGE_RUST);
+                    });
+                } else {
+                    cell_centered(ui, |ui| {
+                        ui.label(
+                            egui::RichText::new(forma)
+                                .strong()
+                                .size(12.5)
+                                .color(Colors::ORANGE_RUST),
                         );
                     });
-                    texto_con_chips_inline(ui, desc, text, cyan);
-                    ui.end_row();
                 }
+                codigo_rust_tabla(ui, ej_codigo, state);
+                codigo_rust_tabla(ui, valor, state);
+                texto_con_chips_inline(ui, desc, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
             });
+        }
     });
 
     ui.add_space(14.0);
 
-    let mut note_frame = egui::Frame::new();
-    note_frame.fill = egui::Color32::from_rgb(18, 24, 36);
-    note_frame.inner_margin = egui::Margin::same(12);
-    note_frame.corner_radius = egui::CornerRadius::same(8);
-    note_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 65, 100));
-
-    note_frame.show(ui, |ui| {
+    card(ui, |ui| {
         ui.label(
             egui::RichText::new("Operaciones y División Entera vs Flotante")
+                .font(Typography::card_title())
                 .strong()
-                .size(14.0)
-                .color(naranja),
+                .color(Colors::ORANGE_RUST),
         );
         ui.add_space(6.0);
         ui.horizontal_wrapped(|ui| {
-            punto_lista(ui, naranja);
-            ui.label(egui::RichText::new("División entera (truncada):").size(13.0).color(text));
-            codigo_chip_color(ui, "5 / 2", cyan);
-            ui.label(egui::RichText::new("evalúa a").size(13.0).color(text));
-            codigo_chip_color(ui, "2", egui::Color32::from_rgb(140, 220, 180));
+            punto_lista(ui, Colors::ORANGE_RUST);
+            ui.label(egui::RichText::new("División entera (truncada):").font(Typography::body()).color(Colors::TEXT_PRIMARY));
+            inline_code_chip_color(ui, "5 / 2", Colors::CYAN_ACCENT);
+            ui.label(egui::RichText::new("evalúa a").font(Typography::body()).color(Colors::TEXT_PRIMARY));
+            inline_code_chip_color(ui, "2", Colors::GREEN_ACCENT);
         });
         ui.add_space(3.0);
         ui.horizontal_wrapped(|ui| {
-            punto_lista(ui, cyan);
-            ui.label(egui::RichText::new("División flotante exacta:").size(13.0).color(text));
-            codigo_chip_color(ui, "5.0 / 2.0", cyan);
-            ui.label(egui::RichText::new("evalúa a").size(13.0).color(text));
-            codigo_chip_color(ui, "2.5", egui::Color32::from_rgb(140, 220, 180));
+            punto_lista(ui, Colors::CYAN_ACCENT);
+            ui.label(egui::RichText::new("División flotante exacta:").font(Typography::body()).color(Colors::TEXT_PRIMARY));
+            inline_code_chip_color(ui, "5.0 / 2.0", Colors::CYAN_ACCENT);
+            ui.label(egui::RichText::new("evalúa a").font(Typography::body()).color(Colors::TEXT_PRIMARY));
+            inline_code_chip_color(ui, "2.5", Colors::GREEN_ACCENT);
         });
         ui.add_space(3.0);
         ui.horizontal_wrapped(|ui| {
-            punto_lista(ui, egui::Color32::from_rgb(180, 190, 205));
-            ui.label(egui::RichText::new("No se pueden mezclar tipos directamente; requiere casting:").size(13.0).color(text));
-            codigo_chip_color(ui, "(5 as f64) / 2.0", cyan);
+            punto_lista(ui, Colors::TEXT_MUTED);
+            ui.label(egui::RichText::new("No se pueden mezclar tipos directamente; requiere casting:").font(Typography::body()).color(Colors::TEXT_PRIMARY));
+            inline_code_chip_color(ui, "(5 as f64) / 2.0", Colors::CYAN_ACCENT);
         });
     });
 
     mostrar_tabla_metodos(
         ui,
+        state,
         "grid_metodos_flotantes",
-        "Métodos útiles de los flotantes",
+        "Métodos Útiles de los Flotantes",
         "Estos métodos ayudan a redondear, calcular y comprobar propiedades de f32 y f64:",
         &[
             (
@@ -1318,8 +1054,9 @@ pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui) {
 
     mostrar_tabla_constantes(
         ui,
+        state,
         "grid_constantes_flotantes",
-        "Constantes asociadas a los flotantes",
+        "Constantes Asociadas a los Flotantes",
         "Los tipos f32 y f64 definen valores especiales para límites numéricos, precisión e infinitos:",
         &[
             (
@@ -1357,131 +1094,104 @@ pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui) {
 }
 
 pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let text = egui::Color32::from_rgb(205, 215, 230);
-
-    ui.heading(
-        egui::RichText::new("Booleanos")
-            .size(22.0)
-            .strong()
-            .color(naranja),
-    );
+    session_title(ui, "Tipos Primitivos: Booleanos (bool)");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "El tipo booleano representa una verdad lógica simple. En Rust solo existen dos valores posibles: true y false, ocupando 1 byte en memoria.",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(10.0);
 
-    let mut frame = egui::Frame::new();
-    frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame.inner_margin = egui::Margin::same(12);
-    frame.corner_radius = egui::CornerRadius::same(8);
-    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    frame.show(ui, |ui| {
-        egui::Grid::new("grid_tipos_booleanos")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Tipo", "Valores Posibles", "Tamaño", "Ejemplo de Código", "Descripción"] {
-                    ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
-                    );
-                }
-                ui.end_row();
-
-                codigo_chip_color(ui, "bool", naranja);
-                ui.horizontal(|ui| {
-                    codigo_chip_color(ui, "true", egui::Color32::from_rgb(140, 220, 180));
-                    ui.label(egui::RichText::new("|").color(egui::Color32::from_rgb(100, 120, 150)));
-                    codigo_chip_color(ui, "false", egui::Color32::from_rgb(255, 120, 120));
-                });
-                ui.horizontal(|ui| {
-                    ui.label(egui::RichText::new("1 byte (8 bits)").monospace().size(12.0).color(egui::Color32::from_rgb(180, 190, 205)));
-                });
-                codigo_chip_color(ui, "let es_activo: bool = true;", cyan);
-                texto_con_chips_inline(ui, "Base del control de flujo en condiciones `if` y bucles `while`.", text, cyan);
-                ui.end_row();
+    EducationalTable::new(
+        "grid_tipos_booleanos",
+        &["Tipo", "Valores Posibles", "Tamaño", "Ejemplo de Código", "Descripción"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        body.row(|ui| {
+            cell_centered(ui, |ui| inline_code_chip_color(ui, "bool", Colors::ORANGE_RUST));
+            cell_centered_horizontal(ui, |ui| {
+                inline_code_chip_color(ui, "true", Colors::GREEN_ACCENT);
+                ui.label(egui::RichText::new("|").color(Colors::TEXT_MUTED));
+                inline_code_chip_color(ui, "false", Colors::ERROR);
             });
+            cell_centered(ui, |ui| {
+                ui.label(
+                    egui::RichText::new("1 byte (8 bits)")
+                        .monospace()
+                        .size(12.0)
+                        .color(Colors::TEXT_MUTED),
+                );
+            });
+            codigo_rust_tabla(ui, "let es_activo: bool = true;", state);
+            texto_con_chips_inline(
+                ui,
+                "Base del control de flujo en condiciones `if` y bucles `while`.",
+                Colors::TEXT_PRIMARY,
+                Colors::CYAN_ACCENT,
+            );
+        });
     });
 
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new("Operadores de Comparación")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, "Operadores de Comparación");
     ui.add_space(4.0);
     ui.label(
-        egui::RichText::new("Casi todos los valores booleanos en tus programas nacerán al evaluar relaciones entre datos:")
-            .size(13.5)
-            .color(text),
+        egui::RichText::new(
+            "Casi todos los valores booleanos en tus programas nacerán al evaluar relaciones entre datos:",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY),
     );
     ui.add_space(8.0);
 
-    let mut frame_comp = egui::Frame::new();
-    frame_comp.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame_comp.inner_margin = egui::Margin::same(12);
-    frame_comp.corner_radius = egui::CornerRadius::same(8);
-    frame_comp.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    EducationalTable::new(
+        "grid_operadores_comparacion",
+        &["Operador", "Nombre", "Ejemplo", "Resultado"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let comps = [
+            ("==", "Igual a", "1 == 2", "false"),
+            ("!=", "Distinto de", "1 != 2", "true"),
+            ("<", "Menor que", "1 < 2", "true"),
+            (">", "Mayor que", "1 > 2", "false"),
+            ("<=", "Menor o igual", "1 <= 2", "true"),
+            (">=", "Mayor o igual", "1 >= 2", "false"),
+        ];
 
-    frame_comp.show(ui, |ui| {
-        egui::Grid::new("grid_operadores_comparacion")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Operador", "Nombre", "Ejemplo", "Resultado"] {
+        for (simbolo, nombre, ej, res) in comps {
+            body.row(|ui| {
+                cell_centered(ui, |ui| inline_code_chip_color(ui, simbolo, Colors::ORANGE_RUST));
+                cell_centered(ui, |ui| {
                     ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
+                        egui::RichText::new(nombre)
                             .size(12.0)
-                            .color(egui::Color32::WHITE),
+                            .color(Colors::TEXT_MUTED),
                     );
-                }
-                ui.end_row();
-
-                let comps = [
-                    ("==", "Igual a", "1 == 2", "false"),
-                    ("!=", "Distinto de", "1 != 2", "true"),
-                    ("<", "Menor que", "1 < 2", "true"),
-                    (">", "Mayor que", "1 > 2", "false"),
-                    ("<=", "Menor o igual", "1 <= 2", "true"),
-                    (">=", "Mayor o igual", "1 >= 2", "false"),
-                ];
-
-                for (simbolo, nombre, ej, res) in comps {
-                    codigo_chip_color(ui, simbolo, naranja);
-                    ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(nombre).size(12.0).color(egui::Color32::from_rgb(180, 190, 205)));
-                    });
-                    codigo_chip_color(ui, ej, cyan);
-                    let res_color = if res == "true" {
-                        egui::Color32::from_rgb(140, 220, 180)
-                    } else {
-                        egui::Color32::from_rgb(255, 120, 120)
-                    };
-                    codigo_chip_color(ui, res, res_color);
-                    ui.end_row();
-                }
+                });
+                codigo_rust_tabla(ui, ej, state);
+                let res_color = if res == "true" {
+                    Colors::TEXT_PRIMARY
+                } else {
+                    Colors::ERROR
+                };
+                cell_centered(ui, |ui| inline_code_chip_color(ui, res, res_color));
             });
+        }
     });
 
     mostrar_tabla_metodos(
         ui,
+        state,
         "grid_metodos_booleanos",
-        "Operaciones lógicas de bool",
+        "Operaciones Lógicas de bool",
         "Operadores booleanos fundamentales para combinar expresiones lógicas:",
         &[
             (
@@ -1512,32 +1222,22 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
     );
 
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new("Simulador Lógico Interactivo")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, "Simulador Lógico Interactivo");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new("Interactúa con las compuertas lógicas alternando las entradas A y B:")
-            .size(13.5)
-            .color(text),
+            .font(Typography::body())
+            .color(Colors::TEXT_PRIMARY),
     );
     ui.add_space(8.0);
 
-    let mut frame_sim = egui::Frame::new();
-    frame_sim.fill = egui::Color32::from_rgb(20, 25, 35);
-    frame_sim.inner_margin = egui::Margin::same(12);
-    frame_sim.corner_radius = egui::CornerRadius::same(8);
-    frame_sim.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(60, 80, 110));
-
-    frame_sim.show(ui, |ui| {
+    card(ui, |ui| {
         ui.horizontal(|ui| {
             ui.label(
                 egui::RichText::new("Entrada A:")
+                    .font(Typography::body())
                     .strong()
-                    .color(egui::Color32::WHITE),
+                    .color(Colors::TEXT_WHITE),
             );
             if ui
                 .selectable_label(
@@ -1558,8 +1258,9 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
 
             ui.label(
                 egui::RichText::new("Entrada B:")
+                    .font(Typography::body())
                     .strong()
-                    .color(egui::Color32::WHITE),
+                    .color(Colors::TEXT_WHITE),
             );
             if ui
                 .selectable_label(
@@ -1606,100 +1307,84 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
             ("!A", "NOT", "Invierte el valor de A.", !a),
         ];
 
-        egui::Grid::new("grid_simulador_logico")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Operación", "Compuerta", "Descripción", "Resultado"] {
-                    ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
-                    );
-                }
-                ui.end_row();
-
-                for (op, compuerta, desc, res) in resultados {
-                    codigo_chip_color(ui, op, cyan);
-                    codigo_chip_color(ui, compuerta, naranja);
-                    texto_con_chips_inline(ui, desc, text, cyan);
+        EducationalTable::new(
+            "grid_simulador_logico",
+            &["Operación", "Compuerta", "Resultado", "Descripción"],
+        )
+        .min_col_width(90.0)
+        .spacing(18.0, 6.0)
+        .show(ui, |body| {
+            for (op, compuerta, desc, res) in resultados {
+                body.row(|ui| {
+                    cell_centered(ui, |ui| inline_code_chip_color(ui, op, Colors::CYAN_ACCENT));
+                    cell_centered(ui, |ui| inline_code_chip_color(ui, compuerta, Colors::ORANGE_RUST));
 
                     let (res_text, res_color) = if res {
-                        ("TRUE", egui::Color32::from_rgb(140, 220, 180))
+                        ("TRUE", Colors::TEXT_PRIMARY)
                     } else {
-                        ("FALSE", egui::Color32::from_rgb(255, 120, 120))
+                        ("FALSE", Colors::ERROR)
                     };
 
-                    codigo_chip_color(ui, res_text, res_color);
-                    ui.end_row();
-                }
-            });
+                    cell_centered(ui, |ui| inline_code_chip_color(ui, res_text, res_color));
+                    texto_con_chips_inline(ui, desc, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
+                });
+            }
+        });
     });
 }
 
 pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui, state: &AppState) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let text = egui::Color32::from_rgb(205, 215, 230);
-
-    ui.heading(
-        egui::RichText::new("Caracteres (char)")
-            .size(22.0)
-            .strong()
-            .color(naranja),
-    );
+    session_title(ui, "Tipos Primitivos: Caracteres (char)");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "En Rust, un char es un valor escalar Unicode de 4 bytes (32 bits), lo que significa que soporta ASCII, tildes, alfabetos globales y emojis nativamente.",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(10.0);
 
-    let mut frame = egui::Frame::new();
-    frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame.inner_margin = egui::Margin::same(12);
-    frame.corner_radius = egui::CornerRadius::same(8);
-    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    frame.show(ui, |ui| {
-        egui::Grid::new("grid_tipos_caracteres")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Tipo", "Sintaxis", "Tamaño", "Ejemplo de Código", "Características"] {
-                    ui.label(
-                        egui::RichText::new(encabezado)
-                            .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
-                    );
-                }
-                ui.end_row();
-
-                codigo_chip_color(ui, "char", naranja);
-                ui.horizontal(|ui| {
-                    ui.label(egui::RichText::new("Comillas simples ''").size(12.0).color(egui::Color32::from_rgb(180, 190, 205)));
-                });
-                ui.horizontal(|ui| {
-                    ui.label(egui::RichText::new("4 bytes (32 bits)").monospace().size(12.0).color(egui::Color32::from_rgb(180, 190, 205)));
-                });
-                codigo_chip_color(ui, "let letra: char = '🦀';", cyan);
-                texto_con_chips_inline(ui, "Soporta Unicode completo `U+0000` a `U+D7FF` y `U+E000` a `U+10FFFF`.", text, cyan);
-                ui.end_row();
+    EducationalTable::new(
+        "grid_tipos_caracteres",
+        &["Tipo", "Sintaxis", "Tamaño", "Ejemplo de Código", "Características"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        body.row(|ui| {
+            cell_centered(ui, |ui| inline_code_chip_color(ui, "char", Colors::ORANGE_RUST));
+            cell_centered(ui, |ui| {
+                ui.label(
+                    egui::RichText::new("Comillas simples ''")
+                        .size(12.0)
+                        .color(Colors::TEXT_MUTED),
+                );
             });
+            cell_centered(ui, |ui| {
+                ui.label(
+                    egui::RichText::new("4 bytes (32 bits)")
+                        .monospace()
+                        .size(12.0)
+                        .color(Colors::TEXT_MUTED),
+                );
+            });
+            codigo_rust_tabla(ui, "let letra: char = '🦀';", state);
+            texto_con_chips_inline(
+                ui,
+                "Soporta Unicode completo `U+0000` a `U+D7FF` y `U+E000` a `U+10FFFF`.",
+                Colors::TEXT_PRIMARY,
+                Colors::CYAN_ACCENT,
+            );
+        });
     });
 
     mostrar_tabla_metodos(
         ui,
+        state,
         "grid_metodos_char",
-        "Métodos útiles de char",
+        "Métodos Útiles de char",
         "Los métodos de char ayudan a clasificar caracteres Unicode y transformar texto:",
         &[
             (
@@ -1767,8 +1452,9 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui, state: &AppState) {
 
     mostrar_tabla_constantes(
         ui,
+        state,
         "grid_constantes_char",
-        "Constantes asociadas a char",
+        "Constantes Asociadas a char",
         "El tipo char incluye constantes para los límites de rangos Unicode y caracteres de sustitución:",
         &[
             ("MIN", "Primer valor escalar Unicode válido.", "char::MIN", "'\\0'"),
@@ -1783,154 +1469,116 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui, state: &AppState) {
     );
 
     ui.add_space(18.0);
-    ui.heading(
-        egui::RichText::new("Representación Unicode en Memoria (Bajo el Capó)")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
+    section_heading(ui, "Representación Unicode en Memoria (Bajo el Capó)");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "Como char es un valor escalar Unicode de 32 bits, podemos convertirlo explícitamente a un u32 o formato Hexadecimal para inspeccionar su valor real:",
         )
-        .size(13.5)
-        .color(text),
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY),
     );
     ui.add_space(8.0);
 
-    let codigo_unicode = "fn main() {
-    let letra: char = '🦀';
-    let numero_crudo = letra as u32; // Casting a entero de 32 bits: 129408 (0x1F980)
-
-    // Convertimos de u32 a char de nuevo (devuelve Option porque podría no ser un Unicode válido)
-    let volver = char::from_u32(numero_crudo).unwrap();
-
-    println!(\"Unicode de '🦀': {} [U+{:X}]\", numero_crudo, numero_crudo);
-    println!(\"Recuperado: {}\", volver);
-}";
+    let codigo_unicode = "fn main() {\n    let letra: char = '🦀';\n    let numero_crudo = letra as u32; // Casting a entero de 32 bits: 129408 (0x1F980)\n\n    // Convertimos de u32 a char de nuevo (devuelve Option porque podría no ser un Unicode válido)\n    let volver = char::from_u32(numero_crudo).unwrap();\n\n    println!(\"Unicode de '🦀': {} [U+{:X}]\", numero_crudo, numero_crudo);\n    println!(\"Recuperado: {}\", volver);\n}";
     let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     codigo_resaltado_bloque(ui, codigo_unicode, &state.editor.syntax_set, theme, "rs");
 }
 
 pub fn mostrar_categoria_casting(ui: &mut egui::Ui, state: &AppState) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let text = egui::Color32::from_rgb(205, 215, 230);
     let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
 
-    ui.heading(
-        egui::RichText::new("Conversiones de Tipo (Casting con as)")
-            .size(22.0)
-            .strong()
-            .color(naranja),
-    );
+    session_title(ui, "Conversiones de Tipo (Casting con as)");
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
             "En Rust no existe la coerción implícita de tipos. Para transformar y operar entre diferentes tipos primitivos se requiere una conversión explícita usando la palabra clave as.",
         )
-        .size(13.5)
-        .color(text)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(10.0);
 
-    let mut frame = egui::Frame::new();
-    frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame.inner_margin = egui::Margin::same(12);
-    frame.corner_radius = egui::CornerRadius::same(8);
-    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    EducationalTable::new(
+        "grid_tipos_casting",
+        &["Conversión", "Sintaxis con 'as'", "Ejemplo", "Resultado", "Comportamiento"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let castings = [
+            (
+                "Entero a Decimal",
+                "i32 as f64",
+                "Conversión exacta sin pérdida de datos.",
+                "(10i32 as f64) + 0.5",
+                "10.5",
+            ),
+            (
+                "Decimal a Entero",
+                "f64 as i32",
+                "Trunca la parte decimal (redondeo hacia cero).",
+                "3.99f64 as i32",
+                "3",
+            ),
+            (
+                "Entero a Índice",
+                "u32 as usize",
+                "Permite indexar arrays y slices con seguridad.",
+                "array[pos as usize]",
+                "array[2]",
+            ),
+            (
+                "Caracter a Entero",
+                "char as u32",
+                "Obtiene el código de punto Unicode escalar.",
+                "'🦀' as u32",
+                "129408",
+            ),
+            (
+                "Byte a Caracter",
+                "u8 as char",
+                "Convierte un byte ASCII a su carácter correspondiente.",
+                "65u8 as char",
+                "'A'",
+            ),
+        ];
 
-    frame.show(ui, |ui| {
-        egui::Grid::new("grid_tipos_casting")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 11.0])
-            .show(ui, |ui| {
-                for encabezado in ["Conversión", "Sintaxis con 'as'", "Comportamiento", "Ejemplo", "Resultado"] {
+        for (conversion, sintaxis, comp, ej, res) in castings {
+            body.row(|ui| {
+                cell_centered(ui, |ui| {
                     ui.label(
-                        egui::RichText::new(encabezado)
+                        egui::RichText::new(conversion)
                             .strong()
-                            .size(12.0)
-                            .color(egui::Color32::WHITE),
+                            .size(12.5)
+                            .color(Colors::ORANGE_RUST),
                     );
-                }
-                ui.end_row();
-
-                let castings = [
-                    (
-                        "Entero a Decimal",
-                        "i32 as f64",
-                        "Conversión exacta sin pérdida de datos.",
-                        "(10i32 as f64) + 0.5",
-                        "10.5",
-                    ),
-                    (
-                        "Decimal a Entero",
-                        "f64 as i32",
-                        "Trunca la parte decimal (redondeo hacia cero).",
-                        "3.99f64 as i32",
-                        "3",
-                    ),
-                    (
-                        "Entero a Índice",
-                        "u32 as usize",
-                        "Permite indexar arrays y slices con seguridad.",
-                        "array[pos as usize]",
-                        "array[2]",
-                    ),
-                    (
-                        "Caracter a Entero",
-                        "char as u32",
-                        "Obtiene el código de punto Unicode escalar.",
-                        "'🦀' as u32",
-                        "129408",
-                    ),
-                    (
-                        "Byte a Caracter",
-                        "u8 as char",
-                        "Convierte un byte ASCII a su carácter correspondiente.",
-                        "65u8 as char",
-                        "'A'",
-                    ),
-                ];
-
-                for (conversion, sintaxis, comp, ej, res) in castings {
-                    ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(conversion).strong().size(12.5).color(naranja));
-                    });
-                    codigo_chip_color(ui, sintaxis, naranja);
-                    texto_con_chips_inline(ui, comp, text, cyan);
-                    codigo_chip_color(ui, ej, cyan);
-                    codigo_chip_color(ui, res, egui::Color32::from_rgb(140, 220, 180));
-                    ui.end_row();
-                }
+                });
+                cell_centered(ui, |ui| inline_code_chip_color(ui, sintaxis, Colors::ORANGE_RUST));
+                codigo_rust_tabla(ui, ej, state);
+                cell_centered(ui, |ui| inline_code_chip_color(ui, res, Colors::TEXT_PRIMARY));
+                texto_con_chips_inline(ui, comp, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
             });
+        }
     });
 
     ui.add_space(18.0);
 
     // Tarjetas comparativas de Coerción vs Casting
     ui.columns(2, |cols| {
-        let mut card_err = egui::Frame::new();
-        card_err.fill = egui::Color32::from_rgb(14, 18, 26);
-        card_err.inner_margin = egui::Margin::same(12);
-        card_err.corner_radius = egui::CornerRadius::same(8);
-        card_err.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-        card_err.show(&mut cols[0], |ui| {
+        card(&mut cols[0], |ui| {
             ui.label(
                 egui::RichText::new("Coerción Implícita (Prohibida)")
+                    .font(Typography::card_title())
                     .strong()
-                    .size(15.0)
-                    .color(naranja),
+                    .color(Colors::ORANGE_RUST),
             );
             ui.add_space(6.0);
             ui.label(
                 egui::RichText::new("Rust previene bugs sutiles exigiendo que ambos operandos compartan exactamente el mismo tipo:")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
             ui.add_space(8.0);
 
@@ -1943,24 +1591,18 @@ pub fn mostrar_categoria_casting(ui: &mut egui::Ui, state: &AppState) {
             );
         });
 
-        let mut card_ok = egui::Frame::new();
-        card_ok.fill = egui::Color32::from_rgb(14, 18, 26);
-        card_ok.inner_margin = egui::Margin::same(12);
-        card_ok.corner_radius = egui::CornerRadius::same(8);
-        card_ok.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-        card_ok.show(&mut cols[1], |ui| {
+        card(&mut cols[1], |ui| {
             ui.label(
                 egui::RichText::new("Casting Explícito con 'as' (Válido)")
+                    .font(Typography::card_title())
                     .strong()
-                    .size(15.0)
-                    .color(naranja),
+                    .color(Colors::CYAN_ACCENT),
             );
             ui.add_space(6.0);
             ui.label(
                 egui::RichText::new("Al indicar explícitamente la conversión, el desarrollador asume el control del tipo resultante:")
-                    .size(13.0)
-                    .color(text),
+                    .font(Typography::body())
+                    .color(Colors::TEXT_PRIMARY),
             );
             ui.add_space(8.0);
 
@@ -2790,7 +2432,8 @@ fn mostrar_compuesto_comparar(
 pub fn mostrar_categoria_numeros(ui: &mut egui::Ui) {
     mostrar_categoria_enteros(ui);
     ui.add_space(25.0);
-    mostrar_categoria_flotantes(ui);
+    let state = AppState::default();
+    mostrar_categoria_flotantes(ui, &state);
 
     ui.add_space(30.0);
     ui.separator();

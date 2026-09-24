@@ -2,6 +2,7 @@ pub mod components;
 pub mod content;
 pub mod routes;
 pub mod state;
+pub mod ui;
 pub mod views;
 
 use eframe::egui;

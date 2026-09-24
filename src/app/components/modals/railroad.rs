@@ -141,115 +141,20 @@ fn mostrar_modal_flowchart(
     uri: &'static str,
     mode: usize,
 ) {
-    let svg_text = std::str::from_utf8(bytes_data).unwrap_or("");
-    let (native_w, native_h) = parse_svg_wh(svg_text).unwrap_or((248.0, 704.0));
-    let aspect = native_w / native_h.max(1.0);
-    let (default_w, default_h) = if aspect >= 1.0 {
-        (840.0, 640.0)
-    } else {
-        (320.0, 680.0)
+    let mut is_open = state.ui.show_railroad_modal.is_some();
+    let dimensions = match mode {
+        6 | 7 => Some([860.0, 520.0]),
+        _ => None,
     };
-
-    egui::Window::new("railroad_flowchart_flotante")
-        .title_bar(false)
-        .frame(egui::Frame::NONE)
-        .order(egui::Order::Foreground)
-        .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-        .default_size([default_w, default_h])
-        .min_size([320.0, 300.0])
-        .resizable(true)
-        .collapsible(false)
-        .show(ctx, |ui| {
-            let mut modal_frame = egui::Frame::new();
-            modal_frame.fill = egui::Color32::from_rgb(11, 15, 22);
-            modal_frame.inner_margin = egui::Margin::same(2);
-            modal_frame.corner_radius = egui::CornerRadius::same(4);
-            modal_frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 65, 95));
-            modal_frame.shadow = egui::Shadow {
-                offset: [0, 8],
-                blur: 24,
-                spread: 0,
-                color: egui::Color32::from_black_alpha(180),
-            };
-
-            modal_frame.show(ui, |ui| {
-                ui.set_width(ui.available_width());
-
-                // Visor limpio: solo se conserva el cierre flotante sobre el gráfico.
-                ui.allocate_ui_with_layout(
-                    egui::vec2(ui.available_width(), 24.0),
-                    egui::Layout::right_to_left(egui::Align::Center),
-                    |ui| {
-                        let (close_rect, close_resp) =
-                            ui.allocate_exact_size(egui::vec2(22.0, 22.0), egui::Sense::click());
-                        let hovered = close_resp.hovered();
-                        if hovered {
-                            ui.painter().rect_filled(
-                                close_rect,
-                                egui::CornerRadius::same(5),
-                                egui::Color32::from_rgba_unmultiplied(255, 255, 255, 22),
-                            );
-                        }
-                        let close_color = if hovered {
-                            egui::Color32::from_rgb(255, 140, 140)
-                        } else {
-                            egui::Color32::from_rgb(160, 175, 195)
-                        };
-                        egui::Image::new(egui::include_image!(
-                            "../../../../assets/icons/close-circle-svgrepo-com.svg"
-                        ))
-                        .fit_to_exact_size(egui::vec2(16.0, 16.0))
-                        .tint(close_color)
-                        .paint_at(
-                            ui,
-                            egui::Rect::from_center_size(
-                                close_rect.center(),
-                                egui::vec2(16.0, 16.0),
-                            ),
-                        );
-                        if close_resp.clicked() {
-                            state.ui.show_railroad_modal = None;
-                        }
-                        close_resp.on_hover_text("Cerrar diagrama");
-                    },
-                );
-
-                ui.style_mut().spacing.scroll.floating = false;
-                ui.style_mut().spacing.scroll.bar_width = 8.0;
-                ui.style_mut().spacing.scroll.bar_inner_margin = 0.0;
-                ui.style_mut().spacing.scroll.bar_outer_margin = 0.0;
-                ui.style_mut().visuals.widgets.inactive.bg_fill =
-                    egui::Color32::from_rgb(45, 60, 85);
-                ui.style_mut().visuals.widgets.inactive.bg_stroke = egui::Stroke::NONE;
-                ui.style_mut().visuals.widgets.inactive.corner_radius = egui::CornerRadius::ZERO;
-                ui.style_mut().visuals.widgets.hovered.bg_fill =
-                    egui::Color32::from_rgb(70, 95, 135);
-                ui.style_mut().visuals.widgets.hovered.bg_stroke = egui::Stroke::NONE;
-                ui.style_mut().visuals.widgets.hovered.corner_radius = egui::CornerRadius::ZERO;
-                ui.style_mut().visuals.widgets.active.bg_fill =
-                    egui::Color32::from_rgb(255, 150, 45);
-                ui.style_mut().visuals.widgets.active.bg_stroke = egui::Stroke::NONE;
-                ui.style_mut().visuals.widgets.active.corner_radius = egui::CornerRadius::ZERO;
-
-                egui::ScrollArea::both()
-                    .id_salt(("railroad_flowchart_scroll", mode))
-                    .auto_shrink([false, false])
-                    .show(ui, |ui| {
-                        ui.add_space(0.0);
-                        // El diagrama conserva aire alrededor y no ocupa toda
-                        // la ventana, especialmente en los flowcharts verticales.
-                        let max_diagram_width = if aspect < 1.0 { 280.0 } else { 680.0 };
-                        let avail_w = (ui.available_width().min(max_diagram_width)).max(230.0);
-                        let target_h = avail_w / aspect;
-                        ui.vertical_centered(|ui| {
-                            ui.add(
-                                egui::Image::from_bytes(uri, bytes_data)
-                                    .fit_to_exact_size(egui::vec2(avail_w, target_h))
-                                    .maintain_aspect_ratio(true),
-                            );
-                        });
-                        ui.add_space(2.0);
-                    });
-            });
-        });
+    crate::app::ui::mostrar_modal_diagrama(
+        ctx,
+        &mut is_open,
+        "railroad_flowchart_flotante",
+        uri,
+        bytes_data,
+        dimensions,
+    );
+    if !is_open {
+        state.ui.show_railroad_modal = None;
+    }
 }

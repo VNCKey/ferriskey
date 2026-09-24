@@ -638,7 +638,7 @@ pub fn ejecutar_cargo_run_proyecto(state: &mut AppState, ctx: &egui::Context) {
 }
 
 pub fn mostrar_contenido_tipos_primitivos(ui: &mut egui::Ui, state: &mut AppState) {
-    let orange = egui::Color32::from_rgb(255, 160, 50);
+    let orange = crate::app::ui::Colors::ORANGE_RUST;
     let categorias = [
         (0, "Enteros"),
         (1, "Decimales"),
@@ -687,7 +687,7 @@ pub fn mostrar_contenido_tipos_primitivos(ui: &mut egui::Ui, state: &mut AppStat
         .auto_shrink([false, false])
         .show(ui, |ui| match state.lessons.tipo_primitivo_categoria {
             0 => mostrar_categoria_enteros_interactiva(ui, state),
-            1 => mostrar_categoria_flotantes(ui),
+            1 => mostrar_categoria_flotantes(ui, state),
             2 => mostrar_categoria_booleanos(ui, state),
             3 => mostrar_categoria_caracteres(ui, state),
             _ => mostrar_categoria_casting(ui, state),

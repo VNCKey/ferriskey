@@ -636,116 +636,16 @@ fn render_crate_version_card(
     alpha: f32,
     y_offset: f32,
 ) {
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let green = egui::Color32::from_rgb(100, 220, 150);
-    let text_color = egui::Color32::from_rgb(180, 195, 215);
-
-    let (rect, response) = ui.allocate_exact_size(
-        egui::vec2(card_w, card_h),
-        egui::Sense::click(),
-    );
-
-    let card_rect = egui::Rect::from_min_size(
-        egui::pos2(rect.left(), rect.top() + y_offset),
-        egui::vec2(card_w, card_h),
-    );
-
-    let is_hovered = ui.input(|i| i.pointer.hover_pos().map_or(false, |pos| card_rect.contains(pos)));
-    let hovered = is_hovered;
-    if hovered {
-        ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
-    }
-
-    let alpha_u8 = (alpha.clamp(0.0, 1.0) * 255.0) as u8;
-
-    let bg_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(24, 32, 46, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(14, 18, 26, alpha_u8)
-    };
-
-    let stroke_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(100, 200, 255, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(45, 60, 90, alpha_u8)
-    };
-
-    // 1. Fondo y contorno del card
-    ui.painter().rect(
-        card_rect,
-        egui::CornerRadius::same(6),
-        bg_card,
-        egui::Stroke::new(1.0, stroke_card),
-        egui::StrokeKind::Inside,
-    );
-
-    // 2. Badge de Versión a la derecha
-    let ver_text = format!("v{}", item.max_version);
-    let tag_font = egui::FontId::proportional(10.5);
-    let ver_color_alpha = egui::Color32::from_rgba_unmultiplied(green.r(), green.g(), green.b(), alpha_u8);
-    let ver_galley = ui.painter().layout_no_wrap(ver_text, tag_font, ver_color_alpha);
-    let badge_w = ver_galley.size().x + 8.0;
-    let badge_h = 18.0;
-    let badge_rect = egui::Rect::from_min_size(
-        egui::pos2(card_rect.right() - 8.0 - badge_w, card_rect.top() + 6.0),
-        egui::vec2(badge_w, badge_h),
-    );
-    ui.painter().rect(
-        badge_rect,
-        egui::CornerRadius::same(4),
-        egui::Color32::from_rgba_unmultiplied(18, 44, 28, alpha_u8),
-        egui::Stroke::new(1.0, egui::Color32::from_rgba_unmultiplied(40, 100, 60, alpha_u8)),
-        egui::StrokeKind::Inside,
-    );
-    ui.painter().galley(
-        egui::pos2(badge_rect.left() + 4.0, badge_rect.center().y - ver_galley.size().y / 2.0),
-        ver_galley,
-        ver_color_alpha,
-    );
-
-    // 3. Nombre del crate a la izquierda (completo, sin ...)
-    let title_font = egui::FontId::proportional(13.0);
-    let name_color = if hovered { egui::Color32::WHITE } else { cyan };
-    let name_color_alpha = egui::Color32::from_rgba_unmultiplied(name_color.r(), name_color.g(), name_color.b(), alpha_u8);
-
-    let name_pos = egui::pos2(card_rect.left() + 8.0, card_rect.top() + 6.0);
-    let name_galley = ui.painter().layout_no_wrap(item.name.clone(), title_font, name_color_alpha);
-    let name_clip_rect = egui::Rect::from_min_max(
-        egui::pos2(card_rect.left() + 8.0, card_rect.top() + 4.0),
-        egui::pos2(badge_rect.left() - 4.0, card_rect.top() + 25.0),
-    );
-    ui.painter().with_clip_rect(name_clip_rect).galley(name_pos, name_galley, name_color_alpha);
-
-    // 4. Descripción debajo del nombre
-    let desc_raw = item.description.as_deref().unwrap_or("Sin descripción proporcionada.");
-    let desc_clean = desc_raw.replace('\n', " ").replace('\r', "").trim().to_string();
-    let desc_text = if desc_clean.chars().count() > 100 {
-        let s: String = desc_clean.chars().take(100).collect();
-        format!("{}...", s)
-    } else {
-        desc_clean
-    };
-    let desc_font = egui::FontId::proportional(10.5);
-    let desc_color_alpha = egui::Color32::from_rgba_unmultiplied(text_color.r(), text_color.g(), text_color.b(), alpha_u8);
-    let desc_max_w = (card_rect.width() - 16.0).max(40.0);
-    
-    let desc_rect = egui::Rect::from_min_max(
-        egui::pos2(card_rect.left() + 8.0, card_rect.top() + 26.0),
-        egui::pos2(card_rect.right() - 8.0, card_rect.bottom() - 4.0),
-    );
-    let desc_galley = ui.painter().layout(
-        desc_text,
-        desc_font,
-        desc_color_alpha,
-        desc_max_w,
-    );
-    ui.painter().with_clip_rect(desc_rect).galley(
-        egui::pos2(card_rect.left() + 8.0, card_rect.top() + 26.0),
-        desc_galley,
-        desc_color_alpha,
-    );
-
-    if response.clicked() && is_hovered {
+    if crate::app::ui::crate_item_card(
+        ui,
+        &item.name,
+        item.description.as_deref(),
+        crate::app::ui::CrateCardBadge::Version(&item.max_version),
+        card_w,
+        card_h,
+        alpha,
+        y_offset,
+    ) {
         vs.selected_crate = Some(item.clone());
         vs.full_detail = None;
         vs.detail_tab = 0;
@@ -764,135 +664,22 @@ fn render_crate_download_card(
     y_offset: f32,
     use_recent: bool,
 ) {
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let orange = egui::Color32::from_rgb(255, 170, 70);
-    let text_color = egui::Color32::from_rgb(180, 195, 215);
-
-    let (rect, response) = ui.allocate_exact_size(
-        egui::vec2(card_w, card_h),
-        egui::Sense::click(),
-    );
-
-    let card_rect = egui::Rect::from_min_size(
-        egui::pos2(rect.left(), rect.top() + y_offset),
-        egui::vec2(card_w, card_h),
-    );
-
-    let is_hovered = ui.input(|i| i.pointer.hover_pos().map_or(false, |pos| card_rect.contains(pos)));
-    let hovered = is_hovered;
-    if hovered {
-        ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
-    }
-
-    let alpha_u8 = (alpha.clamp(0.0, 1.0) * 255.0) as u8;
-
-    let bg_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(24, 32, 46, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(14, 18, 26, alpha_u8)
-    };
-
-    let stroke_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(100, 200, 255, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(45, 60, 90, alpha_u8)
-    };
-
-    // 1. Fondo y contorno del card
-    ui.painter().rect(
-        card_rect,
-        egui::CornerRadius::same(6),
-        bg_card,
-        egui::Stroke::new(1.0, stroke_card),
-        egui::StrokeKind::Inside,
-    );
-
-    // 2. Badge de Descargas (Icono SVG + Número formateado X.XT) a la derecha
     let dl_count = if use_recent {
         item.recent_downloads.unwrap_or(item.downloads)
     } else {
         item.downloads
     };
-    let dl_text = formatear_numero_compacto(dl_count);
-    let dl_font = egui::FontId::proportional(10.5);
-    let dl_color_alpha = egui::Color32::from_rgba_unmultiplied(orange.r(), orange.g(), orange.b(), alpha_u8);
-    let dl_galley = ui.painter().layout_no_wrap(dl_text, dl_font, dl_color_alpha);
 
-    let icon_size = 12.0;
-    let badge_w = icon_size + 3.0 + dl_galley.size().x + 8.0;
-    let badge_h = 18.0;
-    let badge_rect = egui::Rect::from_min_size(
-        egui::pos2(card_rect.right() - 8.0 - badge_w, card_rect.top() + 6.0),
-        egui::vec2(badge_w, badge_h),
-    );
-    ui.painter().rect(
-        badge_rect,
-        egui::CornerRadius::same(4),
-        egui::Color32::from_rgba_unmultiplied(36, 26, 16, alpha_u8),
-        egui::Stroke::new(1.0, egui::Color32::from_rgba_unmultiplied(100, 65, 30, alpha_u8)),
-        egui::StrokeKind::Inside,
-    );
-
-    // Pintar SVG de descarga
-    let icon_rect = egui::Rect::from_min_size(
-        egui::pos2(badge_rect.left() + 3.0, badge_rect.center().y - icon_size / 2.0),
-        egui::vec2(icon_size, icon_size),
-    );
-    let img_dl = egui::Image::new(egui::include_image!("../../../../assets/icons/download-svgrepo-com.svg"))
-        .fit_to_exact_size(egui::vec2(icon_size, icon_size))
-        .tint(dl_color_alpha);
-    img_dl.paint_at(ui, icon_rect);
-
-    // Pintar texto de descargas
-    ui.painter().galley(
-        egui::pos2(icon_rect.right() + 2.0, badge_rect.center().y - dl_galley.size().y / 2.0),
-        dl_galley,
-        dl_color_alpha,
-    );
-
-    // 3. Nombre del crate a la izquierda (completo, sin ...)
-    let title_font = egui::FontId::proportional(13.0);
-    let name_color = if hovered { egui::Color32::WHITE } else { cyan };
-    let name_color_alpha = egui::Color32::from_rgba_unmultiplied(name_color.r(), name_color.g(), name_color.b(), alpha_u8);
-
-    let name_pos = egui::pos2(card_rect.left() + 8.0, card_rect.top() + 6.0);
-    let name_galley = ui.painter().layout_no_wrap(item.name.clone(), title_font, name_color_alpha);
-    let name_clip_rect = egui::Rect::from_min_max(
-        egui::pos2(card_rect.left() + 8.0, card_rect.top() + 4.0),
-        egui::pos2(badge_rect.left() - 4.0, card_rect.top() + 25.0),
-    );
-    ui.painter().with_clip_rect(name_clip_rect).galley(name_pos, name_galley, name_color_alpha);
-
-    // 4. Descripción debajo del nombre
-    let desc_raw = item.description.as_deref().unwrap_or("Sin descripción proporcionada.");
-    let desc_clean = desc_raw.replace('\n', " ").replace('\r', "").trim().to_string();
-    let desc_text = if desc_clean.chars().count() > 100 {
-        let s: String = desc_clean.chars().take(100).collect();
-        format!("{}...", s)
-    } else {
-        desc_clean
-    };
-    let desc_font = egui::FontId::proportional(10.5);
-    let desc_color_alpha = egui::Color32::from_rgba_unmultiplied(text_color.r(), text_color.g(), text_color.b(), alpha_u8);
-    let desc_max_w = (card_rect.width() - 16.0).max(40.0);
-    
-    let desc_rect = egui::Rect::from_min_max(
-        egui::pos2(card_rect.left() + 8.0, card_rect.top() + 26.0),
-        egui::pos2(card_rect.right() - 8.0, card_rect.bottom() - 4.0),
-    );
-    let desc_galley = ui.painter().layout(
-        desc_text,
-        desc_font,
-        desc_color_alpha,
-        desc_max_w,
-    );
-    ui.painter().with_clip_rect(desc_rect).galley(
-        egui::pos2(card_rect.left() + 8.0, card_rect.top() + 26.0),
-        desc_galley,
-        desc_color_alpha,
-    );
-
-    if response.clicked() && is_hovered {
+    if crate::app::ui::crate_item_card(
+        ui,
+        &item.name,
+        item.description.as_deref(),
+        crate::app::ui::CrateCardBadge::Downloads(dl_count),
+        card_w,
+        card_h,
+        alpha,
+        y_offset,
+    ) {
         vs.selected_crate = Some(item.clone());
         vs.full_detail = None;
         vs.detail_tab = 0;
@@ -910,83 +697,16 @@ fn render_keyword_compact_card(
     alpha: f32,
     y_offset: f32,
 ) {
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let title_color = egui::Color32::from_rgb(255, 160, 50);
-    let text_color = egui::Color32::from_rgb(180, 195, 215);
-
-    let (rect, response) = ui.allocate_exact_size(
-        egui::vec2(card_w, card_h),
-        egui::Sense::click(),
-    );
-
-    let card_rect = egui::Rect::from_min_size(
-        egui::pos2(rect.left(), rect.top() + y_offset),
-        egui::vec2(card_w, card_h),
-    );
-
-    let is_hovered = ui.input(|i| i.pointer.hover_pos().map_or(false, |pos| card_rect.contains(pos)));
-    let hovered = is_hovered;
-    if hovered {
-        ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
-    }
-
-    let alpha_u8 = (alpha.clamp(0.0, 1.0) * 255.0) as u8;
-
-    let bg_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(24, 32, 46, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(14, 18, 26, alpha_u8)
-    };
-
-    let stroke_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(100, 200, 255, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(45, 60, 90, alpha_u8)
-    };
-
-    ui.painter().rect(
-        card_rect,
-        egui::CornerRadius::same(6),
-        bg_card,
-        egui::Stroke::new(1.0, stroke_card),
-        egui::StrokeKind::Inside,
-    );
-
-    // Flecha SVG a la derecha
-    let arrow_size = 14.0;
-    let arrow_rect = egui::Rect::from_center_size(
-        egui::pos2(card_rect.right() - 14.0, card_rect.center().y),
-        egui::vec2(arrow_size, arrow_size),
-    );
-    let arrow_color = if hovered { title_color } else { cyan };
-    let arrow_color_alpha = egui::Color32::from_rgba_unmultiplied(arrow_color.r(), arrow_color.g(), arrow_color.b(), alpha_u8);
-    let img_arrow = egui::Image::new(egui::include_image!("../../../../assets/icons/arrow-up-svgrepo-com.svg"))
-        .fit_to_exact_size(egui::vec2(arrow_size, arrow_size))
-        .tint(arrow_color_alpha);
-    img_arrow.paint_at(ui, arrow_rect);
-
-    // Texto de palabra clave a la izquierda
-    let kw_text = item.keyword.clone();
-    let title_font = egui::FontId::proportional(13.0);
-    let kw_color = if hovered { egui::Color32::WHITE } else { cyan };
-    let kw_color_alpha = egui::Color32::from_rgba_unmultiplied(kw_color.r(), kw_color.g(), kw_color.b(), alpha_u8);
-    let kw_pos = egui::pos2(card_rect.left() + 10.0, card_rect.top() + 8.0);
-    let kw_galley = ui.painter().layout_no_wrap(kw_text, title_font, kw_color_alpha);
-    let kw_clip_rect = egui::Rect::from_min_max(
-        egui::pos2(card_rect.left() + 10.0, card_rect.top() + 4.0),
-        egui::pos2(arrow_rect.left() - 4.0, card_rect.top() + 26.0),
-    );
-    ui.painter().with_clip_rect(kw_clip_rect).galley(kw_pos, kw_galley, kw_color_alpha);
-
-    // Cantidad de crates debajo de la palabra clave
-    let cnt_text = format!("{} paquetes", formatear_numero(item.crates_cnt));
-    let cnt_font = egui::FontId::proportional(10.5);
-    let cnt_color_alpha = egui::Color32::from_rgba_unmultiplied(text_color.r(), text_color.g(), text_color.b(), alpha_u8);
-    let cnt_pos = egui::pos2(card_rect.left() + 10.0, card_rect.top() + 36.0);
-    let cnt_galley = ui.painter().layout_no_wrap(cnt_text, cnt_font, cnt_color_alpha);
-    ui.painter().galley(cnt_pos, cnt_galley, cnt_color_alpha);
-
-    if response.clicked() && is_hovered {
+    let subtitle = format!("{} paquetes", formatear_numero(item.crates_cnt));
+    if crate::app::ui::taxonomy_item_card(
+        ui,
+        &item.keyword,
+        &subtitle,
+        card_w,
+        card_h,
+        alpha,
+        y_offset,
+    ) {
         let now = ui.input(|i| i.time);
         vs.search_query = item.keyword.clone();
         vs.is_search_active = true;
@@ -1007,111 +727,22 @@ fn render_category_compact_card(
     alpha: f32,
     y_offset: f32,
 ) {
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let title_color = egui::Color32::from_rgb(255, 160, 50);
-    let text_color = egui::Color32::from_rgb(180, 195, 215);
-
-    let (rect, response) = ui.allocate_exact_size(
-        egui::vec2(card_w, card_h),
-        egui::Sense::click(),
-    );
-
-    let card_rect = egui::Rect::from_min_size(
-        egui::pos2(rect.left(), rect.top() + y_offset),
-        egui::vec2(card_w, card_h),
-    );
-
-    let is_hovered = ui.input(|i| i.pointer.hover_pos().map_or(false, |pos| card_rect.contains(pos)));
-    let hovered = is_hovered;
-    if hovered {
-        ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
-    }
-
-    let alpha_u8 = (alpha.clamp(0.0, 1.0) * 255.0) as u8;
-
-    let bg_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(24, 32, 46, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(14, 18, 26, alpha_u8)
-    };
-
-    let stroke_card = if hovered {
-        egui::Color32::from_rgba_unmultiplied(100, 200, 255, alpha_u8)
-    } else {
-        egui::Color32::from_rgba_unmultiplied(45, 60, 90, alpha_u8)
-    };
-
-    ui.painter().rect(
-        card_rect,
-        egui::CornerRadius::same(6),
-        bg_card,
-        egui::Stroke::new(1.0, stroke_card),
-        egui::StrokeKind::Inside,
-    );
-
-    // Flecha SVG a la derecha
-    let arrow_size = 14.0;
-    let arrow_rect = egui::Rect::from_center_size(
-        egui::pos2(card_rect.right() - 14.0, card_rect.center().y),
-        egui::vec2(arrow_size, arrow_size),
-    );
-    let arrow_color = if hovered { title_color } else { cyan };
-    let arrow_color_alpha = egui::Color32::from_rgba_unmultiplied(arrow_color.r(), arrow_color.g(), arrow_color.b(), alpha_u8);
-    let img_arrow = egui::Image::new(egui::include_image!("../../../../assets/icons/arrow-up-svgrepo-com.svg"))
-        .fit_to_exact_size(egui::vec2(arrow_size, arrow_size))
-        .tint(arrow_color_alpha);
-    img_arrow.paint_at(ui, arrow_rect);
-
-    // Nombre de Categoría a la izquierda (completo, sin ...)
-    let title_font = egui::FontId::proportional(13.0);
-    let cat_color = if hovered { egui::Color32::WHITE } else { cyan };
-    let cat_color_alpha = egui::Color32::from_rgba_unmultiplied(cat_color.r(), cat_color.g(), cat_color.b(), alpha_u8);
-
-    let cat_pos = egui::pos2(card_rect.left() + 10.0, card_rect.top() + 6.0);
-    let cat_galley = ui.painter().layout_no_wrap(item.category.clone(), title_font, cat_color_alpha);
-    let cat_clip_rect = egui::Rect::from_min_max(
-        egui::pos2(card_rect.left() + 10.0, card_rect.top() + 4.0),
-        egui::pos2(arrow_rect.left() - 4.0, card_rect.top() + 25.0),
-    );
-    ui.painter().with_clip_rect(cat_clip_rect).galley(cat_pos, cat_galley, cat_color_alpha);
-
-    // Descripción o cantidad de crates debajo
     let desc_raw = item.description.as_deref().unwrap_or("");
-    let desc_font = egui::FontId::proportional(10.5);
-    let desc_color_alpha = egui::Color32::from_rgba_unmultiplied(text_color.r(), text_color.g(), text_color.b(), alpha_u8);
-    let desc_max_w = (arrow_rect.left() - card_rect.left() - 10.0).max(40.0);
-
-    if !desc_raw.trim().is_empty() {
-        let desc_clean = desc_raw.replace('\n', " ").replace('\r', "").trim().to_string();
-        let desc_text = if desc_clean.chars().count() > 100 {
-            let s: String = desc_clean.chars().take(100).collect();
-            format!("{}...", s)
-        } else {
-            desc_clean
-        };
-        let desc_rect = egui::Rect::from_min_max(
-            egui::pos2(card_rect.left() + 10.0, card_rect.top() + 26.0),
-            egui::pos2(arrow_rect.left() - 4.0, card_rect.bottom() - 4.0),
-        );
-        let desc_galley = ui.painter().layout(
-            desc_text,
-            desc_font,
-            desc_color_alpha,
-            desc_max_w,
-        );
-        ui.painter().with_clip_rect(desc_rect).galley(
-            egui::pos2(card_rect.left() + 10.0, card_rect.top() + 26.0),
-            desc_galley,
-            desc_color_alpha,
-        );
+    let subtitle = if !desc_raw.trim().is_empty() {
+        desc_raw.to_string()
     } else {
-        let cnt_text = format!("{} paquetes registrados", formatear_numero(item.crates_cnt));
-        let cnt_pos = egui::pos2(card_rect.left() + 10.0, card_rect.top() + 36.0);
-        let cnt_galley = ui.painter().layout_no_wrap(cnt_text, desc_font, desc_color_alpha);
-        ui.painter().galley(cnt_pos, cnt_galley, desc_color_alpha);
-    }
+        format!("{} paquetes registrados", formatear_numero(item.crates_cnt))
+    };
 
-    if response.clicked() && is_hovered {
+    if crate::app::ui::taxonomy_item_card(
+        ui,
+        &item.category,
+        &subtitle,
+        card_w,
+        card_h,
+        alpha,
+        y_offset,
+    ) {
         let now = ui.input(|i| i.time);
         vs.search_query = item.category.clone();
         vs.is_search_active = true;
@@ -1122,6 +753,7 @@ fn render_category_compact_card(
     }
 }
 
+
 fn render_search_results_grid(
     ui: &mut egui::Ui,
     vs: &mut CratesIoViewState,
@@ -1129,7 +761,6 @@ fn render_search_results_grid(
     elapsed: f64,
 ) {
     let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let green = egui::Color32::from_rgb(100, 220, 150);
     let text_color = egui::Color32::from_rgb(200, 210, 225);
 
     let available_w = ui.available_width();
@@ -1204,18 +835,7 @@ fn render_search_results_grid(
 
                         ui.add_space(4.0);
 
-                        let mut tag_frame = egui::Frame::new();
-                        tag_frame.fill = egui::Color32::from_rgb(18, 40, 28);
-                        tag_frame.corner_radius = egui::CornerRadius::same(4);
-                        tag_frame.inner_margin = egui::Margin::symmetric(6, 2);
-                        tag_frame.show(ui, |ui| {
-                            ui.label(
-                                egui::RichText::new(format!("v{}", item_clone.max_version))
-                                    .size(11.0)
-                                    .strong()
-                                    .color(green),
-                            );
-                        });
+                        crate::app::ui::tag_chip(ui, &format!("v{}", item_clone.max_version));
 
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             if boton_custom_cyan(ui, "Ver Detalle", 82.0).clicked() {
@@ -1361,18 +981,7 @@ fn render_search_results_grid(
 
                 ui.add_space(4.0);
 
-                let mut tag_frame = egui::Frame::new();
-                tag_frame.fill = egui::Color32::from_rgb(18, 40, 28);
-                tag_frame.corner_radius = egui::CornerRadius::same(4);
-                tag_frame.inner_margin = egui::Margin::symmetric(6, 2);
-                tag_frame.show(ui, |ui| {
-                    ui.label(
-                        egui::RichText::new(format!("v{}", item_clone.max_version))
-                            .size(11.0)
-                            .strong()
-                            .color(green),
-                    );
-                });
+                crate::app::ui::tag_chip(ui, &format!("v{}", item_clone.max_version));
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if boton_custom_cyan(ui, "Ver Detalle", 82.0).clicked() {
@@ -1468,7 +1077,6 @@ fn mostrar_detalle_crate(
 ) {
     lanzar_detalle_asincrono(item.id.clone(), ui.ctx().clone());
 
-    let title_color = egui::Color32::from_rgb(255, 160, 50);
     let cyan = egui::Color32::from_rgb(100, 200, 255);
     let green = egui::Color32::from_rgb(100, 220, 150);
     let text_color = egui::Color32::from_rgb(200, 210, 225);
@@ -1529,50 +1137,17 @@ fn mostrar_detalle_crate(
                     ui.add_space(8.0);
 
                     // Badge de Versión
-                    let mut tag_v = egui::Frame::new();
-                    tag_v.fill = egui::Color32::from_rgb(18, 40, 28);
-                    tag_v.corner_radius = egui::CornerRadius::same(4);
-                    tag_v.inner_margin = egui::Margin::symmetric(8, 3);
-                    tag_v.show(ui, |ui| {
-                        ui.label(
-                            egui::RichText::new(format!("v{}", item.max_version))
-                                .size(12.0)
-                                .strong()
-                                .color(green),
-                        );
-                    });
+                    crate::app::ui::tag_chip(ui, &format!("v{}", item.max_version));
 
                     ui.add_space(6.0);
 
                     // Badge Oficial
-                    let mut tag_oficial = egui::Frame::new();
-                    tag_oficial.fill = egui::Color32::from_rgb(18, 30, 48);
-                    tag_oficial.corner_radius = egui::CornerRadius::same(4);
-                    tag_oficial.inner_margin = egui::Margin::symmetric(8, 3);
-                    tag_oficial.show(ui, |ui| {
-                        ui.label(
-                            egui::RichText::new("crates.io oficial")
-                                .size(11.5)
-                                .strong()
-                                .color(egui::Color32::from_rgb(120, 190, 255)),
-                        );
-                    });
+                    crate::app::ui::tag_chip(ui, "crates.io oficial");
 
                     ui.add_space(6.0);
 
                     // Badge Licencia (Real de la API)
-                    let mut tag_lic = egui::Frame::new();
-                    tag_lic.fill = egui::Color32::from_rgb(38, 28, 16);
-                    tag_lic.corner_radius = egui::CornerRadius::same(4);
-                    tag_lic.inner_margin = egui::Margin::symmetric(8, 3);
-                    tag_lic.show(ui, |ui| {
-                        ui.label(
-                            egui::RichText::new(format!("Licencia: {}", lic_str))
-                                .size(11.5)
-                                .strong()
-                                .color(title_color),
-                        );
-                    });
+                    crate::app::ui::tag_chip(ui, &format!("Licencia: {}", lic_str));
                 });
 
                 ui.add_space(8.0);

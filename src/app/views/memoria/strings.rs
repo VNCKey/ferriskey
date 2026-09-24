@@ -1,126 +1,42 @@
 use crate::app::AppState;
-use eframe::egui;
-
-fn tabla_metodos_string(
-    ui: &mut egui::Ui,
-    id: &str,
-    titulo: &str,
-    subtitulo: &str,
-    filas: &[(&str, &str, &str)],
-) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let texto = egui::Color32::from_rgb(205, 215, 230);
-    let ejemplo_color = egui::Color32::from_rgb(180, 220, 180);
-
-    let mut frame = egui::Frame::new();
-    frame.fill = egui::Color32::from_rgb(14, 18, 26);
-    frame.inner_margin = egui::Margin::same(12);
-    frame.corner_radius = egui::CornerRadius::same(8);
-    frame.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
-
-    frame.show(ui, |ui| {
-        ui.label(
-            egui::RichText::new(titulo)
-                .strong()
-                .size(15.0)
-                .color(naranja),
-        );
-        ui.add_space(2.0);
-        ui.label(
-            egui::RichText::new(subtitulo)
-                .size(12.5)
-                .color(egui::Color32::from_rgb(160, 175, 195)),
-        );
-        ui.add_space(10.0);
-
-        egui::Grid::new(id)
-            .striped(true)
-            .min_col_width(120.0)
-            .spacing([20.0, 8.0])
-            .show(ui, |ui| {
-                ui.label(
-                    egui::RichText::new("Método")
-                        .strong()
-                        .size(12.0)
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Descripción / Comportamiento")
-                        .strong()
-                        .size(12.0)
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Ejemplo de uso")
-                        .strong()
-                        .size(12.0)
-                        .color(egui::Color32::WHITE),
-                );
-                ui.end_row();
-
-                for (metodo, desc, ejemplo) in filas {
-                    ui.label(
-                        egui::RichText::new(*metodo)
-                            .monospace()
-                            .strong()
-                            .color(cyan),
-                    );
-                    ui.label(
-                        egui::RichText::new(*desc)
-                            .size(13.0)
-                            .color(texto),
-                    );
-                    ui.label(
-                        egui::RichText::new(*ejemplo)
-                            .monospace()
-                            .size(12.0)
-                            .color(ejemplo_color),
-                    );
-                    ui.end_row();
-                }
-            });
-    });
-}
+use crate::app::ui::*;
+use eframe::egui::{self, RichText};
 
 /// Sección teórica completa sobre String y &str en Rust
 pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let texto = egui::Color32::from_rgb(205, 215, 230);
-
     ui.label(
-        egui::RichText::new(
+        RichText::new(
             "String es el tipo de texto dinámico y modificable por excelencia en Rust. Se almacena como un vector de bytes UTF-8 en el Heap y gestiona su memoria automáticamente sin recolector de basura.",
         )
-        .size(14.0)
-        .color(texto)
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
     ui.add_space(12.0);
 
-    // Tabla 1: Anatomía de Memoria de String
+    // Tabla: Anatomía de Memoria de String
     let mut table_mem = egui::Frame::new();
-    table_mem.fill = egui::Color32::from_rgb(14, 18, 26);
-    table_mem.inner_margin = egui::Margin::same(12);
-    table_mem.corner_radius = egui::CornerRadius::same(8);
-    table_mem.stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(45, 60, 90));
+    table_mem.fill = Colors::BG_CARD;
+    table_mem.inner_margin = Spacing::card_margin();
+    table_mem.corner_radius = Spacing::card_rounding();
+    table_mem.stroke = Spacing::card_stroke();
 
     table_mem.show(ui, |ui| {
         ui.horizontal(|ui| {
             ui.label(
-                egui::RichText::new(
+                RichText::new(
                     "Estructura Interna en Memoria (24 Bytes en Stack + Buffer en Heap)",
                 )
                 .strong()
-                .size(15.0)
-                .color(naranja),
+                .font(Typography::card_title())
+                .color(Colors::ORANGE_RUST),
             );
             ui.add_space(8.0);
 
             let btn_color = if state.ui.show_railroad_modal == Some(7) {
-                naranja
+                Colors::ORANGE_RUST
             } else {
-                egui::Color32::from_rgb(180, 190, 205)
+                Colors::TEXT_MUTED
             };
             if ui
                 .add(
@@ -151,32 +67,16 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
             .min_col_width(90.0)
             .spacing([20.0, 8.0])
             .show(ui, |ui| {
-                ui.label(
-                    egui::RichText::new("Campo")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Ubicación")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Tamaño")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
-                ui.label(
-                    egui::RichText::new("Propósito / Descripción")
-                        .strong()
-                        .color(egui::Color32::WHITE),
-                );
+                ui.label(RichText::new("Campo").strong().color(Colors::TEXT_WHITE));
+                ui.label(RichText::new("Ubicación").strong().color(Colors::TEXT_WHITE));
+                ui.label(RichText::new("Tamaño").strong().color(Colors::TEXT_WHITE));
+                ui.label(RichText::new("Propósito / Descripción").strong().color(Colors::TEXT_WHITE));
                 ui.end_row();
 
                 ui.label(
-                    egui::RichText::new("ptr")
+                    RichText::new("ptr")
                         .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                        .color(Colors::CYAN_ACCENT),
                 );
                 ui.label("Stack");
                 ui.label("8 Bytes (64-bit)");
@@ -184,9 +84,9 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
                 ui.end_row();
 
                 ui.label(
-                    egui::RichText::new("len")
+                    RichText::new("len")
                         .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                        .color(Colors::CYAN_ACCENT),
                 );
                 ui.label("Stack");
                 ui.label("8 Bytes (usize)");
@@ -194,9 +94,9 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
                 ui.end_row();
 
                 ui.label(
-                    egui::RichText::new("cap")
+                    RichText::new("cap")
                         .monospace()
-                        .color(egui::Color32::from_rgb(100, 200, 255)),
+                        .color(Colors::CYAN_ACCENT),
                 );
                 ui.label("Stack");
                 ui.label("8 Bytes (usize)");
@@ -204,9 +104,9 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
                 ui.end_row();
 
                 ui.label(
-                    egui::RichText::new("Buffer UTF-8")
+                    RichText::new("Buffer UTF-8")
                         .strong()
-                        .color(naranja),
+                        .color(Colors::ORANGE_RUST),
                 );
                 ui.label("Heap");
                 ui.label("Dinámico (cap bytes)");
@@ -217,19 +117,13 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
 
     ui.add_space(18.0);
 
-    ui.heading(
-        egui::RichText::new("Arsenal de Métodos Directos de String")
-            .size(18.0)
-            .strong()
-            .color(naranja),
-    );
-    ui.add_space(4.0);
+    section_heading(ui, "Arsenal de Métodos Directos de String");
     ui.label(
-        egui::RichText::new(
+        RichText::new(
             "Colección de operaciones integradas para consultar, modificar y transformar texto directamente sin necesidad de iteradores.",
         )
-        .size(13.5)
-        .color(texto),
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY),
     );
     ui.add_space(12.0);
 
@@ -279,11 +173,13 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
         ),
     ];
 
-    tabla_metodos_string(
+    tabla_metodos(
         ui,
         "grid_inspeccion_string",
         "1. Inspección y Búsqueda (Solo Lectura)",
         "Métodos que consultan propiedades del buffer sin modificar su contenido ni reservar nueva memoria.",
+        &state.editor.syntax_set,
+        &state.editor.theme_set.themes["base16-ocean.dark"],
         &filas_inspeccion,
     );
 
@@ -335,11 +231,13 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
         ),
     ];
 
-    tabla_metodos_string(
+    tabla_metodos(
         ui,
         "grid_modificacion_string",
         "2. Modificación en Memoria (Requieren let mut)",
         "Operaciones in-place que alteran directamente el buffer en el Heap. Los índices son posiciones en bytes.",
+        &state.editor.syntax_set,
+        &state.editor.theme_set.themes["base16-ocean.dark"],
         &filas_modificacion,
     );
 
@@ -381,11 +279,13 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
         ),
     ];
 
-    tabla_metodos_string(
+    tabla_metodos(
         ui,
         "grid_transformacion_string",
         "3. Transformación y Formato (Nuevos Valores)",
         "Operaciones que no mutan el original, sino que generan una nueva vista prestada (&str) o un nuevo String en Heap.",
+        &state.editor.syntax_set,
+        &state.editor.theme_set.themes["base16-ocean.dark"],
         &filas_transformacion,
     );
 }

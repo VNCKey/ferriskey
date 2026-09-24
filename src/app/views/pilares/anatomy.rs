@@ -1455,25 +1455,13 @@ pub(crate) fn codigo_resaltado_bloque(
     theme: &Theme,
     extension: &str,
 ) {
-    egui::Frame::new()
-        .fill(egui::Color32::from_rgb(12, 18, 27))
-        .stroke(egui::Stroke::new(
-            1.0,
-            egui::Color32::from_rgba_unmultiplied(255, 160, 50, 72),
-        ))
-        .corner_radius(egui::CornerRadius::same(5))
-        .inner_margin(egui::Margin {
-            left: 12,
-            right: 12,
-            top: 9,
-            bottom: 9,
-        })
-        .show(ui, |ui| {
-            ui.set_min_width(ui.available_width());
-            let code_width = ui.available_width();
-            let galley = syntax_layouter(ui, codigo, code_width, syntax_set, theme, extension);
-            ui.add(egui::Label::new(galley).selectable(true));
-        });
+    crate::app::ui::highlighted_code_block(
+        ui,
+        codigo,
+        syntax_set,
+        theme,
+        extension,
+    );
 }
 
 fn codigo_toml_bloque(ui: &mut egui::Ui, codigo: &str, syntax_set: &SyntaxSet, theme: &Theme) {
