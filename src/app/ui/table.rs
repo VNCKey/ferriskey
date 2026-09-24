@@ -216,6 +216,23 @@ pub fn tabla_metodos(
     theme: &syntect::highlighting::Theme,
     filas: &[(&str, &str, &str)],
 ) {
+    // El título y la explicación pertenecen a la sección de lectura, no al
+    // componente visual de la tabla. Así cada tabla conserva únicamente sus
+    // encabezados y filas dentro del borde.
+    ui.label(
+        RichText::new(titulo)
+            .strong()
+            .font(Typography::card_title())
+            .color(Colors::ORANGE_RUST),
+    );
+    ui.add_space(3.0);
+    ui.label(
+        RichText::new(subtitulo)
+            .font(Typography::body_small())
+            .color(Colors::TEXT_MUTED),
+    );
+    ui.add_space(10.0);
+
     let mut frame = egui::Frame::new();
     frame.fill = Colors::BG_CARD;
     frame.inner_margin = egui::Margin {
@@ -227,21 +244,7 @@ pub fn tabla_metodos(
     frame.corner_radius = Spacing::card_rounding();
     frame.stroke = Spacing::card_stroke();
 
-        frame.show(ui, |ui| {
-        ui.label(
-            RichText::new(titulo)
-                .strong()
-                .font(Typography::card_title())
-                .color(Colors::ORANGE_RUST),
-        );
-        ui.add_space(2.0);
-        ui.label(
-            RichText::new(subtitulo)
-                .font(Typography::body_small())
-                .color(Colors::TEXT_MUTED),
-        );
-        ui.add_space(10.0);
-
+    frame.show(ui, |ui| {
         Grid::new(id)
             .striped(true)
             .num_columns(3)
@@ -254,14 +257,7 @@ pub fn tabla_metodos(
                 ui.end_row();
 
                 for (metodo, desc, ejemplo) in filas {
-                    cell_centered(ui, |ui| {
-                        ui.label(
-                            RichText::new(*metodo)
-                                .monospace()
-                                .strong()
-                                .color(Colors::CYAN_ACCENT),
-                        )
-                    });
+                    table_code_snippet(ui, metodo, syntax_set, theme, "rs");
                     texto_con_chips_inline(ui, desc, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
                     table_code_snippet(ui, ejemplo, syntax_set, theme, "rs");
                     ui.end_row();

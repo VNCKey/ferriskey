@@ -2,290 +2,390 @@ use crate::app::AppState;
 use crate::app::ui::*;
 use eframe::egui::{self, RichText};
 
-/// Sección teórica completa sobre String y &str en Rust
+/// Referencia visual y progresiva sobre `String` y `&str`.
 pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
+    let syntax_set = &state.editor.syntax_set;
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+
+    session_title(ui, "String vs &str");
+    session_intro(
+        ui,
+        "En Rust, el texto puede ser un valor que posee sus datos o una vista que solo los observa. Esta diferencia explica por qué algunos textos pueden crecer, cómo se prestan sin moverlos y qué ocurre con su memoria.",
+    );
+
+    section_heading(ui, "¿Qué es String?");
     ui.label(
         RichText::new(
-            "String es el tipo de texto dinámico y modificable por excelencia en Rust. Se almacena como un vector de bytes UTF-8 en el Heap y gestiona su memoria automáticamente sin recolector de basura.",
+            "String es un tipo de texto con Ownership. Posee los bytes que forman su contenido y administra un buffer en el Heap. Puede crecer durante la ejecución cuando la variable es mutable, por lo que es útil para texto que se construye o cambia.",
         )
         .font(Typography::body())
         .color(Colors::TEXT_PRIMARY)
         .line_height(Some(20.0)),
     );
-    ui.add_space(12.0);
+    ui.add_space(8.0);
+    highlighted_code_block(
+        ui,
+        "let mut texto = String::from(\"Rust\");\ntexto.push_str(\" seguro\");",
+        syntax_set,
+        theme,
+        "rs",
+    );
 
-    // Tabla: Anatomía de Memoria de String
-    let mut table_mem = egui::Frame::new();
-    table_mem.fill = Colors::BG_CARD;
-    table_mem.inner_margin = Spacing::card_margin();
-    table_mem.corner_radius = Spacing::card_rounding();
-    table_mem.stroke = Spacing::card_stroke();
+    ui.add_space(16.0);
+    section_heading(ui, "¿Qué es &str?");
+    ui.label(
+        RichText::new(
+            "&str es una vista prestada de texto UTF-8. No posee los bytes ni decide cuándo se liberan: solo permite leer un texto que pertenece a otro valor o que ya forma parte del programa. Por eso suele utilizarse cuando una función necesita leer texto sin quedarse con su Ownership.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(8.0);
+    highlighted_code_block(
+        ui,
+        "let texto = String::from(\"Rust\");\nlet vista: &str = &texto;\nprintln!(\"{vista}\");",
+        syntax_set,
+        theme,
+        "rs",
+    );
 
-    table_mem.show(ui, |ui| {
-        ui.horizontal(|ui| {
-            ui.label(
-                RichText::new(
-                    "Estructura Interna en Memoria (24 Bytes en Stack + Buffer en Heap)",
-                )
-                .strong()
-                .font(Typography::card_title())
-                .color(Colors::ORANGE_RUST),
-            );
-            ui.add_space(8.0);
+    ui.add_space(16.0);
+    section_heading(ui, "Comparación rápida");
+    ui.label(
+        RichText::new(
+            "Ambos representan texto, pero la diferencia está en quién posee los datos y qué puede hacer con ellos.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY),
+    );
+    ui.add_space(10.0);
 
-            let btn_color = if state.ui.show_railroad_modal == Some(7) {
-                Colors::ORANGE_RUST
-            } else {
-                Colors::TEXT_MUTED
-            };
-            if ui
-                .add(
-                    egui::Button::image(
-                        egui::Image::from_bytes(
-                            "bytes://view.svg",
-                            include_bytes!("../../../../assets/diagramas/view.svg"),
-                        )
-                        .fit_to_exact_size(egui::vec2(18.0, 18.0))
-                        .tint(btn_color),
-                    )
-                    .frame(state.ui.show_railroad_modal == Some(7)),
-                )
-                .on_hover_text("Ver diagrama visual de la arquitectura del Heap")
-                .clicked()
-            {
-                state.ui.show_railroad_modal = if state.ui.show_railroad_modal == Some(7) {
-                    None
-                } else {
-                    Some(7)
-                };
-            }
-        });
-        ui.add_space(8.0);
+    EducationalTable::new(
+        "tabla_comparacion_string_str",
+        &["Característica", "String", "&str"],
+    )
+    .min_col_width(115.0)
+    .max_col_width(((ui.available_width() - 80.0) / 3.0).max(150.0))
+    .spacing(16.0, 7.0)
+    .show(ui, |body| {
+        let filas = [
+            (
+                "Ownership",
+                "Posee su buffer de texto.",
+                "No posee el texto; solo lo observa.",
+            ),
+            (
+                "Memoria",
+                "Administra un buffer dinámico en el Heap.",
+                "Guarda una vista hacia texto existente.",
+            ),
+            (
+                "Tamaño",
+                "Puede crecer si la variable es mutable.",
+                "La vista tiene una longitud fija.",
+            ),
+            (
+                "Creación",
+                "String::from(\"Rust\")",
+                "\"Rust\" o una referencia a String.",
+            ),
+            (
+                "Uso",
+                "Se puede prestar con &texto.",
+                "Se puede leer directamente mientras exista su texto original.",
+            ),
+        ];
 
-        egui::Grid::new("tabla_string_memoria_anatomia")
-            .striped(true)
-            .min_col_width(90.0)
-            .spacing([20.0, 8.0])
-            .show(ui, |ui| {
-                ui.label(RichText::new("Campo").strong().color(Colors::TEXT_WHITE));
-                ui.label(RichText::new("Ubicación").strong().color(Colors::TEXT_WHITE));
-                ui.label(RichText::new("Tamaño").strong().color(Colors::TEXT_WHITE));
-                ui.label(RichText::new("Propósito / Descripción").strong().color(Colors::TEXT_WHITE));
-                ui.end_row();
-
+        for (caracteristica, string, str_ref) in filas {
+            body.row(|ui| {
+                cell_centered(ui, |ui| {
+                    inline_code_chip_color(ui, caracteristica, Colors::ORANGE_RUST)
+                });
                 ui.label(
-                    RichText::new("ptr")
-                        .monospace()
-                        .color(Colors::CYAN_ACCENT),
+                    RichText::new(string)
+                        .font(Typography::body_small())
+                        .color(Colors::TEXT_PRIMARY),
                 );
-                ui.label("Stack");
-                ui.label("8 Bytes (64-bit)");
-                ui.label("Puntero con la dirección de memoria exacta del buffer en el Heap.");
-                ui.end_row();
-
                 ui.label(
-                    RichText::new("len")
-                        .monospace()
-                        .color(Colors::CYAN_ACCENT),
+                    RichText::new(str_ref)
+                        .font(Typography::body_small())
+                        .color(Colors::TEXT_PRIMARY),
                 );
-                ui.label("Stack");
-                ui.label("8 Bytes (usize)");
-                ui.label("Longitud actual: cantidad de bytes UTF-8 válidos en uso.");
-                ui.end_row();
-
-                ui.label(
-                    RichText::new("cap")
-                        .monospace()
-                        .color(Colors::CYAN_ACCENT),
-                );
-                ui.label("Stack");
-                ui.label("8 Bytes (usize)");
-                ui.label("Capacidad total: bytes reservados en Heap antes de requerir realloc.");
-                ui.end_row();
-
-                ui.label(
-                    RichText::new("Buffer UTF-8")
-                        .strong()
-                        .color(Colors::ORANGE_RUST),
-                );
-                ui.label("Heap");
-                ui.label("Dinámico (cap bytes)");
-                ui.label("Secuencia contigua de bytes donde residen las letras del texto.");
-                ui.end_row();
             });
+        }
+    });
+
+    ui.add_space(16.0);
+    section_heading(ui, "Un literal de texto");
+    ui.label(
+        RichText::new(
+            "Los literales de texto suelen tener el tipo &str. El texto ya existe como parte del programa, por eso no necesitas crear una String si solo vas a leerlo.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY),
+    );
+    ui.add_space(8.0);
+    highlighted_code_block(
+        ui,
+        "let saludo: &str = \"Hola, Rust!\";",
+        syntax_set,
+        theme,
+        "rs",
+    );
+
+    ui.add_space(18.0);
+    section_heading(ui, "String por dentro");
+    ui.label(
+        RichText::new(
+            "Una String suele guardar en el Stack tres datos pequeños: un puntero al buffer, su longitud actual y su capacidad reservada. Los bytes del texto viven en el Heap. En una arquitectura de 64 bits, esos tres datos suelen ocupar 24 bytes en total.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
+
+    let button_label = if state.ui.show_railroad_modal == Some(7) {
+        "Ocultar diagrama"
+    } else {
+        "Ver diagrama de memoria"
+    };
+    ui.horizontal(|ui| {
+        let response = ui.add(
+            egui::Button::new(
+                RichText::new(button_label)
+                    .font(Typography::body_small())
+                    .color(Colors::TEXT_PRIMARY),
+            )
+            .fill(Colors::BG_CODE_INLINE)
+            .stroke(egui::Stroke::new(1.0, Colors::BORDER_SUBTLE)),
+        );
+        if response.clicked() {
+            state.ui.show_railroad_modal = if state.ui.show_railroad_modal == Some(7) {
+                None
+            } else {
+                Some(7)
+            };
+        }
+    });
+    ui.add_space(10.0);
+
+    EducationalTable::new(
+        "tabla_anatomia_string",
+        &["Campo", "Ubicación", "Qué representa"],
+    )
+    .min_col_width(110.0)
+    .max_col_width(((ui.available_width() - 70.0) / 3.0).max(170.0))
+    .spacing(18.0, 7.0)
+    .show(ui, |body| {
+        let campos = [
+            (
+                "ptr",
+                "Stack",
+                "Dirección del buffer de bytes que está en el Heap.",
+            ),
+            (
+                "len",
+                "Stack",
+                "Cantidad de bytes que el texto utiliza actualmente.",
+            ),
+            (
+                "capacity",
+                "Stack",
+                "Cantidad de bytes reservados antes de necesitar más espacio.",
+            ),
+            (
+                "Buffer UTF-8",
+                "Heap",
+                "Bytes que representan el contenido del texto.",
+            ),
+        ];
+
+        for (campo, ubicacion, descripcion) in campos {
+            body.row(|ui| {
+                cell_centered(ui, |ui| {
+                    inline_code_chip_color(ui, campo, Colors::CYAN_ACCENT)
+                });
+                ui.label(
+                    RichText::new(ubicacion)
+                        .font(Typography::body_small())
+                        .color(Colors::TEXT_PRIMARY),
+                );
+                ui.label(
+                    RichText::new(descripcion)
+                        .font(Typography::body_small())
+                        .color(Colors::TEXT_PRIMARY),
+                );
+            });
+        }
     });
 
     ui.add_space(18.0);
-
-    section_heading(ui, "Arsenal de Métodos Directos de String");
+    section_heading(ui, "Texto UTF-8 y longitud");
     ui.label(
         RichText::new(
-            "Colección de operaciones integradas para consultar, modificar y transformar texto directamente sin necesidad de iteradores.",
+            "String y &str guardan texto UTF-8. Por eso .len() cuenta bytes y no necesariamente la cantidad de caracteres visibles: algunos caracteres necesitan más de un byte.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(8.0);
+    highlighted_code_block(
+        ui,
+        "let texto = \"🦀\";\nprintln!(\"{} bytes\", texto.len()); // 4 bytes",
+        syntax_set,
+        theme,
+        "rs",
+    );
+
+    ui.add_space(20.0);
+    section_heading(ui, "Métodos de String y &str");
+    ui.label(
+        RichText::new(
+            "Estas operaciones sirven para crear, convertir, consultar, modificar o producir texto. Las tablas muestran qué tipo de valor participa y qué resultado puedes esperar.",
         )
         .font(Typography::body())
         .color(Colors::TEXT_PRIMARY),
     );
     ui.add_space(12.0);
 
-    // =========================================================
-    // TABLA 1: Inspección y Búsqueda (Solo lectura)
-    // =========================================================
-    let filas_inspeccion = [
+    let filas_creacion = [
         (
-            ".len()",
-            "Devuelve la longitud del texto en bytes (no en caracteres).",
-            "texto.len() // usize",
+            "String::new()",
+            "Crea una String vacía que puede recibir texto después.",
+            "let texto = String::new()",
         ),
         (
+            "String::from(&str)",
+            "Crea una String con Ownership a partir de una vista de texto.",
+            "String::from(\"Rust\")",
+        ),
+        (
+            ".to_string()",
+            "Crea una String a partir de un valor que puede representarse como texto.",
+            "\"Rust\".to_string()",
+        ),
+        (
+            ".as_str()",
+            "Obtiene una vista &str de una String sin copiar sus bytes.",
+            "texto.as_str() // &str",
+        ),
+    ];
+    tabla_metodos(
+        ui,
+        "grid_creacion_string",
+        "Crear y convertir",
+        "Operaciones que ayudan a pasar de un texto prestado a una String con Ownership, o a obtener una vista sin copiar.",
+        syntax_set,
+        theme,
+        &filas_creacion,
+    );
+
+    ui.add_space(14.0);
+
+    let filas_consulta = [
+        (".len()", "Cuenta los bytes utilizados por el texto.", "texto.len()"),
+        (
             ".capacity()",
-            "Memoria RAM (en bytes) reservada actualmente en el Heap.",
+            "Consulta cuántos bytes están reservados para la String.",
             "texto.capacity()",
         ),
         (
             ".is_empty()",
-            "Devuelve true si la longitud es 0 (\"\").",
-            "\"\".is_empty() // true",
+            "Indica si el texto no contiene ningún byte.",
+            "texto.is_empty()",
         ),
         (
             ".contains(str)",
-            "Comprueba si una palabra o letra existe dentro del texto.",
+            "Comprueba si el texto contiene una parte determinada.",
             "texto.contains(\"Rust\")",
         ),
         (
             ".starts_with(str)",
-            "Verifica si el texto comienza con el prefijo indicado.",
-            "texto.starts_with(\"Al\")",
+            "Comprueba si comienza con el texto indicado.",
+            "texto.starts_with(\"Ru\")",
         ),
         (
             ".ends_with(str)",
-            "Verifica si el texto termina con el sufijo indicado.",
-            "texto.ends_with(\".\")",
-        ),
-        (
-            ".find(str)",
-            "Busca el texto y devuelve la posición (byte) de su inicio.",
-            "texto.find(\"a\") // Option",
-        ),
-        (
-            ".rfind(str)",
-            "Igual que .find(), pero busca desde el final hacia el inicio.",
-            "texto.rfind(\"a\")",
+            "Comprueba si termina con el texto indicado.",
+            "texto.ends_with(\"!\")",
         ),
     ];
-
     tabla_metodos(
         ui,
-        "grid_inspeccion_string",
-        "1. Inspección y Búsqueda (Solo Lectura)",
-        "Métodos que consultan propiedades del buffer sin modificar su contenido ni reservar nueva memoria.",
-        &state.editor.syntax_set,
-        &state.editor.theme_set.themes["base16-ocean.dark"],
-        &filas_inspeccion,
+        "grid_consulta_string",
+        "Consulta",
+        "Métodos que observan el texto sin modificarlo.",
+        syntax_set,
+        theme,
+        &filas_consulta,
     );
 
     ui.add_space(14.0);
-
-    // =========================================================
-    // TABLA 2: Modificación en Memoria (Requieren let mut)
-    // =========================================================
     let filas_modificacion = [
         (
             ".push(char)",
-            "Añade un solo carácter al final del texto.",
+            "Añade un carácter al final de una String mutable.",
             "texto.push('!')",
         ),
         (
             ".push_str(&str)",
-            "Añade una cadena de texto completa al final.",
-            "texto.push_str(\" Hola\")",
-        ),
-        (
-            ".insert(idx, char)",
-            "Inserta un carácter en una posición de byte específica.",
-            "texto.insert(0, '¡')",
-        ),
-        (
-            ".insert_str(idx, &str)",
-            "Inserta una frase en una posición de byte específica.",
-            "texto.insert_str(5, \"amigo\")",
-        ),
-        (
-            ".remove(idx)",
-            "Borra el carácter en esa posición exacta y lo devuelve.",
-            "texto.remove(0) // char",
-        ),
-        (
-            ".pop()",
-            "Elimina el último carácter del final y lo devuelve.",
-            "texto.pop() // Option",
-        ),
-        (
-            ".truncate(n)",
-            "Corta el texto conservando solo los primeros n bytes.",
-            "texto.truncate(4)",
+            "Añade una vista de texto al final de una String mutable.",
+            "texto.push_str(\" Rust\")",
         ),
         (
             ".clear()",
-            "Vacía el contenido del texto dejando su longitud en 0.",
+            "Elimina todo el contenido y deja la String vacía.",
             "texto.clear()",
         ),
+        (
+            ".truncate(n)",
+            "Conserva los primeros n bytes del texto.",
+            "texto.truncate(4)",
+        ),
     ];
-
     tabla_metodos(
         ui,
         "grid_modificacion_string",
-        "2. Modificación en Memoria (Requieren let mut)",
-        "Operaciones in-place que alteran directamente el buffer en el Heap. Los índices son posiciones en bytes.",
-        &state.editor.syntax_set,
-        &state.editor.theme_set.themes["base16-ocean.dark"],
+        "Modificación",
+        "Métodos que cambian el buffer; la String debe ser mutable.",
+        syntax_set,
+        theme,
         &filas_modificacion,
     );
 
     ui.add_space(14.0);
-
-    // =========================================================
-    // TABLA 3: Transformación y Formato (Nuevos valores)
-    // =========================================================
     let filas_transformacion = [
         (
             ".trim()",
-            "Elimina espacios en blanco y saltos de línea en ambos extremos.",
+            "Devuelve una vista sin espacios exteriores.",
             "texto.trim() // &str",
         ),
         (
             ".to_uppercase()",
-            "Crea un nuevo String con todo el texto en MAYÚSCULAS.",
-            "texto.to_uppercase() // String",
+            "Crea una nueva String en mayúsculas.",
+            "texto.to_uppercase()",
         ),
         (
             ".to_lowercase()",
-            "Crea un nuevo String con todo el texto en minúsculas.",
-            "texto.to_lowercase() // String",
+            "Crea una nueva String en minúsculas.",
+            "texto.to_lowercase()",
         ),
         (
             ".replace(a, b)",
-            "Busca todas las apariciones de 'a' y las reemplaza por 'b'.",
-            "texto.replace(\"key\", \"kay\")",
-        ),
-        (
-            ".replacen(a, b, n)",
-            "Igual que .replace(), pero solo para las primeras n ocurrencias.",
-            "texto.replacen(\"o\", \"a\", 2)",
-        ),
-        (
-            ".repeat(n)",
-            "Genera un nuevo String duplicando el texto n veces consecutivas.",
-            "\"Ja\".repeat(3) // \"JaJaJa\"",
+            "Crea una nueva String reemplazando coincidencias.",
+            "texto.replace(\"Rust\", \"RUST\")",
         ),
     ];
-
     tabla_metodos(
         ui,
         "grid_transformacion_string",
-        "3. Transformación y Formato (Nuevos Valores)",
-        "Operaciones que no mutan el original, sino que generan una nueva vista prestada (&str) o un nuevo String en Heap.",
-        &state.editor.syntax_set,
-        &state.editor.theme_set.themes["base16-ocean.dark"],
+        "Transformación",
+        "Métodos que devuelven una vista o una nueva String sin cambiar el texto original.",
+        syntax_set,
+        theme,
         &filas_transformacion,
     );
 }
