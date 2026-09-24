@@ -10,6 +10,7 @@ use crate::views::pilares::anatomy::{
     codigo_inline_chip, codigo_resaltado_bloque, codigo_terminal_bloque, punto_lista,
     titulo_seccion,
 };
+use crate::app::ui::{cell_centered, inline_code_chip_color, table_code_snippet, EducationalTable};
 pub mod primitivos;
 use self::primitivos::{
     mostrar_categoria_booleanos, mostrar_categoria_caracteres, mostrar_categoria_casting,
@@ -855,7 +856,263 @@ fn generar_railroad_color_image() -> Option<egui::ColorImage> {
     ))
 }
 
-pub fn mostrar_contenido_macros(ui: &mut egui::Ui) {
+pub fn mostrar_contenido_macros(ui: &mut egui::Ui, state: &AppState) {
+    let orange = egui::Color32::from_rgb(255, 160, 50);
+    let text_col = egui::Color32::from_rgb(205, 215, 230);
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+
+    ui.heading(
+        egui::RichText::new("Macros")
+            .size(20.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(6.0);
+    ui.label(
+        egui::RichText::new(
+            "Las macros permiten escribir una sintaxis que Rust transforma en código durante la compilación. Esta tabla reúne las Declarative Macros más utilizadas de la biblioteca estándar.",
+        )
+        .size(13.5)
+        .color(text_col),
+    );
+    ui.add_space(10.0);
+
+    ui.heading(
+        egui::RichText::new("Format Strings")
+            .size(18.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new(
+            "Los Format Strings indican cómo mostrar un valor dentro de macros como println!, print!, format! y write!. El tipo debe ser compatible con el formato elegido.",
+        )
+        .size(13.5)
+        .color(text_col),
+    );
+    ui.add_space(8.0);
+
+    EducationalTable::new(
+        "tabla_format_strings",
+        &["Sintaxis", "Nombre", "Ejemplo de Código", "Uso"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let formatos = [
+            ("{}", "Display", "println!(\"{}\", valor);", "Salida legible para usuarios."),
+            ("{:?}", "Debug", "println!(\"{:?}\", valor);", "Inspección técnica en una línea."),
+            ("{:#?}", "Pretty Debug", "println!(\"{:#?}\", datos);", "Debug con formato expandido."),
+            ("{0}", "Positional argument", "println!(\"{0} - {0}\", valor);", "Reutiliza el argumento en una posición."),
+            ("{nombre}", "Named argument", "println!(\"Hola, {nombre}\");", "Inserta un argumento por nombre."),
+            ("{:b}", "Binary", "println!(\"{:b}\", numero);", "Muestra un entero en base 2."),
+            ("{:o}", "Octal", "println!(\"{:o}\", numero);", "Muestra un entero en base 8."),
+            ("{:x}", "Hexadecimal", "println!(\"{:x}\", numero);", "Muestra un entero en hexadecimal minúsculo."),
+            ("{:X}", "Hexadecimal uppercase", "println!(\"{:X}\", numero);", "Muestra un entero en hexadecimal mayúsculo."),
+            ("{:e}", "Scientific", "println!(\"{:e}\", decimal);", "Muestra un decimal en notación científica."),
+            ("{:E}", "Scientific uppercase", "println!(\"{:E}\", decimal);", "Usa la notación científica con E mayúscula."),
+            ("{:.2}", "Precision", "println!(\"{:.2}\", precio);", "Muestra dos cifras decimales."),
+            ("{:>10}", "Right alignment", "println!(\"{:>10}\", texto);", "Alinea el valor a la derecha."),
+            ("{:<10}", "Left alignment", "println!(\"{:<10}\", texto);", "Alinea el valor a la izquierda."),
+            ("{:^10}", "Center alignment", "println!(\"{:^10}\", texto);", "Centra el valor dentro del ancho."),
+            ("{:0>8}", "Fill and width", "println!(\"{:0>8}\", numero);", "Rellena con ceros hasta ocho posiciones."),
+            ("{:+}", "Explicit sign", "println!(\"{:+}\", numero);", "Muestra también el signo positivo."),
+            ("{:#x}", "Alternate form", "println!(\"{:#x}\", numero);", "Añade el prefijo 0x al hexadecimal."),
+            ("{:p}", "Pointer", "println!(\"{:p}\", &valor);", "Muestra la dirección de una referencia."),
+            ("{{ }}", "Literal braces", "println!(\"{{{{}}}}\");", "Muestra llaves como texto literal."),
+            ("{:width$}", "Dynamic width", "println!(\"{:width$}\", texto, width = 10);", "Recibe el ancho desde otro argumento."),
+            ("{:.precision$}", "Dynamic precision", "println!(\"{:.precision$}\", valor, precision = 2);", "Recibe la precisión desde otro argumento."),
+        ];
+
+        for (sintaxis, nombre, ejemplo, uso) in formatos {
+            body.row(|ui| {
+                cell_centered(ui, |ui| inline_code_chip_color(ui, sintaxis, orange));
+                ui.label(egui::RichText::new(nombre).size(12.0).color(text_col));
+                table_code_snippet(ui, ejemplo, &state.editor.syntax_set, theme, "rs");
+                ui.label(egui::RichText::new(uso).size(12.0).color(text_col));
+            });
+        }
+    });
+
+    ui.add_space(18.0);
+    ui.heading(
+        egui::RichText::new("Declarative Macros")
+            .size(18.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new(
+            "Estas macros utilizan patrones para generar código. Las macros de salida de la tabla anterior usan este mismo sistema de invocación con el signo !.",
+        )
+        .size(13.5)
+        .color(text_col),
+    );
+    ui.add_space(8.0);
+
+    let declarative_max_col_width = ((ui.available_width() - 120.0) / 4.0).max(140.0);
+    EducationalTable::new(
+        "tabla_macros_declarativas",
+        &["Macro", "Propósito", "Ejemplo de Código", "Comportamiento"],
+    )
+    .min_col_width(90.0)
+    .max_col_width(declarative_max_col_width)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        let macros = [
+            ("print!", "Escritura en stdout", "print!(\"Cargando...\");", "Escribe sin salto de línea."),
+            ("println!", "Escritura en stdout", "println!(\"Hola, Rust!\");", "Escribe y añade un salto de línea."),
+            ("eprint!", "Escritura en stderr", "eprint!(\"Error\");", "Escribe errores sin salto de línea."),
+            ("eprintln!", "Escritura en stderr", "eprintln!(\"Error\");", "Escribe errores con salto de línea."),
+            ("format!", "Crear texto formateado", "let s = format!(\"x = {}\", 10);", "Devuelve un String sin imprimirlo."),
+            ("write!", "Escribir texto formateado", "write!(salida, \"x = {}\", 10);", "Escribe en un destino que acepta formato."),
+            ("writeln!", "Escribir con salto", "writeln!(salida, \"Listo\");", "Escribe texto y añade un salto de línea."),
+            ("dbg!", "Inspección de valores", "let y = dbg!(x * 2);", "Muestra información de depuración y devuelve el valor."),
+            ("vec!", "Crear un vector", "let valores = vec![1, 2, 3];", "Construye un Vec<T> con los valores indicados."),
+            ("assert!", "Comprobar una condición", "assert!(edad >= 18);", "Continúa si es true y genera un panic si es false."),
+            ("assert_eq!", "Comparar igualdad", "assert_eq!(actual, esperado);", "Comprueba que dos valores sean iguales."),
+            ("assert_ne!", "Comparar diferencia", "assert_ne!(a, b);", "Comprueba que dos valores sean diferentes."),
+            ("panic!", "Interrumpir la ejecución", "panic!(\"Fallo crítico\");", "Detiene el hilo actual con un mensaje."),
+            ("todo!", "Marcar una tarea pendiente", "todo!(\"Implementar\");", "Indica código pendiente y genera un panic al ejecutarse."),
+            ("unimplemented!", "Marcar una función pendiente", "unimplemented!();", "Indica que todavía no existe una implementación."),
+            ("unreachable!", "Marcar un camino imposible", "unreachable!();", "Indica que esa parte del código no debería alcanzarse."),
+            ("matches!", "Comprobar un patrón", "matches!(valor, Some(_));", "Devuelve true si el valor coincide con el patrón."),
+            ("concat!", "Unir literales", "concat!(\"Rust\", \"!\");", "Concatena textos conocidos durante la compilación."),
+            ("stringify!", "Convertir código en texto", "stringify!(a + b);", "Convierte los tokens recibidos en un String literal."),
+            ("env!", "Leer una variable de entorno", "env!(\"CARGO_PKG_NAME\");", "Obtiene su valor durante la compilación."),
+            ("option_env!", "Leer una variable opcional", "option_env!(\"MI_VALOR\");", "Devuelve un Option según exista la variable."),
+            ("include_str!", "Incluir texto", "include_str!(\"datos.txt\");", "Incluye un archivo como texto durante la compilación."),
+            ("include_bytes!", "Incluir bytes", "include_bytes!(\"datos.bin\");", "Incluye un archivo como bytes durante la compilación."),
+            ("line!", "Consultar la línea", "line!();", "Devuelve la línea del código fuente."),
+            ("column!", "Consultar la columna", "column!();", "Devuelve la columna del código fuente."),
+            ("file!", "Consultar el archivo", "file!();", "Devuelve la ruta del archivo fuente."),
+            ("module_path!", "Consultar el módulo", "module_path!();", "Devuelve la ruta del módulo actual."),
+            ("cfg!", "Consultar configuración", "cfg!(debug_assertions);", "Evalúa una condición de compilación y devuelve bool."),
+            ("compile_error!", "Detener la compilación", "compile_error!(\"Configuración inválida\");", "Genera un error de compilación personalizado."),
+            ("macro_rules!", "Definir una macro", "macro_rules! repetir { ($x:expr) => { $x }; }", "Define una Declarative Macro basada en patrones."),
+        ];
+
+        for (nombre, proposito, ejemplo, comportamiento) in macros {
+            body.row(|ui| {
+                cell_centered(ui, |ui| inline_code_chip_color(ui, nombre, orange));
+                ui.label(egui::RichText::new(proposito).size(12.0).color(text_col));
+                table_code_snippet(ui, ejemplo, &state.editor.syntax_set, theme, "rs");
+                ui.label(
+                    egui::RichText::new(comportamiento)
+                        .size(12.0)
+                        .color(text_col),
+                );
+            });
+        }
+    });
+
+    ui.add_space(18.0);
+    ui.heading(
+        egui::RichText::new("Compiler Attributes (Lint Attributes)")
+            .size(18.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new("Los Compiler Attributes utilizan la sintaxis #[...] para dar instrucciones al compilador. Los Lint Attributes controlan advertencias del código; se escriben encima del elemento al que afectan y no son macros.")
+            .size(13.5)
+            .color(text_col),
+    );
+    ui.add_space(8.0);
+
+    ui.label(
+        egui::RichText::new("allow: permitir una situación concreta")
+            .size(15.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new("Evita una advertencia específica cuando sabes que el código es intencional.")
+            .size(13.0)
+            .color(text_col),
+    );
+    ui.add_space(6.0);
+    codigo_resaltado_bloque(
+        ui,
+        "#[allow(unused_variables)]\nfn ejemplo() {\n    let resultado = 10;\n}",
+        &state.editor.syntax_set,
+        theme,
+        "rs",
+    );
+
+    ui.add_space(14.0);
+    ui.label(
+        egui::RichText::new("warn: solicitar una advertencia")
+            .size(15.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new("Activa una advertencia para el elemento indicado cuando se detecta ese lint.")
+            .size(13.0)
+            .color(text_col),
+    );
+    ui.add_space(6.0);
+    codigo_resaltado_bloque(
+        ui,
+        "#[warn(dead_code)]\nfn auxiliar() {}",
+        &state.editor.syntax_set,
+        theme,
+        "rs",
+    );
+
+    ui.add_space(14.0);
+    ui.label(
+        egui::RichText::new("deny: convertir una advertencia en error")
+            .size(15.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new("Impide compilar cuando aparece el lint indicado.")
+            .size(13.0)
+            .color(text_col),
+    );
+    ui.add_space(6.0);
+    codigo_resaltado_bloque(
+        ui,
+        "#[deny(unused_imports)]\nuse std::fmt::Debug;",
+        &state.editor.syntax_set,
+        theme,
+        "rs",
+    );
+
+    ui.add_space(14.0);
+    ui.label(
+        egui::RichText::new("forbid: impedir que el lint se relaje")
+            .size(15.0)
+            .strong()
+            .color(orange),
+    );
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new("Bloquea ese lint de forma más estricta y no permite cambiarlo posteriormente con allow.")
+            .size(13.0)
+            .color(text_col),
+    );
+    ui.add_space(6.0);
+    codigo_resaltado_bloque(
+        ui,
+        "#[forbid(unsafe_code)]\nfn seguro() {\n    println!(\"Código sin unsafe\");\n}",
+        &state.editor.syntax_set,
+        theme,
+        "rs",
+    );
+}
+
+#[allow(dead_code)]
+fn mostrar_contenido_macros_legacy(ui: &mut egui::Ui) {
     ui.heading(
         egui::RichText::new("Categorías de Macros en Rust")
             .size(18.0)
@@ -1637,6 +1894,7 @@ pub fn mostrar_nav_superior(ui: &mut egui::Ui, state: &mut AppState) {
                     let tabs_teoria = [
                         (7, "Core"),
                         (4, "Data Types"),
+                        (5, "Macros"),
                     ];
                     for (indice, texto) in tabs_teoria {
                         let es_activo = state.lessons.conceptos_tab == indice;
@@ -1714,7 +1972,12 @@ pub fn mostrar_tutorial_conceptos_basicos(ui: &mut egui::Ui, state: &mut AppStat
     match state.lessons.conceptos_tab {
         0 => funciones::mostrar(ui, state),
         4 => mostrar_contenido_tipos_primitivos(ui, state),
-        5 => mostrar_contenido_macros(ui),
+        5 => {
+            egui::ScrollArea::vertical()
+                .id_salt("conceptos_macros_scroll")
+                .auto_shrink([false, false])
+                .show(ui, |ui| mostrar_contenido_macros(ui, state));
+        }
         7 => {
             egui::ScrollArea::vertical()
                 .id_salt("conceptos_core_mechanics_scroll")
@@ -2172,7 +2435,40 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "5. const: un valor fijo", cyan);
+        titulo_seccion(ui, "5. Indicar que una variable no se utilizará", cyan);
+        ui.indent("conceptos_variable_prefijo_guion_bajo", |ui| {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.label(
+                    egui::RichText::new("Si una variable comienza con")
+                        .size(13.0)
+                        .color(text_col),
+                );
+                codigo_inline_chip(ui, "_");
+                ui.label(
+                    egui::RichText::new(", Rust entiende que probablemente no utilizarás su valor y no muestra la advertencia correspondiente.")
+                        .size(13.0)
+                        .color(text_col),
+                );
+            });
+            ui.add_space(6.0);
+            codigo_resaltado_bloque(
+                ui,
+                "let _resultado = 10;",
+                &state.editor.syntax_set,
+                &theme,
+                "rs",
+            );
+            ui.add_space(5.0);
+            ui.label(
+                egui::RichText::new("El nombre sigue siendo una variable; el prefijo indica tu intención de no utilizarla por ahora.")
+                    .size(12.5)
+                    .color(text_col),
+            );
+            ui.add_space(12.0);
+        });
+
+        titulo_seccion(ui, "6. const: un valor fijo", cyan);
         ui.indent("conceptos_const_intro", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
@@ -2195,7 +2491,7 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "6. static: un valor global", cyan);
+        titulo_seccion(ui, "7. static: un valor global", cyan);
         ui.indent("conceptos_static_intro", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
@@ -2213,7 +2509,7 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "7. type: un alias legible", cyan);
+        titulo_seccion(ui, "8. type: un alias legible", cyan);
         ui.indent("conceptos_type_intro", |ui| {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
@@ -2233,7 +2529,7 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "8. Comparar let, let mut, const y static", orange);
+        titulo_seccion(ui, "9. Comparar let, let mut, const y static", orange);
         ui.indent("conceptos_variables_comparacion", |ui| {
             ui.add_space(4.0);
             ui.label(
@@ -2316,35 +2612,39 @@ fn mostrar_retos_conceptos_drawer(
             ui.add_space(12.0);
         });
 
-        titulo_seccion(ui, "2. Procedural macros", cyan);
-        ui.indent("conceptos_macros_procedurales", |ui| {
+        titulo_seccion(ui, "2. Compiler Attributes (Lint Attributes)", cyan);
+        ui.indent("conceptos_macros_compiler_attributes", |ui| {
             ui.add_space(4.0);
-            ui.label(
-                egui::RichText::new(
-                    "Las Procedural macros reciben código, lo analizan y generan código nuevo durante la compilación. Son más avanzadas y pueden aparecer como macros function-like, derive o attribute. Por ahora basta con reconocer que pertenecen a una segunda categoría de macros.",
-                )
-                .size(13.0)
-                .color(text_col)
-                .line_height(Some(19.0)),
-            );
-            ui.add_space(7.0);
-            for (tipo, descripcion) in [
+            ui.horizontal_wrapped(|ui| {
+                ui.label(
+                    egui::RichText::new("Los Compiler Attributes usan la sintaxis")
+                        .size(13.0)
+                        .color(text_col),
+                );
+                codigo_inline_chip(ui, "#[...]");
+                ui.label(
+                    egui::RichText::new("para dar instrucciones al compilador y controlar algunas advertencias.")
+                        .size(13.0)
+                        .color(text_col),
+                );
+            });
+            ui.add_space(6.0);
+            for (atributo, descripcion) in [
                 (
-                    "Function-like macros",
-                    "se invocan con una sintaxis parecida a una función y terminan en !.",
+                    "#[allow(unused_variables)]",
+                    "permite variables que todavía no se utilizan sin mostrar esa advertencia.",
                 ),
                 (
-                    "Derive macros",
-                    "generan implementaciones para un struct o enum mediante #[derive(...)].",
+                    "#[allow(dead_code)]",
+                    "permite código declarado que aún no se utiliza.",
                 ),
                 (
-                    "Attribute macros",
-                    "aplican instrucciones especiales sobre una función, struct o módulo.",
+                    "#[allow(unused_imports)]",
+                    "permite imports que todavía no se utilizan.",
                 ),
             ] {
                 ui.horizontal_wrapped(|ui| {
-                    punto_lista(ui, bullet_col);
-                    codigo_inline_chip(ui, tipo);
+                    codigo_inline_chip(ui, atributo);
                     ui.label(
                         egui::RichText::new(descripcion)
                             .size(12.5)
@@ -2353,6 +2653,12 @@ fn mostrar_retos_conceptos_drawer(
                 });
                 ui.add_space(3.0);
             }
+            ui.add_space(4.0);
+            ui.label(
+                egui::RichText::new("No son macros: son instrucciones integradas del compilador, aunque usan una sintaxis parecida.")
+                    .size(12.5)
+                    .color(text_col),
+            );
             ui.add_space(12.0);
         });
     } else if current == 2 {
@@ -3074,8 +3380,8 @@ fn retos_conceptos() -> [(&'static str, &'static str, &'static str, &'static str
         ),
         (
             "Macros",
-            "Macros y println!",
-            "Una macro puede adaptar o generar código antes de compilar. En Rust, el signo ! indica una invocación de macro; println! muestra información en la terminal.",
+            "Declarative macros y Compiler Attributes",
+            "Una Declarative Macro puede adaptar o generar código antes de compilar. También conocerás los Compiler Attributes, como #[allow(...)], que controlan advertencias del compilador.",
             "println!(\"Hola, Rust!\");",
         ),
         (

@@ -43,6 +43,7 @@ pub struct EducationalTable<'a> {
     id: &'a str,
     headers: Vec<&'a str>,
     min_col_width: f32,
+    max_col_width: Option<f32>,
     spacing: [f32; 2],
 }
 
@@ -52,12 +53,18 @@ impl<'a> EducationalTable<'a> {
             id,
             headers: headers.to_vec(),
             min_col_width: 100.0,
+            max_col_width: None,
             spacing: [18.0, 6.0],
         }
     }
 
     pub fn min_col_width(mut self, width: f32) -> Self {
         self.min_col_width = width;
+        self
+    }
+
+    pub fn max_col_width(mut self, width: f32) -> Self {
+        self.max_col_width = Some(width);
         self
     }
 
@@ -75,7 +82,9 @@ impl<'a> EducationalTable<'a> {
         frame.fill = Colors::BG_CARD;
         frame.inner_margin = egui::Margin {
             left: 20,
-            right: 18,
+            // egui::Grid extiende visualmente las franjas laterales de sus filas.
+            // Este margen mantiene esas franjas dentro del borde del Frame.
+            right: 46,
             top: 10,
             bottom: 10,
         };
@@ -85,12 +94,22 @@ impl<'a> EducationalTable<'a> {
         let num_cols = self.headers.len();
 
         frame.show(ui, |ui| {
-            Grid::new(self.id)
+            // La tabla ocupa únicamente el ancho disponible del panel. Así,
+            // una celda con contenido largo no puede ensanchar todo el layout.
+            let table_width = ui.available_width();
+            ui.set_width(table_width);
+            ui.set_max_width(table_width);
+
+            let mut grid = Grid::new(self.id)
                 .striped(true)
                 .num_columns(num_cols)
                 .min_col_width(self.min_col_width)
-                .spacing(self.spacing)
-                .show(ui, |ui| {
+                .spacing(self.spacing);
+            if let Some(max_col_width) = self.max_col_width {
+                grid = grid.max_col_width(max_col_width);
+            }
+
+            grid.show(ui, |ui| {
                     // Encabezados con estilo consistente y alineados a la izquierda
                     for header in &self.headers {
                         cell_centered(ui, |ui| {

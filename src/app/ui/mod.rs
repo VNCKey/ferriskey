@@ -24,7 +24,7 @@ pub use card::{
 #[allow(unused_imports)]
 pub use code::{
     code_block, code_box, highlighted_code, highlighted_code_block, inline_code_chip,
-    inline_code_chip_color, table_code_snippet, CodePresentation,
+    inline_code_chip_color, inline_highlighted_code, table_code_snippet, CodePresentation,
 };
 #[allow(unused_imports)]
 pub use modal::{mostrar_modal_diagrama, parse_svg_dimensions};

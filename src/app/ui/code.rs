@@ -45,6 +45,35 @@ pub fn inline_code_chip_color(ui: &mut egui::Ui, code: &str, color: egui::Color3
     });
 }
 
+/// Chip inline con la misma superficie visual que el código inline, pero con
+/// colores de sintaxis para fragmentos Rust cortos dentro de una explicación.
+pub fn inline_highlighted_code(
+    ui: &mut egui::Ui,
+    code: &str,
+    syntax_set: &SyntaxSet,
+    theme: &Theme,
+    extension: &str,
+) {
+    let mut frame = egui::Frame::new();
+    frame.fill = Colors::BG_CODE_INLINE;
+    frame.inner_margin = Margin::symmetric(6, 2);
+    frame.corner_radius = CornerRadius::same(Spacing::ROUND_SM);
+    frame.stroke = Stroke::new(1.0, Colors::BORDER_SUBTLE);
+
+    frame.show(ui, |ui| {
+        let galley = syntax_layouter_with_font_size(
+            ui,
+            code,
+            f32::INFINITY,
+            syntax_set,
+            theme,
+            extension,
+            12.0,
+        );
+        ui.add(egui::Label::new(galley).selectable(true));
+    });
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CodePresentation {
     Block,

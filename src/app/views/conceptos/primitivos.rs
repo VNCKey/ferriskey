@@ -5,7 +5,7 @@ use crate::views::conceptos::mostrar_selector_proyectos_estandar_con_archivos;
 use crate::views::control_flujo::card_frame_tutorial;
 use crate::views::pilares::anatomy::{codigo_resaltado_bloque, punto_lista};
 use crate::app::ui::{
-    card, centered_grid, cell_centered, cell_centered_horizontal, texto_con_chips_inline, EducationalTable, inline_code_chip, inline_code_chip_color, table_code_snippet,
+    card, centered_grid, cell_centered, cell_centered_horizontal, texto_con_chips_inline, EducationalTable, inline_code_chip_color, inline_highlighted_code, table_code_snippet,
     section_heading, session_title, Colors, Typography,
 };
 use eframe::egui;
@@ -55,6 +55,44 @@ fn mostrar_tabla_metodos(
         });
 }
 
+fn mostrar_tabla_logica(
+    ui: &mut egui::Ui,
+    state: &AppState,
+    id: &str,
+    titulo: &str,
+    introduccion: &str,
+    filas: &[(&str, &str, &str, &str, &str)],
+) {
+    ui.add_space(18.0);
+    section_heading(ui, titulo);
+    ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new(introduccion)
+            .font(Typography::body())
+            .color(Colors::TEXT_PRIMARY)
+            .line_height(Some(20.0)),
+    );
+    ui.add_space(8.0);
+
+    EducationalTable::new(
+        id,
+        &["Operación", "Compuerta", "Ejemplo", "Resultado", "Qué hace"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        for (operacion, compuerta, descripcion, ejemplo, resultado) in filas {
+            body.row(|ui| {
+                cell_centered(ui, |ui| inline_code_chip_color(ui, operacion, Colors::CYAN_ACCENT));
+                cell_centered(ui, |ui| inline_code_chip_color(ui, compuerta, Colors::ORANGE_RUST));
+                codigo_rust_tabla(ui, ejemplo, state);
+                cell_centered(ui, |ui| inline_code_chip_color(ui, resultado, Colors::TEXT_PRIMARY));
+                texto_con_chips_inline(ui, descripcion, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
+            });
+        }
+    });
+}
+
 fn mostrar_tabla_constantes(
     ui: &mut egui::Ui,
     state: &AppState,
@@ -102,6 +140,8 @@ pub(crate) fn mostrar_enteros_interactivo(
     state: &mut AppState,
     mostrar_encabezado: bool,
 ) {
+    let syntax_theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+
     if mostrar_encabezado {
         session_title(ui, "Tipos Primitivos: Enteros");
         ui.add_space(8.0);
@@ -154,17 +194,18 @@ pub(crate) fn mostrar_enteros_interactivo(
     ui.columns(2, |columns| {
         // --- COLUMNA 1 (IZQUIERDA): ENTEROS i ---
         columns[0].vertical(|ui| {
+            ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new("Enteros con signo")
+                        .font(Typography::card_title())
+                        .strong()
+                        .color(Colors::ORANGE_RUST),
+                );
+                inline_code_chip_color(ui, "i", Colors::ORANGE_RUST);
+            });
+            ui.add_space(6.0);
+
             card(ui, |ui| {
-                ui.horizontal(|ui| {
-                    ui.label(
-                        egui::RichText::new("Enteros con signo")
-                            .font(Typography::card_title())
-                            .strong()
-                            .color(Colors::ORANGE_RUST),
-                    );
-                    inline_code_chip_color(ui, "i", Colors::ORANGE_RUST);
-                });
-                ui.add_space(8.0);
 
                 centered_grid(ui, "grid_enteros_con_signo_layout", |ui| {
                     egui::Grid::new("grid_enteros_con_signo")
@@ -218,14 +259,7 @@ pub(crate) fn mostrar_enteros_interactivo(
                                         .color(Colors::TEXT_MUTED),
                                 );
                             });
-                            cell_centered(ui, |ui| {
-                                ui.label(
-                                    egui::RichText::new(rango)
-                                        .monospace()
-                                        .size(11.5)
-                                        .color(Colors::TEXT_MUTED),
-                                );
-                            });
+                            codigo_rust_tabla(ui, rango, state);
                             ui.end_row();
                         }
                         })
@@ -235,17 +269,18 @@ pub(crate) fn mostrar_enteros_interactivo(
 
         // --- COLUMNA 2 (DERECHA): ENTEROS u ---
         columns[1].vertical(|ui| {
+            ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new("Enteros sin signo")
+                        .font(Typography::card_title())
+                        .strong()
+                        .color(Colors::CYAN_ACCENT),
+                );
+                inline_code_chip_color(ui, "u", Colors::CYAN_ACCENT);
+            });
+            ui.add_space(6.0);
+
             card(ui, |ui| {
-                ui.horizontal(|ui| {
-                    ui.label(
-                        egui::RichText::new("Enteros sin signo")
-                            .font(Typography::card_title())
-                            .strong()
-                            .color(Colors::CYAN_ACCENT),
-                    );
-                    inline_code_chip_color(ui, "u", Colors::CYAN_ACCENT);
-                });
-                ui.add_space(8.0);
 
                 centered_grid(ui, "grid_enteros_sin_signo_layout", |ui| {
                     egui::Grid::new("grid_enteros_sin_signo")
@@ -295,14 +330,7 @@ pub(crate) fn mostrar_enteros_interactivo(
                                         .color(Colors::TEXT_MUTED),
                                 );
                             });
-                            cell_centered(ui, |ui| {
-                                ui.label(
-                                    egui::RichText::new(rango)
-                                        .monospace()
-                                        .size(11.5)
-                                        .color(Colors::TEXT_MUTED),
-                                );
-                            });
+                            codigo_rust_tabla(ui, rango, state);
                             ui.end_row();
                         }
                         })
@@ -328,19 +356,25 @@ pub(crate) fn mostrar_enteros_interactivo(
                     .font(Typography::body())
                     .color(Colors::TEXT_PRIMARY),
             );
-            inline_code_chip(ui, "let x = 5;");
+            inline_highlighted_code(ui, "let x = 5;", &state.editor.syntax_set, syntax_theme, "rs");
             ui.label(
                 egui::RichText::new(", el compilador lo infiere automáticamente como")
                     .font(Typography::body())
                     .color(Colors::TEXT_PRIMARY),
             );
-            inline_code_chip_color(ui, "i32", Colors::ORANGE_RUST);
+            inline_highlighted_code(ui, "i32", &state.editor.syntax_set, syntax_theme, "rs");
             ui.label(
                 egui::RichText::new("por defecto (equivalente a")
                     .font(Typography::body())
                     .color(Colors::TEXT_PRIMARY),
             );
-            inline_code_chip(ui, "let x: i32 = 5;");
+            inline_highlighted_code(
+                ui,
+                "let x: i32 = 5;",
+                &state.editor.syntax_set,
+                syntax_theme,
+                "rs",
+            );
             ui.label(
                 egui::RichText::new("), por ser el tipo más eficiente y equilibrado en la mayoría de procesadores modernos.")
                     .font(Typography::body())
@@ -718,6 +752,8 @@ pub fn mostrar_categoria_enteros(ui: &mut egui::Ui) {
 }
 
 pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui, state: &AppState) {
+    let syntax_theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+
     session_title(ui, "Tipos Primitivos: Decimales (Flotantes)");
     ui.add_space(8.0);
     ui.label(
@@ -827,21 +863,47 @@ pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui, state: &AppState) {
                     .font(Typography::body())
                     .color(Colors::TEXT_PRIMARY),
             );
-            inline_code_chip(ui, "let x = 3.14;");
+            inline_highlighted_code(
+                ui,
+                "let x = 3.14;",
+                &state.editor.syntax_set,
+                syntax_theme,
+                "rs",
+            );
+        });
+        ui.add_space(2.0);
+        ui.horizontal_wrapped(|ui| {
             ui.label(
                 egui::RichText::new(", el compilador lo infiere automáticamente como")
                     .font(Typography::body())
                     .color(Colors::TEXT_PRIMARY),
             );
-            inline_code_chip_color(ui, "f64", Colors::ORANGE_RUST);
+            inline_highlighted_code(ui, "f64", &state.editor.syntax_set, syntax_theme, "rs");
             ui.label(
                 egui::RichText::new("por defecto (equivalente a")
                     .font(Typography::body())
                     .color(Colors::TEXT_PRIMARY),
             );
-            inline_code_chip(ui, "let x: f64 = 3.14;");
+        });
+        ui.add_space(2.0);
+        ui.horizontal_wrapped(|ui| {
+            inline_highlighted_code(
+                ui,
+                "let x: f64 = 3.14;",
+                &state.editor.syntax_set,
+                syntax_theme,
+                "rs",
+            );
             ui.label(
-                egui::RichText::new("), ya que en CPUs modernas ofrece mayor precisión con un rendimiento prácticamente idéntico a f32.")
+                egui::RichText::new(
+                    "), ya que en CPUs modernas ofrece mayor precisión con un rendimiento prácticamente idéntico a",
+                )
+                .font(Typography::body())
+                .color(Colors::TEXT_PRIMARY),
+            );
+            inline_highlighted_code(ui, "f32", &state.editor.syntax_set, syntax_theme, "rs");
+            ui.label(
+                egui::RichText::new(".")
                     .font(Typography::body())
                     .color(Colors::TEXT_PRIMARY),
             );
@@ -951,25 +1013,25 @@ pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui, state: &AppState) {
         );
         ui.add_space(6.0);
         ui.horizontal_wrapped(|ui| {
-            punto_lista(ui, Colors::ORANGE_RUST);
+            punto_lista(ui, Colors::TEXT_MUTED);
             ui.label(egui::RichText::new("División entera (truncada):").font(Typography::body()).color(Colors::TEXT_PRIMARY));
-            inline_code_chip_color(ui, "5 / 2", Colors::CYAN_ACCENT);
+            inline_code_chip_color(ui, "5 / 2", Colors::TEXT_PRIMARY);
             ui.label(egui::RichText::new("evalúa a").font(Typography::body()).color(Colors::TEXT_PRIMARY));
-            inline_code_chip_color(ui, "2", Colors::GREEN_ACCENT);
+            inline_code_chip_color(ui, "2", Colors::TEXT_PRIMARY);
         });
         ui.add_space(3.0);
         ui.horizontal_wrapped(|ui| {
-            punto_lista(ui, Colors::CYAN_ACCENT);
+            punto_lista(ui, Colors::TEXT_MUTED);
             ui.label(egui::RichText::new("División flotante exacta:").font(Typography::body()).color(Colors::TEXT_PRIMARY));
-            inline_code_chip_color(ui, "5.0 / 2.0", Colors::CYAN_ACCENT);
+            inline_code_chip_color(ui, "5.0 / 2.0", Colors::TEXT_PRIMARY);
             ui.label(egui::RichText::new("evalúa a").font(Typography::body()).color(Colors::TEXT_PRIMARY));
-            inline_code_chip_color(ui, "2.5", Colors::GREEN_ACCENT);
+            inline_code_chip_color(ui, "2.5", Colors::TEXT_PRIMARY);
         });
         ui.add_space(3.0);
         ui.horizontal_wrapped(|ui| {
             punto_lista(ui, Colors::TEXT_MUTED);
             ui.label(egui::RichText::new("No se pueden mezclar tipos directamente; requiere casting:").font(Typography::body()).color(Colors::TEXT_PRIMARY));
-            inline_code_chip_color(ui, "(5 as f64) / 2.0", Colors::CYAN_ACCENT);
+            inline_code_chip_color(ui, "(5 as f64) / 2.0", Colors::TEXT_PRIMARY);
         });
     });
 
@@ -1094,16 +1156,30 @@ pub fn mostrar_categoria_flotantes(ui: &mut egui::Ui, state: &AppState) {
 }
 
 pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
+    let syntax_theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+
     session_title(ui, "Tipos Primitivos: Booleanos (bool)");
     ui.add_space(4.0);
     ui.label(
-        egui::RichText::new(
-            "El tipo booleano representa una verdad lógica simple. En Rust solo existen dos valores posibles: true y false, ocupando 1 byte en memoria.",
-        )
+        egui::RichText::new("El tipo booleano representa una verdad lógica simple. En Rust solo existen dos valores posibles:")
         .font(Typography::body())
         .color(Colors::TEXT_PRIMARY)
-        .line_height(Some(20.0)),
+        .line_height(Some(20.0))
     );
+    ui.horizontal_wrapped(|ui| {
+        inline_highlighted_code(ui, "true", &state.editor.syntax_set, syntax_theme, "rs");
+        ui.label(
+            egui::RichText::new("y")
+                .font(Typography::body())
+                .color(Colors::TEXT_PRIMARY),
+        );
+        inline_highlighted_code(ui, "false", &state.editor.syntax_set, syntax_theme, "rs");
+        ui.label(
+            egui::RichText::new(", ocupando 1 byte en memoria.")
+                .font(Typography::body())
+                .color(Colors::TEXT_PRIMARY),
+        );
+    });
     ui.add_space(10.0);
 
     EducationalTable::new(
@@ -1116,9 +1192,9 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
         body.row(|ui| {
             cell_centered(ui, |ui| inline_code_chip_color(ui, "bool", Colors::ORANGE_RUST));
             cell_centered_horizontal(ui, |ui| {
-                inline_code_chip_color(ui, "true", Colors::GREEN_ACCENT);
+                inline_code_chip_color(ui, "true", Colors::TEXT_PRIMARY);
                 ui.label(egui::RichText::new("|").color(Colors::TEXT_MUTED));
-                inline_code_chip_color(ui, "false", Colors::ERROR);
+                inline_code_chip_color(ui, "false", Colors::TEXT_PRIMARY);
             });
             cell_centered(ui, |ui| {
                 ui.label(
@@ -1177,17 +1253,12 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
                     );
                 });
                 codigo_rust_tabla(ui, ej, state);
-                let res_color = if res == "true" {
-                    Colors::TEXT_PRIMARY
-                } else {
-                    Colors::ERROR
-                };
-                cell_centered(ui, |ui| inline_code_chip_color(ui, res, res_color));
+                cell_centered(ui, |ui| inline_code_chip_color(ui, res, Colors::TEXT_PRIMARY));
             });
         }
     });
 
-    mostrar_tabla_metodos(
+    mostrar_tabla_logica(
         ui,
         state,
         "grid_metodos_booleanos",
@@ -1196,25 +1267,29 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
         &[
             (
                 "!valor",
-                "Invierte true a false y false a true (NOT).",
+                "NOT",
+                "Invierte true a false y false a true.",
                 "!true",
                 "false",
             ),
             (
                 "a && b",
-                "Verdadero solo si ambos son true con cortocircuito (AND).",
+                "AND",
+                "Verdadero solo si ambos son true con cortocircuito.",
                 "true && false",
                 "false",
             ),
             (
                 "a || b",
-                "Verdadero si al menos uno es true con cortocircuito (OR).",
+                "OR",
+                "Verdadero si al menos uno es true con cortocircuito.",
                 "true || false",
                 "true",
             ),
             (
                 "a ^ b",
-                "Verdadero si los valores son diferentes (XOR).",
+                "XOR",
+                "Verdadero si los valores son diferentes.",
                 "true ^ false",
                 "true",
             ),
@@ -1231,105 +1306,99 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
     );
     ui.add_space(8.0);
 
-    card(ui, |ui| {
-        ui.horizontal(|ui| {
-            ui.label(
-                egui::RichText::new("Entrada A:")
-                    .font(Typography::body())
-                    .strong()
-                    .color(Colors::TEXT_WHITE),
-            );
-            if ui
-                .selectable_label(
-                    state.dashboard.bool_sim_a,
-                    egui::RichText::new(if state.dashboard.bool_sim_a {
-                        "TRUE"
-                    } else {
-                        "FALSE"
-                    })
-                    .strong(),
-                )
-                .clicked()
-            {
-                state.dashboard.bool_sim_a = !state.dashboard.bool_sim_a;
-            }
+    ui.horizontal(|ui| {
+        ui.label(
+            egui::RichText::new("Entrada A:")
+                .font(Typography::body())
+                .strong()
+                .color(Colors::TEXT_WHITE),
+        );
+        if ui
+            .selectable_label(
+                state.dashboard.bool_sim_a,
+                egui::RichText::new(if state.dashboard.bool_sim_a {
+                    "TRUE"
+                } else {
+                    "FALSE"
+                })
+                .strong()
+                .color(Colors::TEXT_PRIMARY),
+            )
+            .clicked()
+        {
+            state.dashboard.bool_sim_a = !state.dashboard.bool_sim_a;
+        }
 
-            ui.add_space(20.0);
+        ui.add_space(20.0);
 
-            ui.label(
-                egui::RichText::new("Entrada B:")
-                    .font(Typography::body())
-                    .strong()
-                    .color(Colors::TEXT_WHITE),
-            );
-            if ui
-                .selectable_label(
-                    state.dashboard.bool_sim_b,
-                    egui::RichText::new(if state.dashboard.bool_sim_b {
-                        "TRUE"
-                    } else {
-                        "FALSE"
-                    })
-                    .strong(),
-                )
-                .clicked()
-            {
-                state.dashboard.bool_sim_b = !state.dashboard.bool_sim_b;
-            }
-        });
+        ui.label(
+            egui::RichText::new("Entrada B:")
+                .font(Typography::body())
+                .strong()
+                .color(Colors::TEXT_WHITE),
+        );
+        if ui
+            .selectable_label(
+                state.dashboard.bool_sim_b,
+                egui::RichText::new(if state.dashboard.bool_sim_b {
+                    "TRUE"
+                } else {
+                    "FALSE"
+                })
+                .strong()
+                .color(Colors::TEXT_PRIMARY),
+            )
+            .clicked()
+        {
+            state.dashboard.bool_sim_b = !state.dashboard.bool_sim_b;
+        }
+    });
 
-        ui.add_space(10.0);
-        ui.separator();
-        ui.add_space(10.0);
+    ui.add_space(14.0);
 
-        let a = state.dashboard.bool_sim_a;
-        let b = state.dashboard.bool_sim_b;
+    let a = state.dashboard.bool_sim_a;
+    let b = state.dashboard.bool_sim_b;
 
-        let resultados = [
-            (
-                "A && B",
-                "AND",
-                "Verdadero solo si AMBAS son verdaderas.",
-                a && b,
-            ),
-            (
-                "A || B",
-                "OR",
-                "Verdadero si AL MENOS UNA es verdadera.",
-                a || b,
-            ),
-            (
-                "A ^ B",
-                "XOR",
-                "Verdadero si son DIFERENTES entre sí.",
-                a ^ b,
-            ),
-            ("!A", "NOT", "Invierte el valor de A.", !a),
-        ];
+    let resultados = [
+        (
+            "A && B",
+            "AND",
+            "Verdadero solo si ambas son verdaderas.",
+            a && b,
+        ),
+        (
+            "A || B",
+            "OR",
+            "Verdadero si al menos una es verdadera.",
+            a || b,
+        ),
+        (
+            "A ^ B",
+            "XOR",
+            "Verdadero si son diferentes entre sí.",
+            a ^ b,
+        ),
+        ("!A", "NOT", "Invierte el valor de A.", !a),
+    ];
 
-        EducationalTable::new(
-            "grid_simulador_logico",
-            &["Operación", "Compuerta", "Resultado", "Descripción"],
-        )
-        .min_col_width(90.0)
-        .spacing(18.0, 6.0)
-        .show(ui, |body| {
-            for (op, compuerta, desc, res) in resultados {
-                body.row(|ui| {
-                    cell_centered(ui, |ui| inline_code_chip_color(ui, op, Colors::CYAN_ACCENT));
-                    cell_centered(ui, |ui| inline_code_chip_color(ui, compuerta, Colors::ORANGE_RUST));
+    EducationalTable::new(
+        "grid_simulador_logico",
+        &["Operación", "Compuerta", "Resultado", "Descripción"],
+    )
+    .min_col_width(90.0)
+    .spacing(18.0, 6.0)
+    .show(ui, |body| {
+        for (op, compuerta, desc, res) in resultados {
+            body.row(|ui| {
+                cell_centered(ui, |ui| inline_code_chip_color(ui, op, Colors::CYAN_ACCENT));
+                cell_centered(ui, |ui| inline_code_chip_color(ui, compuerta, Colors::ORANGE_RUST));
 
-                    let (res_text, res_color) = if res {
-                        ("TRUE", Colors::TEXT_PRIMARY)
-                    } else {
-                        ("FALSE", Colors::ERROR)
-                    };
+                let res_text = if res { "TRUE" } else { "FALSE" };
 
-                    cell_centered(ui, |ui| inline_code_chip_color(ui, res_text, res_color));
-                    texto_con_chips_inline(ui, desc, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
-                });
-            }
-        });
+                cell_centered(ui, |ui| inline_code_chip_color(ui, res_text, Colors::TEXT_PRIMARY));
+                texto_con_chips_inline(ui, desc, Colors::TEXT_PRIMARY, Colors::CYAN_ACCENT);
+            });
+        }
     });
 }
 
@@ -1473,14 +1542,14 @@ pub fn mostrar_categoria_caracteres(ui: &mut egui::Ui, state: &AppState) {
     ui.add_space(4.0);
     ui.label(
         egui::RichText::new(
-            "Como char es un valor escalar Unicode de 32 bits, podemos convertirlo explícitamente a un u32 o formato Hexadecimal para inspeccionar su valor real:",
+            "Cada char representa un carácter Unicode. Podemos convertirlo a u32 para consultar su código numérico en decimal y hexadecimal:",
         )
         .font(Typography::body())
         .color(Colors::TEXT_PRIMARY),
     );
     ui.add_space(8.0);
 
-    let codigo_unicode = "fn main() {\n    let letra: char = '🦀';\n    let numero_crudo = letra as u32; // Casting a entero de 32 bits: 129408 (0x1F980)\n\n    // Convertimos de u32 a char de nuevo (devuelve Option porque podría no ser un Unicode válido)\n    let volver = char::from_u32(numero_crudo).unwrap();\n\n    println!(\"Unicode de '🦀': {} [U+{:X}]\", numero_crudo, numero_crudo);\n    println!(\"Recuperado: {}\", volver);\n}";
+    let codigo_unicode = "let letra: char = '🦀';\nlet codigo = letra as u32;\n\nprintln!(\"Decimal: {codigo}\");\nprintln!(\"Hexadecimal: U+{codigo:X}\");";
     let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
     codigo_resaltado_bloque(ui, codigo_unicode, &state.editor.syntax_set, theme, "rs");
 }
