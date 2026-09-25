@@ -1,70 +1,80 @@
+use crate::app::ui::*;
 use crate::app::AppState;
-use crate::views::control_flujo::card_frame_tutorial;
-use eframe::egui;
+use crate::views::funciones::grupo_funciones;
+use eframe::egui::{self, RichText};
 
-pub fn mostrar_tab_parametros(
-    ui: &mut egui::Ui,
-    state: &mut AppState,
-    naranja: egui::Color32,
-    cyan: egui::Color32,
-    texto: egui::Color32,
-) {
+pub fn mostrar_tab_parametros(ui: &mut egui::Ui, state: &mut AppState) {
     ui.label(
-        egui::RichText::new(
-            "En Rust existen 3 formas fundamentales de recibir parámetros en una función según la gestión de memoria (Ownership & Borrowing): por valor (transferencia de propiedad), por préstamo inmutable (&T) y por préstamo mutable (&mut T).",
+        RichText::new(
+            "Los parámetros indican qué datos necesita una función. La forma de recibirlos define si la función toma Ownership, presta el valor o puede modificarlo.",
         )
-        .color(texto),
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
     );
-    ui.add_space(12.0);
+    ui.add_space(16.0);
 
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_fn_parametros_ownership")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Forma de Recibir").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Efecto en la Memoria (Ownership)").strong().color(egui::Color32::WHITE));
-                ui.end_row();
+    section_heading(ui, "Formas de recibir datos");
+    ui.label(
+        RichText::new(
+            "Compara las tres formas básicas antes de elegir cómo diseñar una función.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
 
-                // Valor (T)
-                ui.label(egui::RichText::new("Valor (T)").strong().color(naranja));
-                let code_val = "fn consumir(texto: String) {\n    println!(\"{texto}\");\n}\n\nlet s = String::from(\"Rust\");\nconsumir(s); // 's' se mueve a la función y deja de ser válida aquí".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Parámetro por Valor (T)".to_string(), code_val));
-                }
-                ui.label("La función toma la propiedad (Ownership). La variable original se Mueve (o Copia si es de tipo primitivo).");
-                ui.end_row();
+    grupo_funciones(
+        ui,
+        (
+            "Por valor: T",
+            "La función recibe el valor. Si el tipo no implementa `Copy`, la variable original deja de poder utilizarse después del `call`.",
+            "fn consumir(texto: String) {\n    println!(\"{texto}\");\n}\n\nlet texto = String::from(\"Rust\");\nconsumir(texto);",
+        ),
+        (
+            "Borrowing: &T",
+            "La función recibe una referencia de solo lectura. El dueño conserva su `Ownership` y puede seguir utilizando el valor.",
+            "fn longitud(texto: &String) -> usize {\n    texto.len()\n}\n\nlet texto = String::from(\"Rust\");\nlet cantidad = longitud(&texto);",
+        ),
+        state,
+    );
 
-                // Borrowing (&T)
-                ui.label(egui::RichText::new("Borrowing (&T)").strong().color(naranja));
-                let code_ref = "fn calcular_longitud(texto: &String) -> usize {\n    texto.len()\n}\n\nlet s = String::from(\"Rust\");\nlet len = calcular_longitud(&s); // 's' sigue siendo válida después".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Parámetro por Borrowing (&T)".to_string(), code_ref));
-                }
-                ui.label("Presta el valor de solo lectura. La función lee el dato sin quitarle la propiedad a la variable dueña.");
-                ui.end_row();
+    divider(ui);
+    section_heading(ui, "Permitir modificaciones");
+    ui.label(
+        RichText::new(
+            "Una referencia mutable presta el valor con permiso explícito para cambiarlo en la función.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
 
-                // Borrowing Mutable (&mut T)
-                ui.label(egui::RichText::new("Borrowing Mutable (&mut T)").strong().color(naranja));
-                let code_mut = "fn agregar_saludo(texto: &mut String) {\n    texto.push_str(\", Hola!\");\n}\n\nlet mut s = String::from(\"Rust\");\nagregar_saludo(&mut s);".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Parámetro por Borrowing Mutable (&mut T)".to_string(), code_mut));
-                }
-                ui.label("Presta el valor con permiso de modificación in-situ. Permite alterar la variable original en memoria.");
-                ui.end_row();
-            });
-    });
+    grupo_funciones(
+        ui,
+        (
+            "Borrowing Mutable: &mut T",
+            "`&mut T` permite modificar el valor original. La variable dueña debe declararse con `let mut`.",
+            "fn agregar_saludo(texto: &mut String) {\n    texto.push_str(\", hola\");\n}\n\nlet mut texto = String::from(\"Rust\");\nagregar_saludo(&mut texto);",
+        ),
+        (
+            "Regla de acceso",
+            "Durante el mismo acceso no se mezclan una referencia mutable y referencias inmutables al mismo valor.",
+            "let mut texto = String::from(\"Rust\");\nlet lectura = &texto;\n\nprintln!(\"{lectura}\");\n\nlet cambio = &mut texto;\ncambio.push('!');",
+        ),
+        state,
+    );
+
+    divider(ui);
+    section_heading(ui, "Cómo elegir");
+    ui.label(
+        RichText::new(
+            "Usa `T` cuando la función debe recibir la propiedad, `&T` cuando solo necesita leer y `&mut T` cuando debe modificar el valor original.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
 }

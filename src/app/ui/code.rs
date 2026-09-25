@@ -170,14 +170,69 @@ pub fn table_code_snippet(
     theme: &Theme,
     extension: &str,
 ) {
-    highlighted_code(
+    // En una celda de Grid el widget puede recibir todo el ancho de la
+    // columna. Medimos primero el código para que el bloque conserve un ancho
+    // proporcional al texto y solo se ajuste cuando realmente necesita
+    // envolver una línea larga.
+    let horizontal_padding = 14.0;
+    let vertical_padding = 8.0;
+    let outer_vertical_margin = 6.0;
+    let available_width = ui.available_width().max(40.0);
+    let natural_galley = syntax_layouter_with_font_size(
         ui,
         code,
+        f32::INFINITY,
         syntax_set,
         theme,
         extension,
-        CodePresentation::Compact,
+        12.0,
     );
+    let max_content_width = (available_width - horizontal_padding).max(1.0);
+    let galley = if natural_galley.size().x > max_content_width {
+        syntax_layouter_with_font_size(
+            ui,
+            code,
+            max_content_width,
+            syntax_set,
+            theme,
+            extension,
+            12.0,
+        )
+    } else {
+        natural_galley
+    };
+
+    let block_size = egui::vec2(
+        (galley.size().x + horizontal_padding).min(available_width),
+        galley.size().y + vertical_padding,
+    );
+    let outer_size = egui::vec2(block_size.x, block_size.y + outer_vertical_margin);
+    let (outer_rect, _) = ui.allocate_exact_size(outer_size, egui::Sense::hover());
+    let block_rect = egui::Rect::from_min_size(
+        egui::pos2(outer_rect.left(), outer_rect.top() + outer_vertical_margin * 0.5),
+        block_size,
+    );
+
+    if ui.is_rect_visible(block_rect) {
+        ui.painter().rect(
+            block_rect,
+            CornerRadius::same(5),
+            egui::Color32::from_rgb(12, 18, 27),
+            Stroke::new(
+                1.0,
+                egui::Color32::from_rgba_unmultiplied(255, 160, 50, 72),
+            ),
+            egui::StrokeKind::Inside,
+        );
+        ui.painter().galley(
+            egui::pos2(
+                block_rect.left() + horizontal_padding * 0.5,
+                block_rect.top() + vertical_padding * 0.5,
+            ),
+            galley,
+            egui::Color32::WHITE,
+        );
+    }
 }
 
 /// Bloque de código con encabezado, nombre de archivo o título y botón de copiar al portapapeles

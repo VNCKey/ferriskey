@@ -18,6 +18,53 @@ use syntect::parsing::SyntaxSet;
 mod binary_analyzer;
 use binary_analyzer::{BinaryCardStyle, BinaryProfile, mostrar_ficha_binario};
 
+/// Renderiza una explicación del Code Lab y convierte los fragmentos entre
+/// backticks en chips de código inline. Así los términos Rust conservan el
+/// mismo borde, fondo y resaltado que el resto de la aplicación.
+fn texto_codelab_con_codigo(
+    ui: &mut egui::Ui,
+    texto: &str,
+    text_col: egui::Color32,
+    syntax_set: &SyntaxSet,
+    theme: &Theme,
+) {
+    for (indice_parrafo, parrafo) in texto.split("\n\n").enumerate() {
+        if indice_parrafo > 0 {
+            ui.add_space(4.0);
+        }
+
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing.x = 3.0;
+
+            for (indice_fragmento, fragmento) in parrafo.split('`').enumerate() {
+                if fragmento.is_empty() {
+                    continue;
+                }
+
+                if indice_fragmento % 2 == 1 {
+                    crate::app::ui::inline_highlighted_code(
+                        ui,
+                        fragmento,
+                        syntax_set,
+                        theme,
+                        "rs",
+                    );
+                } else {
+                    ui.add(
+                        egui::Label::new(
+                            egui::RichText::new(fragmento)
+                                .size(13.0)
+                                .color(text_col)
+                                .line_height(Some(19.0)),
+                        )
+                        .wrap_mode(egui::TextWrapMode::Wrap),
+                    );
+                }
+            }
+        });
+    }
+}
+
 pub struct CodeLabConfig {
     pub project_selector_id: &'static str,
     pub separator_id: &'static str,
@@ -1092,6 +1139,33 @@ pub fn mostrar_reto_codelab_item(
             "Paths & Imports" => &["crate::", "use", "as"],
             "Re-export & Public API" => &["pub use", "API", "Facade"],
             "Module File Structure" => &["src/", "main.rs", "mod.rs"],
+            "Array" => &["[T; N]", "Index", "Destructuring Pattern"],
+            "Tuplas" => &["Tuple", ".0", "Destructuring Pattern"],
+            "Collections" => &["Vec", "HashMap", "len"],
+            "Slices" => &["&[T]", "&mut [T]", "Range"],
+            "Condicionales" => &["if", "else if", "bool"],
+            "Bucles" => &["loop", "while", "for"],
+            "Match" => &["match", "_", "Pattern Matching"],
+            "Closure básico" => &["Closure", "| |", "Expression"],
+            "Captura del entorno" => &["Capture", "Fn", "FnMut"],
+            "move y Ownership" => &["move", "Ownership", "Capture"],
+            "Closures como parámetros" => &["impl Fn", "Parameter", "Closure"],
+            "Modos de iteración" => &[".iter()", ".iter_mut()", ".into_iter()"],
+            "Adaptadores perezosos" => &[".filter()", ".map()", "Lazy"],
+            "Consumidores" => &[".collect()", ".sum()", ".find()"],
+            "Pipeline y tipos de salida" => &["collect::<T>()", "HashSet", "Type"],
+            "Structs" => &["Struct", "Fields", "impl"],
+            "Enums" => &["Enum", "Variants", "Pattern"],
+            "Traits" => &["Trait", "impl", "Behavior"],
+            "Pattern Matching" => &["if let", "while let", "Variant"],
+            "panic!" => &["panic!", "assert!", "Unrecoverable"],
+            "Result" => &["Result", "Ok", "Err"],
+            "Match de Result" => &["match", "Ok", "Err"],
+            "Operador ?" => &["?", "Propagation", "Early return"],
+            "Generic Functions" => &["<T>", "Function", "Type"],
+            "Generic Structs" => &["Struct<T>", "Field", "Instance"],
+            "impl Trait" => &["impl Trait", "Behavior", "Parameter"],
+            "Type Inference" => &["Inference", "<T>", "Concrete Type"],
             _ => &[subtitulo],
         };
         for tag in tags {
@@ -1118,6 +1192,38 @@ pub fn mostrar_reto_codelab_item(
             | "String, Heap & Move Semantics"
             | "Ownership"
             | "Borrowing"
+            | "Declaration & Module Tree"
+            | "Visibility"
+            | "Paths & Imports"
+            | "Re-export & Public API"
+            | "Module File Structure"
+            | "Array"
+            | "Tuplas"
+            | "Collections"
+            | "Slices"
+            | "Condicionales"
+            | "Bucles"
+            | "Match"
+            | "Closure básico"
+            | "Captura del entorno"
+            | "move y Ownership"
+            | "Closures como parámetros"
+            | "Modos de iteración"
+            | "Adaptadores perezosos"
+            | "Consumidores"
+            | "Pipeline y tipos de salida"
+            | "Structs"
+            | "Enums"
+            | "Traits"
+            | "Pattern Matching"
+            | "panic!"
+            | "Result"
+            | "Match de Result"
+            | "Operador ?"
+            | "Generic Functions"
+            | "Generic Structs"
+            | "impl Trait"
+            | "Type Inference"
     ) {
         let introduccion = if titulo == "Stack & Copy Semantics" {
             "En esta parte aprenderás cómo Rust organiza valores simples en el Stack y qué ocurre cuando un valor puede copiarse automáticamente."
@@ -1125,15 +1231,74 @@ pub fn mostrar_reto_codelab_item(
             "En esta parte conocerás String, la memoria dinámica del Heap y el momento en que un valor pasa a otra variable mediante Move Semantics."
         } else if titulo == "Ownership" {
             "En esta parte aprenderás cómo Rust determina quién es responsable de cada valor y cuándo termina esa responsabilidad."
-        } else {
+        } else if titulo == "Borrowing" {
             "En esta parte aprenderás a utilizar un valor mediante una Reference sin tomar su Ownership."
+        } else if titulo == "Declaration & Module Tree" {
+            "En esta parte aprenderás a declarar módulos y a construir el árbol que organiza el código de tu crate."
+        } else if titulo == "Visibility" {
+            "En esta parte aprenderás cómo Rust protege los ítems por defecto y cómo exponer únicamente lo que otros módulos necesitan."
+        } else if titulo == "Paths & Imports" {
+            "En esta parte aprenderás a recorrer el árbol de módulos mediante rutas y a simplificar su uso con imports."
+        } else if titulo == "Re-export & Public API" {
+            "En esta parte aprenderás a ofrecer una API pública sencilla sin revelar la estructura interna de tu crate."
+        } else if titulo == "Array" {
+            "En esta parte aprenderás a trabajar con un Array paso a paso: desde su creación hasta su Destructuring Pattern."
+        } else if titulo == "Tuplas" {
+            "En esta parte aprenderás a agrupar valores diferentes en una Tuple y a separar sus elementos de forma clara."
+        } else if titulo == "Collections" {
+            "En esta parte aprenderás cómo guardar varios valores cuando una colección necesita crecer, reducirse o relacionar claves con valores."
+        } else if titulo == "Slices" {
+            "En esta parte aprenderás a crear vistas sobre datos existentes sin copiar la colección original."
+        } else if titulo == "Condicionales" {
+            "En esta parte aprenderás a elegir entre caminos y a obtener valores mediante condiciones booleanas."
+        } else if titulo == "Bucles" {
+            "En esta parte aprenderás a repetir acciones con la construcción adecuada y a controlar cada vuelta."
+        } else if titulo == "Match" {
+            "En esta parte aprenderás a comparar valores con patrones y a cubrir todos los casos posibles."
+        } else if titulo == "Closure básico" {
+            "En esta parte aprenderás qué es un Closure, cómo se escribe y cómo se guarda para ejecutarlo después."
+        } else if titulo == "Captura del entorno" {
+            "En esta parte aprenderás cómo un Closure utiliza variables externas y cómo cambia la captura cuando necesita modificarlas."
+        } else if titulo == "move y Ownership" {
+            "En esta parte aprenderás cómo move transfiere el Ownership de los valores capturados al Closure."
+        } else if titulo == "Closures como parámetros" {
+            "En esta parte aprenderás a pasar un Closure a una función para separar la operación de la estructura que la ejecuta."
+        } else if titulo == "Modos de iteración" {
+            "En esta parte aprenderás a elegir entre prestar referencias, modificar elementos o consumir una colección completa."
+        } else if titulo == "Adaptadores perezosos" {
+            "En esta parte aprenderás a construir transformaciones encadenadas que esperan a un consumidor para ejecutarse."
+        } else if titulo == "Consumidores" {
+            "En esta parte aprenderás a convertir un pipeline en un resultado final mediante consumidores como collect, sum y find."
+        } else if titulo == "Pipeline y tipos de salida" {
+            "En esta parte aprenderás a indicar qué colección debe construir collect y cómo utilizar Turbofish para aclarar el tipo."
+        } else if titulo == "Structs" {
+            "En esta parte aprenderás a agrupar datos relacionados mediante campos nombrados y a construir instancias de una Struct."
+        } else if titulo == "Enums" {
+            "En esta parte aprenderás a representar alternativas con variantes simples o con datos asociados."
+        } else if titulo == "Traits" {
+            "En esta parte aprenderás a definir comportamiento compartido y a implementarlo para tus tipos propios."
+        } else if titulo == "Pattern Matching" {
+            "En esta parte aprenderás a comprobar variantes y extraer sus datos mediante if let y while let."
+        } else if titulo == "panic!" {
+            "En esta parte aprenderás cuándo un fallo debe detener el programa y cómo reconocer un estado irrecuperable."
+        } else if titulo == "Result" {
+            "En esta parte aprenderás a representar una operación que puede terminar con éxito o con un error recuperable."
+        } else if titulo == "Match de Result" {
+            "En esta parte aprenderás a separar el camino Ok del camino Err y a responder de forma explícita."
+        } else if titulo == "Operador ?" {
+            "En esta parte aprenderás cómo propagar un error temprano sin repetir un match completo en cada operación."
+        } else if titulo == "Generic Functions" {
+            "En esta parte aprenderás a crear una función que pueda utilizarse con distintos tipos mediante un parámetro de tipo."
+        } else if titulo == "Generic Structs" {
+            "En esta parte aprenderás a declarar una Struct adaptable y a crear instancias concretas con distintos tipos."
+        } else if titulo == "impl Trait" {
+            "En esta parte aprenderás una forma breve de recibir un valor que cumple un comportamiento conocido."
+        } else if titulo == "Type Inference" {
+            "En esta parte aprenderás cómo Rust deduce el tipo concreto de una llamada genérica cuando la información es suficiente."
+        } else {
+            "En esta parte relacionarás las declaraciones mod con los archivos y carpetas que Rust busca dentro de src/."
         };
-        ui.label(
-            egui::RichText::new(introduccion)
-                .size(13.5)
-                .color(text_col)
-                .line_height(Some(19.0)),
-        );
+        texto_codelab_con_codigo(ui, introduccion, text_col, syntax_set, theme);
         ui.add_space(14.0);
 
         let conceptos: Vec<&str> = explicacion.split("\n\n").collect();
@@ -1143,13 +1308,173 @@ pub fn mostrar_reto_codelab_item(
             &["1. String", "2. Heap", "3. Move Semantics"]
         } else if titulo == "Ownership" {
             &["1. Un propietario", "2. Un solo propietario", "3. Fin del Scope"]
-        } else {
+        } else if titulo == "Borrowing" {
             &[
                 "1. Borrowing",
                 "2. Immutable Reference",
                 "3. Multiple References",
                 "4. Mutable Reference",
                 "5. Borrowing Rules",
+            ]
+        } else if titulo == "Declaration & Module Tree" {
+            &["1. Module", "2. Module Tree", "3. Module Path"]
+        } else if titulo == "Visibility" {
+            &["1. Private by default", "2. pub", "3. pub(crate)"]
+        } else if titulo == "Paths & Imports" {
+            &[
+                "1. Module Path",
+                "2. crate::",
+                "3. self:: y super::",
+                "4. use",
+            ]
+        } else if titulo == "Re-export & Public API" {
+            &["1. Internal Module", "2. pub use", "3. Public API"]
+        } else if titulo == "Array" {
+            &[
+                "1. Crear un Array",
+                "2. Inicializar valores",
+                "3. Acceder y modificar",
+                "4. Destructuring Pattern",
+            ]
+        } else if titulo == "Tuplas" {
+            &[
+                "1. Crear una Tuple",
+                "2. Acceder por índice",
+                "3. Mutabilidad",
+                "4. Destructuring Pattern",
+                "5. Ignorar posiciones",
+            ]
+        } else if titulo == "Collections" {
+            &[
+                "1. Vec: tamaño dinámico",
+                "2. Crear y reservar espacio",
+                "3. Agregar y quitar",
+                "4. HashMap: clave y valor",
+            ]
+        } else if titulo == "Slices" {
+            &[
+                "1. Una vista prestada",
+                "2. Rangos",
+                "3. Slice mutable",
+                "4. Slices de texto",
+            ]
+        } else if titulo == "Condicionales" {
+            &[
+                "1. if y else",
+                "2. else if",
+                "3. if como expresión",
+                "4. Operadores lógicos",
+            ]
+        } else if titulo == "Bucles" {
+            &[
+                "1. loop",
+                "2. while",
+                "3. for y rangos",
+                "4. break y continue",
+            ]
+        } else if titulo == "Match" {
+            &[
+                "1. match y exhaustividad",
+                "2. Literales y rangos",
+                "3. _ y alternativas",
+                "4. Match guard",
+                "5. match como expresión",
+            ]
+        } else if titulo == "Closure básico" {
+            &["1. Sintaxis", "2. Parámetros", "3. Resultado"]
+        } else if titulo == "Captura del entorno" {
+            &["1. Captura inmutable", "2. Captura mutable"]
+        } else if titulo == "move y Ownership" {
+            &["1. move", "2. Transferencia de Ownership"]
+        } else if titulo == "Closures como parámetros" {
+            &["1. impl Fn", "2. Higher-Order Function"]
+        } else if titulo == "Modos de iteración" {
+            &["1. iter", "2. iter_mut", "3. into_iter"]
+        } else if titulo == "Adaptadores perezosos" {
+            &["1. filter", "2. map", "3. Lazy Evaluation"]
+        } else if titulo == "Consumidores" {
+            &["1. collect", "2. sum", "3. find"]
+        } else if titulo == "Pipeline y tipos de salida" {
+            &["1. Tipo de salida", "2. Turbofish"]
+        } else if titulo == "Structs" {
+            &[
+                "1. Declarar una Struct",
+                "2. Crear una instancia",
+                "3. Acceder a los campos",
+                "4. Modificar una instancia",
+                "5. Struct Update Syntax",
+                "6. Tuple Struct",
+                "7. Unit-like Struct",
+                "8. Destructuring Pattern",
+                "9. Derive básico",
+                "10. Bloque impl",
+                "11. Función asociada",
+                "12. Self y shorthand",
+                "13. Método con &self",
+                "14. Método con &mut self",
+                "15. Método con self",
+                "16. Method Chaining",
+            ]
+        } else if titulo == "Enums" {
+            &[
+                "1. Declarar un Enum",
+                "2. Variantes simples",
+                "3. Crear una Variant",
+                "4. Datos asociados",
+                "5. Variantes con campos",
+                "6. Revisar con match",
+                "7. Extraer datos",
+                "8. match como expresión",
+                "9. if let",
+                "10. impl para un Enum",
+                "11. Método del Enum",
+            ]
+        } else if titulo == "Traits" {
+            &[
+                "1. Declarar un Trait",
+                "2. Método requerido",
+                "3. Preparar una Struct",
+                "4. Implementar el Trait",
+                "5. Usar el comportamiento",
+                "6. Método por defecto",
+                "7. Sobrescribir un método",
+                "8. Implementar para un Enum",
+            ]
+        } else if titulo == "Pattern Matching" {
+            &[
+                "1. Pattern",
+                "2. match",
+                "3. Exhaustiveness",
+                "4. Wildcard _",
+                "5. Tuple Pattern",
+                "6. Struct Pattern",
+                "7. Alternativas |",
+                "8. Match guard",
+                "9. match como expresión",
+                "10. if let",
+                "11. while let",
+            ]
+        } else if titulo == "panic!" {
+            &["1. panic!", "2. assert!", "3. Fallo irrecuperable"]
+        } else if titulo == "Result" {
+            &["1. Result", "2. Ok", "3. Err", "4. Error recuperable"]
+        } else if titulo == "Match de Result" {
+            &["1. Revisar el resultado", "2. Camino Ok", "3. Camino Err"]
+        } else if titulo == "Operador ?" {
+            &["1. Comprobar con ?", "2. Propagar Err", "3. Continuar con Ok", "4. Requisito de la función"]
+        } else if titulo == "Generic Functions" {
+            &["1. Parámetro de tipo", "2. Entrada y salida", "3. Llamada concreta", "4. Reutilización"]
+        } else if titulo == "Generic Structs" {
+            &["1. Declarar Struct<T>", "2. Campo adaptable", "3. Crear instancias", "4. Tipo concreto"]
+        } else if titulo == "impl Trait" {
+            &["1. Trait como contrato", "2. Implementar comportamiento", "3. Parámetro impl Trait", "4. Alcance de la forma corta"]
+        } else if titulo == "Type Inference" {
+            &["1. Tipo temporal", "2. Inferir la llamada", "3. Mismo código, otro tipo"]
+        } else {
+            &[
+                "1. mod y archivos",
+                "2. File Structure",
+                "3. Estructura moderna",
             ]
         };
         let ejemplos: &[&str] = if titulo == "Stack & Copy Semantics" {
@@ -1166,13 +1491,250 @@ pub fn mostrar_reto_codelab_item(
                 "let original = String::from(\"Rust\");\nlet propietario = original;",
                 "{\n    let interno = String::from(\"Scope\");\n    println!(\"{interno}\");\n}",
             ]
-        } else {
+        } else if titulo == "Borrowing" {
             &[
                 "let texto = String::from(\"Rust\");\nlet vista = &texto;",
                 "let lectura = &texto;\nprintln!(\"{lectura}\");",
                 "let primera = &texto;\nlet segunda = &texto;",
                 "let cambio = &mut texto;\ncambio.push_str(\" seguro\");",
                 "let lectura = &texto;\n// let cambio = &mut texto; // no se mezclan durante el mismo acceso",
+            ]
+        } else if titulo == "Declaration & Module Tree" {
+            &[
+                "mod utilidades {\n    pub fn saludar() {}\n}",
+                "mod utilidades;",
+                "utilidades::saludar();",
+            ]
+        } else if titulo == "Visibility" {
+            &[
+                "fn secreto() {}",
+                "pub fn conectar() {}",
+                "pub(crate) fn diagnostico() {}",
+            ]
+        } else if titulo == "Paths & Imports" {
+            &[
+                "crate::red::conectar();",
+                "use crate::red::conectar;",
+                "self::configurar();\nsuper::validar();",
+                "use crate::red::conectar;\nconectar();",
+            ]
+        } else if titulo == "Re-export & Public API" {
+            &[
+                "mod interno {\n    pub fn procesar() {}\n}",
+                "pub use interno::procesar;",
+                "use crate::procesar;\nprocesar();",
+            ]
+        } else if titulo == "Array" {
+            &[
+                "let notas: [u8; 4] = [10, 12, 15, 18];",
+                "let ceros = [0; 4];",
+                "let mut notas = [10, 12, 15, 18];\nlet segunda = notas[1];\nnotas[0] = 20;",
+                "let [primera, _, .., ultima] = notas;",
+            ]
+        } else if titulo == "Tuplas" {
+            &[
+                "let datos = (\"Alicia\", 26, true);",
+                "let nombre = datos.0;\nlet edad = datos.1;",
+                "let mut punto = (10, 20);\npunto.0 = 15;",
+                "let (nombre, edad, activo) = datos;",
+                "let (_, edad, _) = datos;\nlet (primero, .., ultimo) = (10, 20, 30);",
+            ]
+        } else if titulo == "Collections" {
+            &[
+                "let mut niveles: Vec<u32> = Vec::new();",
+                "let mut valores = Vec::with_capacity(3);\nvalores.push(10);",
+                "valores.push(20);\nvalores.insert(1, 15);\nvalores.remove(0);\nvalores.pop();",
+                "use std::collections::HashMap;\nlet mut puntos = HashMap::new();\npuntos.insert(\"Rust\", 100);\nlet existe = puntos.contains_key(\"Rust\");",
+            ]
+        } else if titulo == "Slices" {
+            &[
+                "let datos = [10, 20, 30, 40, 50];\nlet vista: &[i32] = &datos[..];",
+                "let parte = &datos[1..4];",
+                "let mut valores = [10, 20, 30, 40];\nlet parte = &mut valores[1..3];\nparte[0] = 99;",
+                "let texto = String::from(\"Rust\");\nlet palabra: &str = &texto[..];",
+            ]
+        } else if titulo == "Condicionales" {
+            &[
+                "let edad = 20;\nlet acceso = if edad >= 18 {\n    \"permitido\"\n} else {\n    \"denegado\"\n};",
+                "let nota = 85;\nlet nivel = if nota >= 90 {\n    \"alto\"\n} else if nota >= 70 {\n    \"medio\"\n} else {\n    \"bajo\"\n};",
+                "let activo = true;\nlet estado = if activo { \"listo\" } else { \"inactivo\" };",
+                "let edad = 20;\nlet permiso = true;\nlet puede_entrar = edad >= 18 && permiso;",
+            ]
+        } else if titulo == "Bucles" {
+            &[
+                "let resultado = loop {\n    break 42;\n};",
+                "let mut contador = 0;\nwhile contador < 3 {\n    contador += 1;\n}",
+                "for numero in 1..=3 {\n    let _ = numero;\n}",
+                "for numero in 1..=5 {\n    if numero == 3 { continue; }\n    if numero == 5 { break; }\n}",
+            ]
+        } else if titulo == "Match" {
+            &[
+                "match valor {\n    0 => \"cero\",\n    _ => \"otro\",\n}",
+                "match edad {\n    0..=17 => \"menor\",\n    _ => \"adulto\",\n}",
+                "match tecla {\n    'q' | 'Q' => \"salir\",\n    _ => \"continuar\",\n}",
+                "match numero {\n    n if n % 2 == 0 => \"par\",\n    _ => \"impar\",\n}",
+                "let nivel = match nota {\n    90..=100 => 'A',\n    _ => 'F',\n};",
+            ]
+        } else if titulo == "Closure básico" {
+            &[
+                "let doble = |numero: i32| numero * 2;",
+                "let sumar = |a: i32, b: i32| a + b;",
+                "let resultado = doble(5);",
+            ]
+        } else if titulo == "Captura del entorno" {
+            &[
+                "let factor = 10;\nlet multiplicar = |numero| numero * factor;",
+                "let mut contador = 0;\nlet mut avanzar = || {\n    contador += 1;\n};",
+            ]
+        } else if titulo == "move y Ownership" {
+            &[
+                "let mensaje = String::from(\"Rust\");\nlet imprimir = move || println!(\"{mensaje}\");",
+                "imprimir();\n// println!(\"{mensaje}\"); // value moved",
+            ]
+        } else if titulo == "Closures como parámetros" {
+            &[
+                "fn aplicar(valor: i32, op: impl Fn(i32) -> i32) -> i32 {\n    op(valor)\n}",
+                "let resultado = aplicar(7, |numero| numero * numero);",
+            ]
+        } else if titulo == "Modos de iteración" {
+            &[
+                "let valores = vec![1, 2, 3];\nfor valor in valores.iter() {\n    let _ = valor;\n}",
+                "let mut valores = vec![1, 2, 3];\nfor valor in valores.iter_mut() {\n    *valor *= 2;\n}",
+                "let valores = vec![1, 2, 3];\nfor valor in valores.into_iter() {\n    let _ = valor;\n}",
+            ]
+        } else if titulo == "Adaptadores perezosos" {
+            &[
+                "let pares = datos.iter().filter(|n| **n % 2 == 0);",
+                "let dobles = datos.iter().map(|n| n * 2);",
+                "let resultado: Vec<_> = datos.iter().map(|n| n * 2).collect();",
+            ]
+        } else if titulo == "Consumidores" {
+            &[
+                "let valores: Vec<_> = datos.iter().collect();",
+                "let total: i32 = datos.iter().sum();",
+                "let encontrado = datos.iter().find(|n| **n > 5);",
+            ]
+        } else if titulo == "Pipeline y tipos de salida" {
+            &[
+                "let valores: Vec<i32> = datos.iter().copied().collect();",
+                "let valores = datos.iter().copied().collect::<Vec<_>>();",
+            ]
+        } else if titulo == "Structs" {
+            &[
+                "struct Usuario {\n    nombre: String,\n    edad: u32,\n}",
+                "let usuario = Usuario {\n    nombre: String::from(\"Ana\"),\n    edad: 25,\n};",
+                "let nombre = usuario.nombre;\nlet edad = usuario.edad;",
+                "let mut usuario = Usuario {\n    nombre: String::from(\"Ana\"),\n    edad: 25,\n};\n\nusuario.edad = 26;",
+                "let usuario2 = Usuario {\n    nombre: String::from(\"Luis\"),\n    ..usuario\n};",
+                "struct Color(u8, u8, u8);\n\nlet rojo = Color(255, 0, 0);\nlet primer_canal = rojo.0;",
+                "struct Marcador;\n\nlet _marcador = Marcador;",
+                "let usuario = Usuario {\n    nombre: String::from(\"Ana\"),\n    edad: 25,\n};\n\nlet Usuario { nombre, edad } = usuario;",
+                "#[derive(Debug, Clone)]\nstruct Usuario {\n    nombre: String,\n    edad: u32,\n}",
+                "impl Usuario {\n    // Aquí viven sus funciones y métodos\n}",
+                "impl Usuario {\n    fn nuevo(nombre: String, edad: u32) -> Usuario {\n        Usuario { nombre, edad }\n    }\n}",
+                "impl Usuario {\n    fn nuevo(nombre: String, edad: u32) -> Self {\n        Self { nombre, edad }\n    }\n}",
+                "impl Usuario {\n    fn es_adulto(&self) -> bool {\n        self.edad >= 18\n    }\n}",
+                "impl Usuario {\n    fn cumplir_anio(&mut self) {\n        self.edad += 1;\n    }\n}",
+                "impl Usuario {\n    fn extraer_nombre(self) -> String {\n        self.nombre\n    }\n}",
+                "impl Usuario {\n    fn sumar_edad(mut self, cantidad: u32) -> Self {\n        self.edad += cantidad;\n        self\n    }\n}\n\nlet usuario = Usuario::nuevo(String::from(\"Ana\"), 25)\n    .sumar_edad(1);",
+            ]
+        } else if titulo == "Enums" {
+            &[
+                "enum Estado {\n    Activo,\n    Apagado,\n}",
+                "enum Estado {\n    Activo,\n    Apagado,\n}",
+                "let estado = Estado::Activo;",
+                "enum Mensaje {\n    Texto(String),\n    Codigo(u16),\n    Fin,\n}\n\nlet mensaje = Mensaje::Texto(String::from(\"Hola\"));",
+                "enum Evento {\n    Mover { x: i32, y: i32 },\n    Cerrar,\n}\n\nlet evento = Evento::Mover { x: 10, y: 20 };",
+                "match estado {\n    Estado::Activo => println!(\"activo\"),\n    Estado::Apagado => println!(\"apagado\"),\n}",
+                "match mensaje {\n    Mensaje::Texto(texto) => println!(\"{texto}\"),\n    Mensaje::Codigo(codigo) => println!(\"{codigo}\"),\n    Mensaje::Fin => println!(\"fin\"),\n}",
+                "let etiqueta = match estado {\n    Estado::Activo => \"activo\",\n    Estado::Apagado => \"apagado\",\n};",
+                "if let Estado::Activo = estado {\n    println!(\"puede continuar\");\n}",
+                "impl Estado {\n    fn esta_activo(&self) -> bool {\n        match self {\n            Estado::Activo => true,\n            Estado::Apagado => false,\n        }\n    }\n}",
+                "impl Estado {\n    fn descripcion(&self) {\n        match self {\n            Estado::Activo => println!(\"activo\"),\n            Estado::Apagado => println!(\"apagado\"),\n        }\n    }\n}",
+            ]
+        } else if titulo == "Traits" {
+            &[
+                "trait Describible {\n    fn describir(&self);\n}",
+                "trait Describible {\n    fn describir(&self);\n}",
+                "struct Usuario {\n    nombre: String,\n}",
+                "impl Describible for Usuario {\n    fn describir(&self) {\n        println!(\"Usuario: {}\", self.nombre);\n    }\n}",
+                "let usuario = Usuario {\n    nombre: String::from(\"Ana\"),\n};\nusuario.describir();",
+                "trait Saludable {\n    fn saludar(&self) {\n        println!(\"Hola\");\n    }\n}",
+                "impl Saludable for Usuario {\n    fn saludar(&self) {\n        println!(\"Hola, {}\", self.nombre);\n    }\n}",
+                "enum Estado {\n    Activo,\n    Apagado,\n}\n\ntrait EstadoTexto {\n    fn mostrar(&self);\n}\n\nimpl EstadoTexto for Estado {\n    fn mostrar(&self) {\n        match self {\n            Estado::Activo => println!(\"activo\"),\n            Estado::Apagado => println!(\"apagado\"),\n        }\n    }\n}",
+            ]
+        } else if titulo == "Pattern Matching" {
+            &[
+                "enum Estado {\n    Activo,\n    Apagado,\n}",
+                "match estado {\n    Estado::Activo => println!(\"activo\"),\n    Estado::Apagado => println!(\"apagado\"),\n}",
+                "match estado {\n    Estado::Activo => println!(\"activo\"),\n    Estado::Apagado => println!(\"apagado\"),\n}",
+                "match estado {\n    Estado::Activo => println!(\"activo\"),\n    _ => println!(\"otro estado\"),\n}",
+                "enum Mensaje {\n    Texto(String),\n    Fin,\n}\n\nmatch mensaje {\n    Mensaje::Texto(texto) => println!(\"{texto}\"),\n    Mensaje::Fin => println!(\"fin\"),\n}",
+                "struct Punto {\n    x: i32,\n    y: i32,\n}\n\nmatch punto {\n    Punto { x, y: 0 } => println!(\"x = {x}\"),\n    _ => println!(\"otro punto\"),\n}",
+                "match estado {\n    Estado::Activo | Estado::Apagado => println!(\"estado conocido\"),\n}",
+                "match edad {\n    edad if edad >= 18 => println!(\"adulto\"),\n    _ => println!(\"menor\"),\n}",
+                "let etiqueta = match estado {\n    Estado::Activo => \"activo\",\n    Estado::Apagado => \"apagado\",\n};",
+                "if let Estado::Activo = estado {\n    println!(\"puede continuar\");\n}",
+                "let mut activo = true;\nwhile let true = activo {\n    println!(\"continúa\");\n    activo = false;\n}",
+            ]
+        } else if titulo == "panic!" {
+            &[
+                "panic!(\"El estado no puede continuar\");",
+                "let edad = 20;\nassert!(edad >= 18, \"La edad no permite continuar\");",
+                "// Un estado imposible detiene el programa\npanic!(\"Estado inválido\");",
+            ]
+        } else if titulo == "Result" {
+            &[
+                "let lectura = std::fs::read_to_string(\"config.txt\");",
+                "match lectura {\n    Ok(contenido) => println!(\"{contenido}\"),\n    Err(error) => println!(\"{error}\"),\n}",
+                "match lectura {\n    Ok(contenido) => println!(\"{contenido}\"),\n    Err(error) => println!(\"No se pudo leer: {error}\"),\n}",
+                "let alternativa = match lectura {\n    Ok(contenido) => contenido,\n    Err(_) => String::from(\"configuración local\"),\n};",
+            ]
+        } else if titulo == "Match de Result" {
+            &[
+                "let resultado = std::fs::read_to_string(\"config.txt\");\nmatch resultado {\n    Ok(texto) => println!(\"{texto}\"),\n    Err(error) => println!(\"{error}\"),\n}",
+                "match resultado {\n    Ok(texto) => println!(\"Archivo: {texto}\"),\n    Err(error) => println!(\"Se usará una alternativa: {error}\"),\n}",
+                "match resultado {\n    Ok(_) => println!(\"La lectura terminó correctamente\"),\n    Err(error) => println!(\"Debemos tratar el error: {error}\"),\n}",
+            ]
+        } else if titulo == "Operador ?" {
+            &[
+                "let contenido = std::fs::read_to_string(\"config.txt\")?;",
+                "let contenido = std::fs::read_to_string(\"config.txt\")?;\nprintln!(\"{contenido}\");",
+                "let primera = std::fs::read_to_string(\"primero.txt\")?;\nlet segunda = std::fs::read_to_string(\"segundo.txt\")?;",
+                "// La función debe devolver un resultado compatible\nlet contenido = std::fs::read_to_string(\"config.txt\")?;",
+            ]
+        } else if titulo == "Generic Functions" {
+            &[
+                "fn identidad<T>(valor: T) -> T {\n    valor\n}",
+                "fn identidad<T>(valor: T) -> T {\n    valor\n}",
+                "let numero = identidad(5);",
+                "let numero = identidad(5);\nlet texto = identidad(\"Rust\");",
+            ]
+        } else if titulo == "Generic Structs" {
+            &[
+                "struct Caja<T> {\n    valor: T,\n}",
+                "struct Caja<T> {\n    valor: T,\n}",
+                "let numero = Caja { valor: 10 };\nlet texto = Caja { valor: \"Rust\" };",
+                "let numero: Caja<i32> = Caja { valor: 10 };",
+            ]
+        } else if titulo == "impl Trait" {
+            &[
+                "trait Describible {\n    fn describir(&self);\n}",
+                "impl Describible for Mensaje {\n    fn describir(&self) {\n        println!(\"Mensaje\");\n    }\n}",
+                "fn mostrar(item: impl Describible) {\n    item.describir();\n}",
+                "// La forma corta pide un comportamiento,\n// no un tipo concreto específico.",
+            ]
+        } else if titulo == "Type Inference" {
+            &[
+                "fn identidad<T>(valor: T) -> T {\n    valor\n}",
+                "let numero = identidad(5);",
+                "let numero = identidad(5);\nlet texto = identidad(\"Rust\");",
+            ]
+        } else {
+            &[
+                "mod red;",
+                "src/red.rs\nsrc/red/http.rs",
+                "src/\n├── main.rs\n├── red.rs\n└── red/\n    └── http.rs",
             ]
         };
 
@@ -1181,12 +1743,7 @@ pub fn mostrar_reto_codelab_item(
             ui.indent(format!("memoria_concepto_{titulo}_{indice}"), |ui| {
                 ui.add_space(4.0);
                 if let Some(concepto) = conceptos.get(indice) {
-                    ui.label(
-                        egui::RichText::new(*concepto)
-                            .size(13.0)
-                            .color(text_col)
-                            .line_height(Some(19.0)),
-                    );
+                    texto_codelab_con_codigo(ui, concepto, text_col, syntax_set, theme);
                 }
                 ui.add_space(6.0);
                 if let Some(ejemplo) = ejemplos.get(indice) {
@@ -1196,12 +1753,7 @@ pub fn mostrar_reto_codelab_item(
             });
         }
     } else {
-        ui.label(
-            egui::RichText::new(explicacion)
-                .size(13.0)
-                .color(text_col)
-                .line_height(Some(19.0)),
-        );
+        texto_codelab_con_codigo(ui, explicacion, text_col, syntax_set, theme);
     }
 
     ui.add_space(14.0);
@@ -1209,12 +1761,7 @@ pub fn mostrar_reto_codelab_item(
     titulo_seccion(ui, "Tu práctica", orange);
     ui.add_space(8.0);
 
-    ui.label(
-        egui::RichText::new(paso_practico)
-            .size(13.0)
-            .color(text_col)
-            .line_height(Some(19.0)),
-    );
+    texto_codelab_con_codigo(ui, paso_practico, text_col, syntax_set, theme);
 
     ui.add_space(12.0);
 

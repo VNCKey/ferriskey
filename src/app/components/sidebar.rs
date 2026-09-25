@@ -139,7 +139,7 @@ pub fn mostrar_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
                 // 7. Funciones & Closures
                 if nav_item_sidebar(
                     ui,
-                    "Closures",
+                    "Functions & Closures",
                     state.ui.ruta_actual == AppRoute::TutorialFunciones,
                 )
                 .clicked()

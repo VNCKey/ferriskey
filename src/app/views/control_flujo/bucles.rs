@@ -1,149 +1,173 @@
+use crate::app::ui::*;
 use crate::app::AppState;
-use crate::views::control_flujo::card_frame_tutorial;
-use eframe::egui;
+use eframe::egui::{self, RichText};
+
+fn grupo_bucles(
+    ui: &mut egui::Ui,
+    izquierda: (&str, &str, &str),
+    derecha: (&str, &str, &str),
+    state: &AppState,
+) {
+    let syntax_set = &state.editor.syntax_set;
+    let theme = &state.editor.theme_set.themes["base16-ocean.dark"];
+
+    ui.columns(2, |columns| {
+        columns[0].label(
+            RichText::new(izquierda.0)
+                .font(Typography::card_title())
+                .strong()
+                .color(Colors::ORANGE_RUST),
+        );
+        columns[0].add_space(6.0);
+        columns[0].label(
+            RichText::new(izquierda.1)
+                .font(Typography::body_small())
+                .color(Colors::TEXT_PRIMARY)
+                .line_height(Some(19.0)),
+        );
+
+        columns[1].label(
+            RichText::new(derecha.0)
+                .font(Typography::card_title())
+                .strong()
+                .color(Colors::ORANGE_RUST),
+        );
+        columns[1].add_space(6.0);
+        columns[1].label(
+            RichText::new(derecha.1)
+                .font(Typography::body_small())
+                .color(Colors::TEXT_PRIMARY)
+                .line_height(Some(19.0)),
+        );
+    });
+    ui.add_space(10.0);
+
+    ui.columns(2, |columns| {
+        highlighted_code_block(&mut columns[0], izquierda.2, syntax_set, theme, "rs");
+        highlighted_code_block(&mut columns[1], derecha.2, syntax_set, theme, "rs");
+    });
+}
 
 pub fn mostrar_tab_bucles(ui: &mut egui::Ui, state: &mut AppState) {
-    let naranja = egui::Color32::from_rgb(255, 160, 50);
-    let cyan = egui::Color32::from_rgb(100, 200, 255);
-    let texto = egui::Color32::from_rgb(200, 210, 225);
-
     ui.label(
-        egui::RichText::new(
-            "Rust ofrece 3 construcciones de bucles principales: 'loop' para ciclos infinitos con capacidad de retorno de valor, 'while' para repetición condicional y 'for' para iterar sobre rangos y colecciones.",
+        RichText::new(
+            "Rust ofrece tres formas principales de repetición: loop, while y for. Cada una expresa una intención diferente y puede combinarse con break y continue.",
         )
-        .color(texto),
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
     );
-    ui.add_space(12.0);
-
-    // 1. Tabla de Sintaxis y Tipos de Bucles
-    ui.label(
-        egui::RichText::new("Tipos de Bucles y Sintaxis")
-            .strong()
-            .size(15.0)
-            .color(naranja),
-    );
-    ui.add_space(6.0);
-
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_bucles_rust_detalles")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Bucle / Control").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Reglas & Descripción").strong().color(egui::Color32::WHITE));
-                ui.end_row();
-
-                // Fila 1: loop
-                ui.label(egui::RichText::new("loop").strong().color(texto));
-                let code_loop = "let mut contador = 0;\n\nlet resultado = loop {\n    contador += 1;\n    if contador == 10 {\n        break contador * 2;\n    }\n};".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: loop con retorno".to_string(), code_loop));
-                }
-                ui.label("Ciclo infinito explícito. Permite devolver un valor mediante 'break valor;'.");
-                ui.end_row();
-
-                // Fila 2: while
-                ui.label(egui::RichText::new("while").strong().color(texto));
-                let code_while = "let mut numero = 3;\n\nwhile numero > 0 {\n    println!(\"{numero}!\");\n    numero -= 1;\n}".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: while".to_string(), code_while));
-                }
-                ui.label("Se ejecuta repetidamente mientras la condición booleana sea 'true'.");
-                ui.end_row();
-
-                // Fila 3: for
-                ui.label(egui::RichText::new("for").strong().color(texto));
-                let code_for = "for i in 1..=5 {\n    println!(\"Número: {i}\");\n}".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: for básico".to_string(), code_for));
-                }
-                ui.label("Itera sobre rangos o colecciones sin riesgo de salirse de los límites de memoria.");
-                ui.end_row();
-
-                // Fila 4: break / continue y Etiquetas
-                ui.label(egui::RichText::new("break / continue / 'etiqueta").strong().color(texto));
-                let code_break = "'externo: for i in 1..=3 {\n    for j in 1..=3 {\n        if i == 2 && j == 2 {\n            break 'externo;\n        }\n    }\n}".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Ejemplo de Sintaxis: Etiquetas de Bucles ('label)".to_string(), code_break));
-                }
-                ui.label("Controlan la ejecución. Las etiquetas ('nombre) permiten romper o continuar bucles anidados específicos.");
-                ui.end_row();
-            });
-    });
-
     ui.add_space(16.0);
 
-    // 2. Formas Básicas del Bucle 'for'
+    section_heading(ui, "Tipos de bucles");
     ui.label(
-        egui::RichText::new("Formas de Usar el Bucle 'for' en Rust")
-            .strong()
-            .size(15.0)
-            .color(naranja),
+        RichText::new(
+            "Elige el bucle según cómo sabes que debe terminar la repetición.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
     );
-    ui.add_space(6.0);
+    ui.add_space(10.0);
 
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_variantes_for_rust")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Forma de for").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Demostración").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
-                ui.end_row();
+    grupo_bucles(
+        ui,
+        (
+            "loop",
+            "Repite indefinidamente hasta que el código decide terminarlo con break.",
+            "let resultado = loop {\n    break 42;\n};",
+        ),
+        (
+            "while",
+            "Comprueba una condición antes de cada vuelta y continúa mientras sea true.",
+            "let mut n = 3;\n\nwhile n > 0 {\n    n -= 1;\n}",
+        ),
+        state,
+    );
 
-                // Rangos Exclusivos vs Inclusivos
-                ui.label(egui::RichText::new("Rangos (a..b y a..=b)").strong().color(texto));
-                let code_v1 = "// 1..5 -> Exclusivo (1, 2, 3, 4)\nfor i in 1..5 {\n    println!(\"{i}\");\n}\n\n// 1..=5 -> Inclusivo (1, 2, 3, 4, 5)\nfor i in 1..=5 {\n    println!(\"{i}\");\n}".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Uso de Rangos: Exclusivos vs Inclusivos".to_string(), code_v1));
-                }
-                ui.label("1..5 excluye el número 5 final; 1..=5 incluye el número 5 final.");
-                ui.end_row();
+    divider(ui);
+    section_heading(ui, "for y rangos");
+    ui.label(
+        RichText::new(
+            "for recorre los valores de un rango o los elementos de una colección sin que tengas que controlar manualmente cada índice.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
 
-                // Iteración sobre Colecciones (Arrays)
-                ui.label(egui::RichText::new("Iterar sobre Colecciones").strong().color(texto));
-                let code_v2 = "let numeros = [10, 20, 30];\n\n// Iteración simple por referencia de lectura\nfor num in &numeros {\n    println!(\"Elemento: {num}\");\n}".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Iterar Colecciones con for".to_string(), code_v2));
-                }
-                ui.label("Recorre directamente cada elemento del arreglo sin necesidad de manejar índices numéricos manuales.");
-                ui.end_row();
+    grupo_bucles(
+        ui,
+        (
+            "for sobre un rango",
+            "El rango 1..=3 incluye los dos límites y produce 1, 2 y 3.",
+            "for numero in 1..=3 {\n    let _ = numero;\n}",
+        ),
+        (
+            "for sobre una colección",
+            "Una referencia permite recorrer los elementos sin tomar la propiedad de la colección.",
+            "let numeros = [10, 20, 30];\n\nfor valor in &numeros {\n    let _ = valor;\n}",
+        ),
+        state,
+    );
 
-                // Control de Flujo Interno (break / continue)
-                ui.label(egui::RichText::new("Interrupción (break / continue)").strong().color(texto));
-                let code_v3 = "for i in 1..=10 {\n    if i % 2 == 0 {\n        continue; // Salta los pares\n    }\n    if i == 7 {\n        break; // Detiene el bucle en 7\n    }\n    println!(\"{i}\");\n}".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Control con break y continue".to_string(), code_v3));
-                }
-                ui.label("'continue' salta inmediatamente a la siguiente vuelta; 'break' aborta el bucle por completo.");
-                ui.end_row();
-            });
-    });
+    ui.add_space(12.0);
+    grupo_bucles(
+        ui,
+        (
+            "Rango exclusivo",
+            "1..5 termina antes de 5, por eso recorre 1, 2, 3 y 4.",
+            "for n in 1..5 {\n    let _ = n;\n}",
+        ),
+        (
+            "Rango inclusivo",
+            "1..=5 también incluye el límite final y recorre hasta 5.",
+            "for n in 1..=5 {\n    let _ = n;\n}",
+        ),
+        state,
+    );
+
+    divider(ui);
+    section_heading(ui, "break, continue y etiquetas");
+    ui.label(
+        RichText::new(
+            "Estas instrucciones cambian el recorrido de un bucle sin tener que añadir condiciones innecesarias alrededor de todo el código.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
+
+    grupo_bucles(
+        ui,
+        (
+            "break",
+            "Termina el bucle inmediatamente cuando ya no necesitas más vueltas.",
+            "loop {\n    if encontrado {\n        break;\n    }\n}",
+        ),
+        (
+            "continue",
+            "Salta el resto de la vuelta actual y comienza la siguiente.",
+            "for valor in valores {\n    if invalido {\n        continue;\n    }\n\n    procesar(valor);\n}",
+        ),
+        state,
+    );
+
+    ui.add_space(12.0);
+    grupo_bucles(
+        ui,
+        (
+            "Etiqueta de bucle",
+            "Una etiqueta permite controlar un bucle exterior cuando existen bucles anidados.",
+            "'externo: for fila in filas {\n    for celda in fila {\n        if vacia(celda) {\n            break 'externo;\n        }\n    }\n}",
+        ),
+        (
+            "break con valor",
+            "loop puede devolver un valor mediante break valor; y guardarlo en una variable.",
+            "let encontrado = loop {\n    if listo() {\n        break 42;\n    }\n};",
+        ),
+        state,
+    );
 }

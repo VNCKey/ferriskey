@@ -1,70 +1,69 @@
 use crate::app::AppState;
-use crate::views::control_flujo::card_frame_tutorial;
-use eframe::egui;
+use crate::app::ui::*;
+use crate::views::iteradores::grupo_iteradores;
+use eframe::egui::{self, RichText};
 
-pub fn mostrar_tab_modos(
-    ui: &mut egui::Ui,
-    state: &mut AppState,
-    naranja: egui::Color32,
-    cyan: egui::Color32,
-    texto: egui::Color32,
-) {
+pub fn mostrar_tab_modos(ui: &mut egui::Ui, state: &mut AppState) {
     ui.label(
-        egui::RichText::new(
-            "En Rust existen 3 formas fundamentales de crear un iterador sobre una colección según la gestión de memoria (Ownership & Borrowing): .iter(), .iter_mut() e .into_iter().",
+        RichText::new(
+            "Rust ofrece tres formas principales de recorrer una colección. La diferencia está en si el iterador presta referencias, permite modificar elementos o transfiere su Ownership.",
         )
-        .color(texto),
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
     );
-    ui.add_space(12.0);
+    ui.add_space(16.0);
 
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_iter_modos_detalles")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Método").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Efecto en la Memoria (Ownership)").strong().color(egui::Color32::WHITE));
-                ui.end_row();
+    section_heading(ui, "Modos de iteración");
+    ui.label(
+        RichText::new(
+            "Elige el modo según qué debe ocurrir con la colección después del recorrido.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
 
-                // .iter()
-                ui.label(egui::RichText::new(".iter()").strong().color(naranja));
-                let code_iter = "let numeros = vec![1, 2, 3];\n\nfor val in numeros.iter() {\n    println!(\"Lectura: {val}\"); // 'val' es de tipo &i32\n}\n\n// 'numeros' sigue siendo válida después del bucle".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Iterador por Referencia (&T): .iter()".to_string(), code_iter));
-                }
-                ui.label("Itera sobre referencias inmutables (&T). No consume la colección ni retira su propiedad.");
-                ui.end_row();
+    grupo_iteradores(
+        ui,
+        (
+            ".iter()",
+            "Presta referencias inmutables. La colección conserva su `Ownership` y sigue disponible después del recorrido.",
+            "let numeros = vec![1, 2, 3];\n\nfor numero in numeros.iter() {\n    let _ = numero;\n}\n\nlet cantidad = numeros.len();",
+        ),
+        (
+            ".iter_mut()",
+            "Presta referencias mutables. Permite modificar los elementos sin mover la colección.",
+            "let mut numeros = vec![1, 2, 3];\n\nfor numero in numeros.iter_mut() {\n    *numero *= 2;\n}",
+        ),
+        state,
+    );
 
-                // .iter_mut()
-                ui.label(egui::RichText::new(".iter_mut()").strong().color(naranja));
-                let code_iter_mut = "let mut numeros = vec![1, 2, 3];\n\nfor val in numeros.iter_mut() {\n    *val *= 2; // 'val' es de tipo &mut i32\n}".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Iterador por Referencia Mutable (&mut T): .iter_mut()".to_string(), code_iter_mut));
-                }
-                ui.label("Itera sobre referencias mutables (&mut T). Permite modificar los elementos in-situ en el Heap.");
-                ui.end_row();
+    divider(ui);
+    section_heading(ui, ".into_iter()");
+    ui.label(
+        RichText::new(
+            "El iterador por valor entrega los elementos y consume la colección original. Es útil cuando el nuevo código necesita quedarse con los valores.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
 
-                // .into_iter()
-                ui.label(egui::RichText::new(".into_iter()").strong().color(naranja));
-                let code_into_iter = "let nombres = vec![String::from(\"Ana\"), String::from(\"Luis\")];\n\nfor nombre in nombres.into_iter() {\n    println!(\"{nombre}\"); // 'nombre' es de tipo String (propiedad movida)\n}\n\n// 'nombres' ya no existe aquí".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Iterador por Valor (T): .into_iter()".to_string(), code_into_iter));
-                }
-                ui.label("Itera por valor (T), transfiriendo el Ownership de cada elemento y destruyendo la colección original.");
-                ui.end_row();
-            });
-    });
+    grupo_iteradores(
+        ui,
+        (
+            "Mover valores",
+            "Cada vuelta recibe el valor `T`, no una referencia `&T`. La colección deja de estar disponible después de consumirla.",
+            "let nombres = vec![String::from(\"Ana\"), String::from(\"Luis\")];\n\nfor nombre in nombres.into_iter() {\n    let _ = nombre;\n}",
+        ),
+        (
+            "Elegir el modo",
+            "Usa `.iter()` para leer, `.iter_mut()` para modificar y `.into_iter()` cuando quieras consumir y mover los valores.",
+            "let valores = vec![1, 2, 3];\n\nlet lectura = valores.iter();\nlet propios = valores.into_iter();",
+        ),
+        state,
+    );
 }

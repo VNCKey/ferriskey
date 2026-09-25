@@ -152,15 +152,8 @@ pub fn mostrar_teoria_string_y_str(ui: &mut egui::Ui, state: &mut AppState) {
         "Ver diagrama de memoria"
     };
     ui.horizontal(|ui| {
-        let response = ui.add(
-            egui::Button::new(
-                RichText::new(button_label)
-                    .font(Typography::body_small())
-                    .color(Colors::TEXT_PRIMARY),
-            )
-            .fill(Colors::BG_CODE_INLINE)
-            .stroke(egui::Stroke::new(1.0, Colors::BORDER_SUBTLE)),
-        );
+        let response = btn_action_small(ui, button_label)
+            .on_hover_text("Abrir diagrama visual de la memoria de String");
         if response.clicked() {
             state.ui.show_railroad_modal = if state.ui.show_railroad_modal == Some(7) {
                 None

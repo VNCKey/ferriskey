@@ -473,6 +473,7 @@ impl eframe::App for AppState {
             AppRoute::TutorialIteradores => {
                 crate::views::iteradores::mostrar_nav_superior(ui, self)
             }
+            AppRoute::TutorialErrores => crate::views::errores::mostrar_nav_superior(ui, self),
             AppRoute::TutorialStructs => crate::views::structs::mostrar_nav_superior(ui, self),
             AppRoute::TutorialEnums => crate::views::enums::mostrar_nav_superior(ui, self),
             AppRoute::TutorialGenericos => crate::views::genericos::mostrar_nav_superior(ui, self),
@@ -487,16 +488,17 @@ impl eframe::App for AppState {
             AppRoute::TutorialOwnership | AppRoute::TutorialStrings | AppRoute::TutorialMemoria => {
                 self.lessons.strings_ownership_tab == 2
             }
-            AppRoute::TutorialModulos => self.lessons.modulos_tab == 6,
+            AppRoute::TutorialModulos => self.lessons.modulos_tab == 2,
             AppRoute::TutorialTiposDatos | AppRoute::TutorialColecciones => {
                 self.lessons.compuestos_tab == 5
             }
             AppRoute::TutorialControlFlujo => self.lessons.controlflujo_tab == 4,
-            AppRoute::TutorialFunciones => self.lessons.funciones_tab == 3,
-            AppRoute::TutorialIteradores => self.lessons.iteradores_tab == 4,
-            AppRoute::TutorialStructs => self.lessons.structs_tab == 4,
+            AppRoute::TutorialFunciones => self.lessons.funciones_tab == 4,
+            AppRoute::TutorialIteradores => self.lessons.iteradores_tab == 5,
+            AppRoute::TutorialErrores => self.lessons.errores_tab == 5,
+            AppRoute::TutorialStructs => self.lessons.structs_tab == 5,
             AppRoute::TutorialEnums => self.lessons.enums_tab == 4,
-            AppRoute::TutorialGenericos => self.lessons.genericos_tab == 4,
+            AppRoute::TutorialGenericos => self.lessons.genericos_tab == 5,
             AppRoute::TutorialTraits => self.lessons.traits_tab == 3,
             _ => false,
         };

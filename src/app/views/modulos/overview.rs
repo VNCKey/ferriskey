@@ -65,30 +65,29 @@ pub fn mostrar(ui: &mut egui::Ui) {
     ui.add_space(18.0);
     section_heading(ui, "Pilares Conceptuales");
 
-    card_overview(
-        ui,
-        "1. Declaration & Module Tree (mod)",
-        "Un módulo agrupa código relacionado dentro de un espacio de nombres propio. Todo crate comienza en una raíz (main.rs o lib.rs) y ramifica su funcionalidad en submódulos, evitando colisiones de nombres y facilitando la navegación del código.",
-    );
-    ui.add_space(8.0);
+    ui.columns(2, |columns| {
+        card_overview(
+            &mut columns[0],
+            "Declaration & Module Tree (mod)",
+            "Un módulo agrupa código relacionado dentro de un espacio de nombres propio. Todo crate comienza en una raíz (main.rs o lib.rs) y ramifica su funcionalidad en submódulos, evitando colisiones de nombres y facilitando la navegación del código.",
+        );
+        columns[0].add_space(8.0);
+        card_overview(
+            &mut columns[0],
+            "Paths & Imports (crate · super · self · use)",
+            "Las rutas indican el camino para acceder a cualquier elemento en el árbol de módulos. crate:: comienza en la raíz del proyecto, self:: se refiere al módulo actual y super:: sube un nivel al módulo padre. La palabra clave use crea accesos directos convenientes.",
+        );
 
-    card_overview(
-        ui,
-        "2. Visibility & Encapsulation (pub · pub(crate))",
-        "En Rust, todos los ítems (funciones, structs, enums, campos) son privados por defecto dentro de su módulo contenedor. Usar pub expone un ítem públicamente, mientras que pub(crate) lo hace visible para cualquier archivo del mismo crate sin exponerlo a usuarios externos.",
-    );
-    ui.add_space(8.0);
-
-    card_overview(
-        ui,
-        "3. Paths & Imports (crate · super · self · use)",
-        "Las rutas indican el camino para acceder a cualquier elemento en el árbol de módulos. crate:: comienza en la raíz del proyecto, self:: se refiere al módulo actual y super:: sube un nivel al módulo padre. La palabra clave use crea accesos directos convenientes.",
-    );
-    ui.add_space(8.0);
-
-    card_overview(
-        ui,
-        "4. Public API Design & Re-export (pub use / Facade Pattern)",
-        "Permite organizar internamente el código en carpetas y submódulos profundos, mientras que en la raíz del crate re-exportas únicamente los tipos y funciones principales con pub use, ofreciendo una experiencia limpia y ergonómica a los consumidores de tu librería.",
-    );
+        card_overview(
+            &mut columns[1],
+            "Visibility & Encapsulation (pub · pub(crate))",
+            "En Rust, todos los ítems (funciones, structs, enums, campos) son privados por defecto dentro de su módulo contenedor. Usar pub expone un ítem públicamente, mientras que pub(crate) lo hace visible para cualquier archivo del mismo crate sin exponerlo a usuarios externos.",
+        );
+        columns[1].add_space(8.0);
+        card_overview(
+            &mut columns[1],
+            "Public API Design & Re-export (pub use / Facade Pattern)",
+            "Permite organizar internamente el código en carpetas y submódulos profundos, mientras que en la raíz del crate re-exportas únicamente los tipos y funciones principales con pub use, ofreciendo una experiencia limpia y ergonómica a los consumidores de tu librería.",
+        );
+    });
 }

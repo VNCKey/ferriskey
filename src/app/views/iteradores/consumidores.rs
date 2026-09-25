@@ -1,205 +1,96 @@
 use crate::app::AppState;
-use crate::views::control_flujo::card_frame_tutorial;
-use eframe::egui;
+use crate::app::ui::*;
+use crate::views::iteradores::grupo_iteradores;
+use eframe::egui::{self, RichText};
 
-pub fn mostrar_tab_consumidores(
-    ui: &mut egui::Ui,
-    state: &mut AppState,
-    naranja: egui::Color32,
-    cyan: egui::Color32,
-    texto: egui::Color32,
-) {
+pub fn mostrar_tab_consumidores(ui: &mut egui::Ui, state: &mut AppState) {
     ui.label(
-        egui::RichText::new(
-            "Los Consumidores (o Métodos Terminales) avanzan el iterador hasta el final para evaluar los datos y producir un resultado final o una nueva colección en memoria.",
+        RichText::new(
+            "Los consumidores avanzan un iterador y producen un resultado final. Son los que hacen que un pipeline perezoso ejecute su trabajo.",
         )
-        .color(texto),
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
     );
+    ui.add_space(16.0);
+
+    section_heading(ui, "Crear resultados");
+    ui.label(
+        RichText::new(
+            "`collect` materializa los valores en una colección y `sum` o `product` los reducen a un resultado numérico.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
+
+    grupo_iteradores(
+        ui,
+        (
+            ".collect()",
+            "Reúne los valores en una colección como `Vec<T>`. El tipo de destino ayuda a Rust a saber qué construir.",
+            "let numeros = [1, 2, 3];\nlet dobles: Vec<i32> = numeros\n    .iter()\n    .map(|numero| numero * 2)\n    .collect();",
+        ),
+        (
+            ".sum() y .product()",
+            "Calculan la suma o el producto de todos los valores del iterador.",
+            "let numeros = [1, 2, 3, 4];\nlet suma: i32 = numeros.iter().sum();\nlet producto: i32 = numeros.iter().product();",
+        ),
+        state,
+    );
+
+    divider(ui);
+    section_heading(ui, "Buscar y comprobar");
+    ui.label(
+        RichText::new(
+            "Estos consumidores pueden detenerse antes de recorrer todos los valores cuando ya obtuvieron la respuesta necesaria.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
+    );
+    ui.add_space(10.0);
+
+    grupo_iteradores(
+        ui,
+        (
+            ".find()",
+            "Devuelve el primer elemento que cumple una condición.",
+            "let numeros = [3, 8, 11];\nlet encontrado = numeros\n    .iter()\n    .find(|numero| **numero > 5);",
+        ),
+        (
+            ".any() y .all()",
+            "`any` comprueba si al menos un elemento cumple y `all` si todos cumplen.",
+            "let numeros = [2, 4, 6];\nlet hay_impar = numeros.iter().any(|n| n % 2 != 0);\nlet todos_pares = numeros.iter().all(|n| n % 2 == 0);",
+        ),
+        state,
+    );
+
     ui.add_space(12.0);
-
-    // 1. Creación de Colecciones
-    ui.label(
-        egui::RichText::new("Creación de Colecciones")
-            .strong()
-            .size(16.0)
-            .color(naranja),
+    grupo_iteradores(
+        ui,
+        (
+            ".count() y .last()",
+            "`count` cuenta los elementos y `last` devuelve el último valor del recorrido.",
+            "let numeros = [10, 20, 30];\nlet cantidad = numeros.iter().count();\nlet ultimo = numeros.iter().last();",
+        ),
+        (
+            ".for_each()",
+            "Ejecuta un Closure con cada elemento y se utiliza cuando buscas un efecto secundario.",
+            "let nombres = [\"Ana\", \"Luis\"];\n\nnombres.iter().for_each(|nombre| {\n    println!(\"Hola {nombre}\");\n});",
+        ),
+        state,
     );
-    ui.add_space(6.0);
 
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_consumidores_colecciones")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Consumidor").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".collect()").strong().color(naranja));
-                let code_collect = "let nums = vec![1, 2, 3];\nlet dobles: Vec<i32> = nums.iter().map(|x| x * 2).collect();".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidor .collect()".to_string(), code_collect));
-                }
-                ui.label("Transforma el iterador en una nueva colección en memoria (como Vec<T> o HashMap).");
-                ui.end_row();
-            });
-    });
-
-    ui.add_space(16.0);
-
-    // 2. Cálculo & Reducción
+    divider(ui);
+    section_heading(ui, "Consumir o conservar");
     ui.label(
-        egui::RichText::new("Cálculo & Reducción")
-            .strong()
-            .size(16.0)
-            .color(naranja),
+        RichText::new(
+            "Antes de consumir una colección, decide si necesitas conservarla para utilizarla después o si el nuevo resultado puede tomar sus valores.",
+        )
+        .font(Typography::body())
+        .color(Colors::TEXT_PRIMARY)
+        .line_height(Some(20.0)),
     );
-    ui.add_space(6.0);
-
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_consumidores_calculo")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Consumidor").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".sum() / .product()").strong().color(naranja));
-                let code_sum = "let nums = vec![1, 2, 3, 4];\nlet suma: i32 = nums.iter().sum(); // 10\nlet prod: i32 = nums.iter().product(); // 24".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidores .sum() y .product()".to_string(), code_sum));
-                }
-                ui.label(".sum() suma todos los elementos; .product() los multiplica todos.");
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".count()").strong().color(naranja));
-                let code_count = "let nums = vec![10, 20, 30];\nlet cantidad = nums.iter().count(); // 3".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidor .count()".to_string(), code_count));
-                }
-                ui.label("Cuenta el número total de elementos contenidos en el iterador.");
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".fold() / .reduce()").strong().color(naranja));
-                let code_fold = "let nums = vec![1, 2, 3];\nlet acumulado = nums.iter().fold(0, |acc, x| acc + x);".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidores .fold() y .reduce()".to_string(), code_fold));
-                }
-                ui.label(".fold(init, f) realiza una acumulación con valor inicial; .reduce(f) sin valor inicial.");
-                ui.end_row();
-            });
-    });
-
-    ui.add_space(16.0);
-
-    // 3. Búsqueda & Comprobación
-    ui.label(
-        egui::RichText::new("Búsqueda & Comprobación")
-            .strong()
-            .size(16.0)
-            .color(naranja),
-    );
-    ui.add_space(6.0);
-
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_consumidores_busqueda")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Consumidor").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".find() / .position()").strong().color(naranja));
-                let code_find = "let nums = vec![10, 20, 30];\nlet encontrado = nums.iter().find(|&&x| x == 20); // Option<&&i32>\nlet pos = nums.iter().position(|&x| x == 20); // Option<usize>".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidores .find() y .position()".to_string(), code_find));
-                }
-                ui.label(".find(pred) busca el primer elemento que satisface el predicado; .position(pred) devuelve su índice.");
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".any() / .all()").strong().color(naranja));
-                let code_any_all = "let nums = vec![1, 2, 3];\nlet hay_pares = nums.iter().any(|&x| x % 2 == 0); // true\nlet todos_positivos = nums.iter().all(|&x| x > 0); // true".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidores .any() y .all()".to_string(), code_any_all));
-                }
-                ui.label(".any(pred) verifica si al menos un elemento cumple; .all(pred) si todos cumplen.");
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".max() / .min()").strong().color(naranja));
-                let code_max_min = "let nums = vec![5, 2, 8, 1];\nlet maximo = nums.iter().max(); // Some(&8)\nlet minimo = nums.iter().min(); // Some(&1)".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidores .max() y .min()".to_string(), code_max_min));
-                }
-                ui.label("Devuelve el valor máximo o mínimo contenido en el iterador.");
-                ui.end_row();
-            });
-    });
-
-    ui.add_space(16.0);
-
-    // 4. Efectos Secundarios
-    ui.label(
-        egui::RichText::new("Efectos Secundarios")
-            .strong()
-            .size(16.0)
-            .color(naranja),
-    );
-    ui.add_space(6.0);
-
-    card_frame_tutorial().show(ui, |ui| {
-        egui::Grid::new("tabla_consumidores_efectos")
-            .striped(true)
-            .spacing([18.0, 10.0])
-            .show(ui, |ui| {
-                ui.label(egui::RichText::new("Consumidor").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Ejemplo de Sintaxis").strong().color(egui::Color32::WHITE));
-                ui.label(egui::RichText::new("Descripción").strong().color(egui::Color32::WHITE));
-                ui.end_row();
-
-                ui.label(egui::RichText::new(".for_each()").strong().color(naranja));
-                let code_foreach = "let nombres = vec![\"Ana\", \"Luis\"];\nnombres.iter().for_each(|nombre| println!(\"Hola {nombre}\"));".to_string();
-                if ui
-                    .button(egui::RichText::new("Ver Código").strong().color(cyan))
-                    .on_hover_text("Abrir modal centrado con el ejemplo de código de solo lectura")
-                    .clicked()
-                {
-                    state.ui.show_code_modal = Some(("Consumidor .for_each()".to_string(), code_foreach));
-                }
-                ui.label("Ejecuta una closure con efectos secundarios sobre cada elemento consumiendo el iterador.");
-                ui.end_row();
-            });
-    });
 }
