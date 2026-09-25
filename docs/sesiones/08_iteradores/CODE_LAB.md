@@ -1,53 +1,67 @@
-# 🧪 Code Lab: 08 - Iteradores & Pipeline Perezoso
+# 🧪 Code Lab: Sesión 08 - Iteradores y Combinadores
 
-## Ejercicio 01: Comparación de Modos de Iteración (`.iter()` vs `.into_iter()`)
-```rust
-fn main() {
-    let numeros = vec![1, 2, 3];
-
-    // 1. .iter() presta referencias inmutables
-    for num in numeros.iter() {
-        println!("Referencia: {}", num);
-    }
-    // 'numeros' sigue siendo válido aquí
-
-    // 2. .into_iter() consume la colección
-    let suma: i32 = numeros.into_iter().sum();
-    println!("Suma total consumida: {}", suma);
-    // 'numeros' ya NO es accesible aquí
-}
-```
+> **Entorno**: Code Lab interactivo integrado en FerrisKey ([`src/app/views/iteradores/mod.rs`](file:///home/alek/VNC/repos/egui_vnc/src/app/views/iteradores/mod.rs))  
+> **Herramientas activas**: Editor interactivo Syntect, Terminal embebida y Drawer de Retos.
 
 ---
 
-## Ejercicio 02: Pipeline Perezoso de Transformación Funcional
-```rust
-fn main() {
-    let datos = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+## 🎯 Descripción del Entorno de Práctica
 
-    // Cadena de iteración: Filtrar pares, multiplicar por 10 y recolectar en Vec
-    let resultado: Vec<i32> = datos
-        .iter()
-        .filter(|&&x| x % 2 == 0)
-        .map(|&x| x * 10)
-        .collect();
-
-    println!("Resultado del pipeline: {:?}", resultado);
-}
-```
+En este Code Lab construirás pipelines de procesamiento funcional de datos sobre colecciones. Experimentarás la diferencia entre `.iter()`, `.iter_mut()` y `.into_iter()`, y combinarás adaptadores perezosos con consumidores eficientes.
 
 ---
 
-## Ejercicio 03: Uso de Turbofish (`::<T>`) con `.collect()`
-```rust
-use std::collections::HashSet;
+## 🏁 Ruta de Ejercicios Prácticos
 
-fn main() {
-    let nombres = vec!["Alice", "Bob", "Alice", "Charlie"];
+### 📌 Ejercicio 1: Modos de Iteración
+- **Código Base**:
+  ```rust
+  fn main() {
+      let mut numeros = vec![10, 20, 30];
 
-    // Sintaxis Turbofish ::<HashSet<_>> para resolver el tipo de destino
-    let unicos = nombres.into_iter().collect::<HashSet<_>>();
+      // 1. Préstamo inmutable (.iter)
+      println!("Lectura con .iter():");
+      for n in numeros.iter() {
+          println!("Elemento: {n}");
+      }
 
-    println!("Nombres únicos recopilados: {:?}", unicos);
-}
-```
+      // 2. Préstamo mutable (.iter_mut)
+      for n in numeros.iter_mut() {
+          *n += 5;
+      }
+      println!("Modificados: {:?}", numeros);
+
+      // 3. Consumo por valor (.into_iter)
+      let consumidos: Vec<i32> = numeros.into_iter().map(|x| x * 2).collect();
+      println!("Consumidos y transformados: {:?}", consumidos);
+      // numeros ya no está disponible
+  }
+  ```
+- **Tu Tarea**:
+  1. Verifica que después de `into_iter()`, intentar imprimir `numeros` causa un error de compilación por *use of moved value*.
+
+---
+
+### 📌 Ejercicio 2: Pipeline de Adaptadores y Consumidores
+- **Código Base**:
+  ```rust
+  fn main() {
+      let puntuaciones = vec![45, 82, 91, 33, 78, 100, 64];
+
+      // Pipeline funcional: filtrar aprobados (>= 70), sumar bonificación (+5) y recolectar
+      let aprobados_con_bono: Vec<i32> = puntuaciones
+          .iter()
+          .filter(|&&nota| nota >= 70)
+          .map(|&nota| (nota + 5).min(100))
+          .collect();
+
+      println!("Notas aprobadas bonificadas: {:?}", aprobados_con_bono);
+
+      // Agregación con sum() y fold()
+      let suma_total: i32 = aprobados_con_bono.iter().sum();
+      println!("Suma total: {suma_total}");
+  }
+  ```
+- **Tu Tarea**:
+  1. Utiliza `.take(3)` para seleccionar únicamente los tres primeros aprobados del vector.
+  2. Utiliza `.enumerate()` para imprimir el número de ranking junto con cada nota.

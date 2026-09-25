@@ -1,43 +1,67 @@
-# 📖 Teoría: 10 - Error Handling (`Option`, `Result` & Familia `unwrap`)
+# 📖 Teoría: Sesión 10 - Manejo Idiomático de Errores
 
-## 1. El Enum `Option<T>` (Presencia o Ausencia)
-El tipo `Option<T>` reemplaza completamente la necesidad de valores nulos (`null` / `nil`), obligando a manejar la ausencia de valores en tiempo de compilación.
+---
+
+## 1. La Filosofía de Rust frente a los Errores
+
+A diferencia de Java, Python o C++ que utilizan excepciones lanzadas en tiempo de ejecución, o de C que utiliza punteros `NULL` y códigos de retorno numéricos no forzados:
+- **Rust no tiene excepciones**: Todo fallo que pueda ocurrir forma parte explícita de la firma de tipos de la función.
+- **Rust no tiene `NULL`**: Se elimina la categoría completa de vulnerabilidades por desreferenciación de punteros nulos (*NullPointerException*).
+
+Rust clasifica los errores en dos grandes categorías:
+1. **Errores Recuperables**: Situaciones normales de la vida real (un archivo no existe, la red falló, el usuario escribió letras en vez de números). Se representan con **`Result<T, E>`**.
+2. **Errores Irrecuperables**: Errores de lógica del programador o estados corruptos del sistema (acceder a un índice de array fuera de rango, división exacta por cero). Se manifiestan con **`panic!`**.
+
+---
+
+## 2. El Enum `Option<T>` (Ausencia Segura de Valor)
 
 ```rust
-pub enum Option<T> {
+enum Option<T> {
     Some(T),
     None,
 }
 ```
 
-### Familia de Combinadores de `Option<T>`
-
-| Método | Sintaxis | Descripción & Caso de Uso |
-|---|---|---|
-| **`.unwrap_or()`** | `opt.unwrap_or("Invitado");` | Extrae el valor si es `Some`; si es `None`, devuelve un valor por defecto precalculado. |
-| **`.unwrap_or_else()`** | `opt.unwrap_or_else(\|| f());` | Ejecuta una closure para calcular el valor por defecto de forma perezosa (*Lazy*) solo si era `None`. |
-| **`.unwrap_or_default()`** | `opt.unwrap_or_default();` | Devuelve el valor predeterminado estándar del tipo `T` (ej: `0` para enteros, `""` para `String`). |
-| **`.expect()`** | `opt.expect("Mensaje");` | Extrae el valor o provoca *panic!* imprimiendo un mensaje explicativo personalizado. |
-| **`.map()` / `.and_then()`** | `opt.map(\|s\| s.len());` | Transforma el valor interior si es `Some`, manteniendo la envoltura `Option`. |
+Para acceder al valor contenido en un `Option`:
+- **`match` o `if let`**: La forma más segura y explícita.
+- **`.unwrap()`**: Obtiene el valor si es `Some`, o provoca un `panic!` si es `None` (usar solo en pruebas o ejemplos rápidos).
+- **`.expect("mensaje")`**: Igual que `unwrap`, pero imprime un mensaje descriptivo si falla.
+- **`.unwrap_or(defecto)`**: Devuelve el valor contenido o un valor predeterminado si es `None`.
+- **`.map(|v| ...)`**: Transforma el valor interior si existe, conservando `None` si estaba ausente.
 
 ---
 
-## 2. El Enum `Result<T, E>` & Operador `?`
-El tipo `Result<T, E>` representa el éxito (`Ok(T)`) o una falla esperada (`Err(E)`).
+## 3. El Enum `Result<T, E>` (Operaciones Fallibles)
 
 ```rust
-pub enum Result<T, E> {
-    Ok(T),
-    Err(E),
+enum Result<T, E> {
+    Ok(T),  // La operación tuvo éxito y contiene el resultado T
+    Err(E), // La operación falló y contiene el error descriptivo E
 }
 ```
 
-### Propagación con `?`
-El operador `?` extrae el valor `T` si es `Ok` o retorna inmediatamente `Err(E)` desde la función actual:
+### El Atributo `#[must_use]`
+`Result` está anotado con `#[must_use]`. Si una función retorna un `Result` y el desarrollador ignora el valor devuelto sin gestionarlo, el compilador genera inmediatamente una advertencia obligatoria.
+
+---
+
+## 4. El Operador de Propagación de Errores `?`
+
+El operador interrogación `?` es la herramienta más idiomática para trabajar con funciones que pueden fallar:
 
 ```rust
-fn leer_config() -> Result<String, std::io::Error> {
-    let contenido = std::fs::read_to_string("app.conf")?; // Retorna error si no existe
-    Ok(contenido)
+use std::fs::File;
+use std::io::{self, Read};
+
+fn leer_nombre_archivo(ruta: &str) -> Result<String, io::Error> {
+    let mut archivo = File::open(ruta)?; // Si falla, retorna Err(e) inmediatamente de la función
+    let mut contenido = String::new();
+    archivo.read_to_string(&mut contenido)?; // Si falla, retorna Err(e)
+    Ok(contenido) // Si todo salió bien, retorna Ok con el contenido
 }
 ```
+
+- Si el resultado es `Ok(valor)`, la expresión con `?` se evalúa a `valor` y el flujo continúa.
+- Si el resultado es `Err(error)`, la función actual **retorna anticipadamente** ese mismo `Err(error)`.
+- El operador `?` también funciona sobre `Option<T>`, desempaquetando `Some(v)` o retornando `None` anticipadamente.

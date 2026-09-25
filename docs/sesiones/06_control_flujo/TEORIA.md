@@ -1,42 +1,108 @@
-# 📖 Teoría: 06 - Control de Flujo (Condicionales, Bucles & Match)
-
-## 1. Condicionales & Expresiones `if / else`
-En Rust, `if` es una expresión: puede devolver un valor asignable a una variable.
-
-```rust
-let condicion = true;
-let numero = if condicion { 5 } else { 6 }; // Ambas ramas deben devolver el mismo tipo
-```
+# 📖 Teoría: Sesión 06 - Control de Flujo
 
 ---
 
-## 2. Bucles (`loop`, `while`, `for`)
-- **`loop`**: Bucle infinito expresivo. Puede devolver un valor al romper con `break valor;`.
-- **`while`**: Se ejecuta mientras la condición sea verdadera.
-- **`for`**: Forma más segura e idiomática para iterar sobre rangos o colecciones (`for i in 0..5`).
+## 1. Condicionales como Expresiones (`if / else`)
+
+En Rust, `if` es una **expresión**, lo que significa que evalúa y produce un valor final:
+
+```rust
+let edad = 20;
+let tiene_permiso = true;
+
+// Todas las ramas deben evaluar exactamente al mismo tipo de dato
+let acceso: &str = if edad >= 18 && tiene_permiso {
+    "permitido"
+} else {
+    "denegado"
+};
+```
+- La condición debe ser estrictamente de tipo `bool` (Rust no tiene *truthy/falsy* como JavaScript o Python).
+- No se requieren paréntesis alrededor de la condición booleana, pero las llaves `{}` son obligatorias.
+
+---
+
+## 2. Bucles en Rust: Tres Sabores
+
+### A. `loop` (Repetición Infinita con Retorno)
+`loop` repite un bloque indefinidamente hasta encontrar una sentencia `break`. Permite retornar un valor evaluado:
+
+```rust
+let mut intentos = 0;
+let resultado = loop {
+    intentos += 1;
+    if intentos == 10 {
+        break intentos * 2; // Devuelve 20 de la expresión loop
+    }
+};
+```
+
+### B. `while` (Bucle Condicional)
+Evalúa una condición booleana antes de cada iteración:
+
+```rust
+let mut contador = 3;
+while contador > 0 {
+    println!("{contador}...");
+    contador -= 1;
+}
+```
+
+### C. `for` (Recorrido Seguro sin Bounds Checking)
+Es el bucle más seguro y eficiente en Rust. Evita accesos fuera de rango:
+
+```rust
+// Rango exclusivo: 1 al 4
+for num in 1..5 {
+    println!("{num}");
+}
+
+// Rango inclusivo: 1 al 5
+for num in 1..=5 {
+    println!("{num}");
+}
+```
+
+### Etiquetas de Bucle (*Loop Labels*)
+Cuando existen bucles anidados, las etiquetas identificadas con comilla simple (`'nombre:`) permiten que `break` o `continue` afecten al bucle exterior:
+
+```rust
+'exterior: for x in 0..10 {
+    for y in 0..10 {
+        if x + y == 15 {
+            break 'exterior; // Rompe el bucle exterior directamente
+        }
+    }
+}
+```
 
 ---
 
 ## 3. Pattern Matching Exhaustivo (`match`)
-La expresión `match` compara un valor contra múltiples patrones y ejecuta el primer brazo coincidente. El compilador **exige exhaustividad total** (cubrir todos los casos posibles).
 
-| Patrón | Ejemplo de Sintaxis | Reglas & Descripción |
-|---|---|---|
-| **Literal Exacto** | `1 => println!("Uno"),` | Coincidencia exacta con un valor explícito (números, caracteres, strings). |
-| **Rangos Inclusivos** | `0..=12 => println!("Niño"),` | Coincidencia inclusiva dentro de un intervalo numérico. |
-| **Patrón Múltiple (OR)** | `'a' \| 'e' \| 'i' => ...` | Evalúa si coincide con cualquiera de los patrones separados por `\|`. |
-| **Comodín `_`** | `_ => println!("Otro"),` | Captura cualquier caso no listado previamente para cumplir exhaustividad. |
-| **Match Guards (`if`)** | `n if n % 2 == 0 => ...` | Añade una condición booleana adicional al patrón evaluado. |
-
----
-
-## 4. `if let` y `while let`
-Permiten evaluar un único patrón específico omitiendo la exhaustividad obligatoria de `match`:
+La expresión `match` compara un valor contra múltiples patrones y ejecuta el primer brazo que coincida:
 
 ```rust
-let valor: Option<i32> = Some(7);
+let calificacion = 85;
 
-if let Some(x) = valor {
-    println!("Valor extraído: {}", x);
-}
+let letra = match calificacion {
+    90..=100 => 'A',
+    80..=89  => 'B',
+    70..=79  => 'C',
+    60..=69  => 'D',
+    _        => 'F', // Comodín obligatorio para garantizar exhaustividad
+};
 ```
+
+### Características de `match`:
+1. **Exhaustividad Garantizada**: El compilador exige que se cubran todos los posibles valores del tipo analizado.
+2. **Alternativas Múltiples (`|`)**: `1 | 2 | 3 => println!("Menor o igual a 3")`.
+3. **Guardas de Coincidencia (*Match Guards*)**: Permiten añadir condiciones booleanas extra al brazo:
+   ```rust
+   let par = (2, -2);
+   match par {
+       (x, y) if x == y => println!("Son iguales"),
+       (x, y) if x + y == 0 => println!("Son opuestos"),
+       _ => println!("Sin relación especial"),
+   }
+   ```

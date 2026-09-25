@@ -1,81 +1,137 @@
-# 🧪 Code Lab: 03 - Memoria (Ownership, Borrowing & Stack vs Heap)
+# 🧪 Code Lab: Sesión 03 - Memoria y Ownership
 
-## Ejercicio 01: Stack & Copy Semantics
-```rust
-fn main() {
-    let x = 42;
-    let y = x; // Copia implícita bit a bit (Trait Copy)
-
-    println!("x sigue siendo válido: {}", x);
-    println!("y contiene una copia: {}", y);
-}
-```
+> **Entorno**: Code Lab interactivo integrado en FerrisKey ([`src/app/views/memoria/mod.rs`](file:///home/alek/VNC/repos/egui_vnc/src/app/views/memoria/mod.rs))  
+> **Herramientas activas**: Editor interactivo Syntect, Terminal embebida, Visualizador de Memoria y Drawer de Retos.
 
 ---
 
-## Ejercicio 02: Heap & Ownership Move
-```rust
-fn main() {
-    let s1 = String::from("FerrisKey");
-    let s2 = s1; // Move semantics: Ownership transferida a s2
+## 🎯 Descripción del Entorno de Práctica
 
-    // println!("{}", s1); // ❌ Error de compilación: use of moved value `s1`
-    println!("s2 es el único dueño activo: {}", s2);
-}
-```
+En este Code Lab experimentarás de primera mano las reglas del **Borrow Checker**. Cada ejercicio está diseñado para compilar en vivo y demostrar la diferencia física entre copias en el Stack, movimientos de propiedad en el Heap y exclusión mutua de referencias.
 
 ---
 
-## Ejercicio 03: Préstamos Mutables (`&mut T`)
-```rust
-fn agregar_sufijo(texto: &mut String) {
-    texto.push_str(" - Aprende Rust sin errores");
-}
+## 🏁 Ruta de los 5 Retos Prácticos
 
-fn main() {
-    let mut mensaje = String::from("FerrisKey");
-    
-    // Préstamo mutable exclusivo
-    agregar_sufijo(&mut mensaje);
+### 📌 Reto 1: Stack & Copy Semantics
+- **Nivel**: Fundamental | **Tags**: Stack & Trait Copy
+- **Código Base**:
+  ```rust
+  fn main() {
+      // Tipos primitivos enteros viven 100% en el Stack
+      let x = 42;
+      let y = x; // Copy automático bit a bit
 
-    println!("Resultado: {}", mensaje);
-}
-```
+      println!("Valor original de x: {x}");
+      println!("Copia independiente en y: {y}");
 
----
-
-## Ejercicio 04: Préstamo Inmutable vs Mutable (Borrow Checker Error)
-```rust
-fn main() {
-    let mut datos = String::from("Rust");
-
-    let r1 = &datos; // Préstamo inmutable
-    let r2 = &datos; // Segundo préstamo inmutable
-
-    println!("Lectores activos: {}, {}", r1, r2);
-    // r1 y r2 ya no se usan después de esta línea (NLL - Non-Lexical Lifetimes)
-
-    let r3 = &mut datos; // ✅ Válido porque r1 y r2 ya finalizaron su scope de uso
-    r3.push_str(" 2026");
-    println!("Modificación mutable: {}", r3);
-}
-```
+      // Modificar y no altera x
+      let y = y + 10;
+      println!("Tras modificar y: x={x}, y={y}");
+  }
+  ```
+- **Tu Tarea**:
+  1. Comprueba que las tuplas fijas compuestas de escalares (ej. `let punto = (10, 20);`) también implementan `Copy`.
+  2. Verifica que ambas variables permanecen utilizables sin restricciones.
 
 ---
 
-## Ejercicio 05: Distinción entre `String` y `&str`
-```rust
-fn procesar_slice(slice: &str) {
-    println!("Contenido prestado: '{}' | Longitud: {} bytes", slice, slice.len());
-}
+### 📌 Reto 2: String, Heap & Move Semantics
+- **Nivel**: Fundamental | **Tags**: Heap & Move
+- **Código Base**:
+  ```rust
+  fn main() {
+      // String aloja un buffer dinámico en el Heap
+      let mut texto = String::from("Rust");
+      texto.push_str(" en el Heap");
 
-fn main() {
-    let texto_heap: String = String::from("FerrisKey Desktop");
-    let texto_literal: &str = "Hola Rust";
+      println!("Texto antes del move: {texto}");
 
-    // Pasamos slices &str
-    procesar_slice(&texto_heap);
-    procesar_slice(texto_literal);
-    procesar_slice(&texto_heap[0..9]); // Slice parcial
-}
-```
+      // Transferencia de Ownership (Move Semantics)
+      let movido = texto; 
+      
+      println!("El nuevo propietario es: {movido}");
+
+      // ❌ Intenta descomentar la línea inferior para experimentar el Borrow Checker:
+      // println!("Intentando leer texto original: {texto}");
+  }
+  ```
+- **Tu Tarea**:
+  1. Descomenta la línea de impresión de `texto` y observa el mensaje de diagnóstico del compilador: `borrow of moved value: texto`.
+  2. Soluciona el error utilizando el método `.clone()` para duplicar explícitamente los datos en el Heap y compara el coste de memoria.
+
+---
+
+### 📌 Reto 3: Reglas de Ownership y Ciclo de Vida (Drop)
+- **Nivel**: Fundamental | **Tags**: Ownership & RAII
+- **Código Base**:
+  ```rust
+  fn tomar_propiedad(cadena: String) {
+      println!("La función recibió la propiedad de: {cadena}");
+  } // 💥 Aquí `cadena` sale del ámbito y se libera su memoria en el Heap
+
+  fn main() {
+      let original = String::from("Ferris");
+
+      // Al pasar la variable como argumento sin referencia, se transfiere la propiedad
+      tomar_propiedad(original);
+
+      // println!("{original}"); // ❌ ERROR: `original` ya no es dueño de nada
+  }
+  ```
+- **Tu Tarea**:
+  1. Modifica la función `tomar_propiedad` para que reciba una referencia `&String` en lugar del valor completo, permitiendo que `main` siga usando `original` tras la invocación.
+
+---
+
+### 📌 Reto 4: Reglas de Borrowing y Exclusividad
+- **Nivel**: Fundamental | **Tags**: &T vs &mut T & NLL
+- **Código Base**:
+  ```rust
+  fn main() {
+      let mut datos = String::from("Concurrencia");
+
+      // 1. Múltiples referencias inmutables simultáneas permitidas
+      {
+          let ref_lectura1 = &datos;
+          let ref_lectura2 = &datos;
+          println!("Lecturas compartidas: {ref_lectura1} y {ref_lectura2}");
+      } // Los préstamos inmutables finalizan aquí
+
+      // 2. Exactamente UNA referencia mutable exclusiva
+      let ref_escritura = &mut datos;
+      ref_escritura.push_str(" Segura");
+      println!("Dato modificado exclusivamente: {ref_escritura}");
+  }
+  ```
+- **Tu Tarea**:
+  1. Intenta crear una referencia inmutable `let r = &datos;` mientras `ref_escritura` sigue activa y analiza cómo el compilador impide posibles carreras de datos.
+
+---
+
+### 📌 Reto 5: Dominio de String frente a `&str` (Slices)
+- **Nivel**: Intermedio | **Tags**: Deref Coercion & Slices
+- **Código Base**:
+  ```rust
+  // Función idiomática que acepta cualquier vista de texto UTF-8
+  fn procesar_texto(slice: &str) {
+      println!("Vista: '{}' | Longitud en bytes: {}", slice, slice.len());
+  }
+
+  fn main() {
+      let texto_heap: String = String::from("FerrisKey Desktop App");
+      let texto_literal: &str = "Hola desde .rodata";
+
+      // 1. Pasar un literal directo (&str)
+      procesar_texto(texto_literal);
+
+      // 2. Pasar un String completo mediante Deref Coercion (&String -> &str)
+      procesar_texto(&texto_heap);
+
+      // 3. Pasar una rodaja parcial (Slice)
+      let palabra = &texto_heap[0..9]; // "FerrisKey"
+      procesar_texto(palabra);
+  }
+  ```
+- **Tu Tarea**:
+  1. Construye una función `primera_palabra(s: &str) -> &str` que busque el primer espacio en blanco y retorne únicamente el slice de la primera palabra sin realizar asignaciones en el Heap.
