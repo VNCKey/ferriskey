@@ -25,6 +25,8 @@ pub struct UiState {
     pub conceptos_salida_abierta: bool,
     pub codelab_drawer_tab: usize,
     pub show_railroad_modal: Option<usize>,
+    pub bool_sim_a: bool,
+    pub bool_sim_b: bool,
 }
 
 impl Default for UiState {
@@ -51,6 +53,8 @@ impl Default for UiState {
             conceptos_salida_abierta: false,
             codelab_drawer_tab: 0,
             show_railroad_modal: None,
+            bool_sim_a: true,
+            bool_sim_b: false,
         }
     }
 }

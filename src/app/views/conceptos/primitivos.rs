@@ -1315,8 +1315,8 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
         );
         if ui
             .selectable_label(
-                state.dashboard.bool_sim_a,
-                egui::RichText::new(if state.dashboard.bool_sim_a {
+                state.ui.bool_sim_a,
+                egui::RichText::new(if state.ui.bool_sim_a {
                     "TRUE"
                 } else {
                     "FALSE"
@@ -1326,7 +1326,7 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
             )
             .clicked()
         {
-            state.dashboard.bool_sim_a = !state.dashboard.bool_sim_a;
+            state.ui.bool_sim_a = !state.ui.bool_sim_a;
         }
 
         ui.add_space(20.0);
@@ -1339,8 +1339,8 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
         );
         if ui
             .selectable_label(
-                state.dashboard.bool_sim_b,
-                egui::RichText::new(if state.dashboard.bool_sim_b {
+                state.ui.bool_sim_b,
+                egui::RichText::new(if state.ui.bool_sim_b {
                     "TRUE"
                 } else {
                     "FALSE"
@@ -1350,14 +1350,14 @@ pub fn mostrar_categoria_booleanos(ui: &mut egui::Ui, state: &mut AppState) {
             )
             .clicked()
         {
-            state.dashboard.bool_sim_b = !state.dashboard.bool_sim_b;
+            state.ui.bool_sim_b = !state.ui.bool_sim_b;
         }
     });
 
     ui.add_space(14.0);
 
-    let a = state.dashboard.bool_sim_a;
-    let b = state.dashboard.bool_sim_b;
+    let a = state.ui.bool_sim_a;
+    let b = state.ui.bool_sim_b;
 
     let resultados = [
         (

@@ -1166,6 +1166,35 @@ pub fn mostrar_reto_codelab_item(
             "Generic Structs" => &["Struct<T>", "Field", "Instance"],
             "impl Trait" => &["impl Trait", "Behavior", "Parameter"],
             "Type Inference" => &["Inference", "<T>", "Concrete Type"],
+            "Dangling References" => &["Reference", "Scope", "Valid"],
+            "Lifetime en Functions" => &["'a", "Input", "Output"],
+            "Lifetime Elision" => &["Elision", "Reference", "Rules"],
+            "Lifetimes en Structs" => &["Struct<'a>", "Borrowing", "Scope"],
+            "Lifetime 'static" => &["'static", "Literal", "Program"],
+            "Unit Tests" => &["#[test]", "#[cfg(test)]", "Unit"],
+            "Assertions" => &["assert!", "assert_eq!", "assert_ne!"],
+            "Integration Tests" => &["tests/", "pub", "API"],
+            "Doc-Tests" => &["///", "Examples", "cargo test"],
+            "Test Commands" => &["cargo test", "--nocapture", "--ignored"],
+            "Package Structure" => &["src/", "lib.rs", "bin/"],
+            "Features" => &["[features]", "cfg", "optional"],
+            "Workspace Members" => &["[workspace]", "members", "resolver"],
+            "Local Dependencies" => &["path", "crate", "API"],
+            "Box<T>" => &["Box<T>", "Stack", "Heap"],
+            "Rc<T> y Arc<T>" => &["Rc<T>", "Arc<T>", "Ownership"],
+            "RefCell<T>" => &["RefCell<T>", "borrow", "Runtime"],
+            "Rc<RefCell<T>>" => &["Rc", "RefCell", "Interior Mutability"],
+            "Deref y Drop" => &["Deref", "Drop", "Scope"],
+            "Threads" => &["thread::spawn", "move", "join"],
+            "Message Passing" => &["mpsc", "send", "recv"],
+            "Shared State" => &["Arc", "Mutex", "lock"],
+            "Send y Sync" => &["Send", "Sync", "Threads"],
+            "Data Race y bloqueo" => &["Data Race", "MutexGuard", "Deadlock"],
+            "async fn y .await" => &["async fn", "Future", ".await"],
+            "Future perezoso" => &["Future", "Pending", "I/O"],
+            "Tokio Runtime" => &["Tokio", "Runtime", "spawn"],
+            "join! y select!" => &["join!", "select!", "Timeout"],
+            "Async y Blocking" => &["Async", "Blocking", "spawn_blocking"],
             _ => &[subtitulo],
         };
         for tag in tags {
@@ -1224,6 +1253,35 @@ pub fn mostrar_reto_codelab_item(
             | "Generic Structs"
             | "impl Trait"
             | "Type Inference"
+            | "Dangling References"
+            | "Lifetime en Functions"
+            | "Lifetime Elision"
+            | "Lifetimes en Structs"
+            | "Lifetime 'static"
+            | "Unit Tests"
+            | "Assertions"
+            | "Integration Tests"
+            | "Doc-Tests"
+            | "Test Commands"
+            | "Package Structure"
+            | "Features"
+            | "Workspace Members"
+            | "Local Dependencies"
+            | "Box<T>"
+            | "Rc<T> y Arc<T>"
+            | "RefCell<T>"
+            | "Rc<RefCell<T>>"
+            | "Deref y Drop"
+            | "Threads"
+            | "Message Passing"
+            | "Shared State"
+            | "Send y Sync"
+            | "Data Race y bloqueo"
+            | "async fn y .await"
+            | "Future perezoso"
+            | "Tokio Runtime"
+            | "join! y select!"
+            | "Async y Blocking"
     ) {
         let introduccion = if titulo == "Stack & Copy Semantics" {
             "En esta parte aprenderás cómo Rust organiza valores simples en el Stack y qué ocurre cuando un valor puede copiarse automáticamente."
@@ -1295,6 +1353,64 @@ pub fn mostrar_reto_codelab_item(
             "En esta parte aprenderás una forma breve de recibir un valor que cumple un comportamiento conocido."
         } else if titulo == "Type Inference" {
             "En esta parte aprenderás cómo Rust deduce el tipo concreto de una llamada genérica cuando la información es suficiente."
+        } else if titulo == "Dangling References" {
+            "En esta parte aprenderás por qué una Reference no puede sobrevivir al valor que presta."
+        } else if titulo == "Lifetime en Functions" {
+            "En esta parte aprenderás a relacionar las References de entrada con la Reference que devuelve una Function."
+        } else if titulo == "Lifetime Elision" {
+            "En esta parte aprenderás cuándo Rust puede escribir los Lifetimes automáticamente."
+        } else if titulo == "Lifetimes en Structs" {
+            "En esta parte aprenderás a guardar una Reference dentro de una Struct sin superar la vida del dato original."
+        } else if titulo == "Lifetime 'static" {
+            "En esta parte aprenderás qué significa que una Reference sea válida durante todo el programa."
+        } else if titulo == "Unit Tests" {
+            "En esta parte aprenderás a comprobar una unidad pequeña del código junto a su implementación."
+        } else if titulo == "Assertions" {
+            "En esta parte aprenderás a expresar expectativas con las macros de aserción de Rust."
+        } else if titulo == "Integration Tests" {
+            "En esta parte aprenderás a probar la API pública de tu crate desde la carpeta tests/."
+        } else if titulo == "Doc-Tests" {
+            "En esta parte aprenderás a convertir ejemplos de documentación en pruebas ejecutables."
+        } else if titulo == "Test Commands" {
+            "En esta parte aprenderás a elegir el comando de Cargo adecuado para ejecutar e inspeccionar tus pruebas."
+        } else if titulo == "Package Structure" {
+            "En esta parte aprenderás a reconocer la estructura convencional de un Package de Cargo."
+        } else if titulo == "Features" {
+            "En esta parte aprenderás a activar código opcional durante la compilación mediante Features."
+        } else if titulo == "Workspace Members" {
+            "En esta parte aprenderás a agrupar varios paquetes bajo un Workspace común."
+        } else if titulo == "Local Dependencies" {
+            "En esta parte aprenderás a conectar dos crates propios mediante una dependencia path."
+        } else if titulo == "Box<T>" {
+            "En esta parte aprenderás a colocar un valor en el Heap conservando un propietario claro."
+        } else if titulo == "Rc<T> y Arc<T>" {
+            "En esta parte aprenderás a compartir Ownership con un contador adecuado al entorno."
+        } else if titulo == "RefCell<T>" {
+            "En esta parte aprenderás qué significa Interior Mutability y cuándo sus préstamos se comprueban en Runtime."
+        } else if titulo == "Rc<RefCell<T>>" {
+            "En esta parte aprenderás a combinar Ownership compartido y mutabilidad interior en un solo hilo."
+        } else if titulo == "Deref y Drop" {
+            "En esta parte aprenderás cómo un Smart Pointer accede a su valor y libera recursos al terminar su Scope."
+        } else if titulo == "Threads" {
+            "En esta parte aprenderás a iniciar un hilo y esperar su resultado de forma explícita."
+        } else if titulo == "Message Passing" {
+            "En esta parte aprenderás a comunicar Threads mediante un canal sin compartir directamente la memoria."
+        } else if titulo == "Shared State" {
+            "En esta parte aprenderás a compartir y proteger un dato con Arc y Mutex."
+        } else if titulo == "Send y Sync" {
+            "En esta parte aprenderás qué reglas permiten transferir o compartir valores entre Threads."
+        } else if titulo == "Data Race y bloqueo" {
+            "En esta parte aprenderás a mantener pequeños los bloqueos y a reconocer riesgos de Deadlock."
+        } else if titulo == "async fn y .await" {
+            "En esta parte aprenderás a describir una operación asíncrona y esperar su Future."
+        } else if titulo == "Future perezoso" {
+            "En esta parte aprenderás por qué un Future representa trabajo pendiente hasta que alguien lo conduce."
+        } else if titulo == "Tokio Runtime" {
+            "En esta parte aprenderás qué aporta Tokio para ejecutar tareas asíncronas."
+        } else if titulo == "join! y select!" {
+            "En esta parte aprenderás a esperar varios Futures o responder al primer evento disponible."
+        } else if titulo == "Async y Blocking" {
+            "En esta parte aprenderás a distinguir una espera asíncrona de una operación que bloquea el Runtime."
         } else {
             "En esta parte relacionarás las declaraciones mod con los archivos y carpetas que Rust busca dentro de src/."
         };
@@ -1470,6 +1586,64 @@ pub fn mostrar_reto_codelab_item(
             &["1. Trait como contrato", "2. Implementar comportamiento", "3. Parámetro impl Trait", "4. Alcance de la forma corta"]
         } else if titulo == "Type Inference" {
             &["1. Tipo temporal", "2. Inferir la llamada", "3. Mismo código, otro tipo"]
+        } else if titulo == "Dangling References" {
+            &["1. Dato original", "2. Fin del Scope", "3. Reference inválida"]
+        } else if titulo == "Lifetime en Functions" {
+            &["1. References de entrada", "2. Relación con 'a", "3. Reference de salida"]
+        } else if titulo == "Lifetime Elision" {
+            &["1. Escribir la relación", "2. Una Reference de entrada", "3. Regla automática"]
+        } else if titulo == "Lifetimes en Structs" {
+            &["1. Struct con Reference", "2. Declarar 'a", "3. Método prestado"]
+        } else if titulo == "Lifetime 'static" {
+            &["1. Literal", "2. Duración completa", "3. Reference local"]
+        } else if titulo == "Unit Tests" {
+            &["1. Función", "2. cfg(test)", "3. test"]
+        } else if titulo == "Assertions" {
+            &["1. assert!", "2. assert_eq!", "3. assert_ne!"]
+        } else if titulo == "Integration Tests" {
+            &["1. Carpeta tests/", "2. API pública", "3. Consumidor externo"]
+        } else if titulo == "Doc-Tests" {
+            &["1. Comentario ///", "2. Ejemplo", "3. cargo test"]
+        } else if titulo == "Test Commands" {
+            &["1. Suite completa", "2. Filtro", "3. Salida y tests ignorados"]
+        } else if titulo == "Package Structure" {
+            &["1. Cargo.toml", "2. lib.rs y main.rs", "3. src/bin/"]
+        } else if titulo == "Features" {
+            &["1. [features]", "2. cfg(feature)", "3. Activar"]
+        } else if titulo == "Workspace Members" {
+            &["1. Workspace", "2. members", "3. target compartido"]
+        } else if titulo == "Local Dependencies" {
+            &["1. crate vecino", "2. path", "3. API pública"]
+        } else if titulo == "Box<T>" {
+            &["1. Box<T>", "2. Heap", "3. Deref"]
+        } else if titulo == "Rc<T> y Arc<T>" {
+            &["1. Rc<T>", "2. strong_count", "3. Arc<T>"]
+        } else if titulo == "RefCell<T>" {
+            &["1. borrow", "2. borrow_mut", "3. Runtime"]
+        } else if titulo == "Rc<RefCell<T>>" {
+            &["1. Rc", "2. RefCell", "3. Combinación"]
+        } else if titulo == "Deref y Drop" {
+            &["1. Deref", "2. Valor interior", "3. Drop"]
+        } else if titulo == "Threads" {
+            &["1. spawn", "2. move", "3. join"]
+        } else if titulo == "Message Passing" {
+            &["1. channel", "2. send", "3. recv"]
+        } else if titulo == "Shared State" {
+            &["1. Arc", "2. Mutex", "3. Scope del guard"]
+        } else if titulo == "Send y Sync" {
+            &["1. Send", "2. Sync", "3. Límite del hilo"]
+        } else if titulo == "Data Race y bloqueo" {
+            &["1. Data Race", "2. Bloqueo", "3. Deadlock"]
+        } else if titulo == "async fn y .await" {
+            &["1. async fn", "2. Future", "3. await"]
+        } else if titulo == "Future perezoso" {
+            &["1. Crear Future", "2. Pending", "3. Esperar"]
+        } else if titulo == "Tokio Runtime" {
+            &["1. Runtime", "2. main", "3. spawn"]
+        } else if titulo == "join! y select!" {
+            &["1. join!", "2. select!", "3. Timeout"]
+        } else if titulo == "Async y Blocking" {
+            &["1. I/O", "2. Blocking", "3. spawn_blocking"]
         } else {
             &[
                 "1. mod y archivos",
@@ -1729,6 +1903,180 @@ pub fn mostrar_reto_codelab_item(
                 "fn identidad<T>(valor: T) -> T {\n    valor\n}",
                 "let numero = identidad(5);",
                 "let numero = identidad(5);\nlet texto = identidad(\"Rust\");",
+            ]
+        } else if titulo == "Dangling References" {
+            &[
+                "let referencia;",
+                "{\n    let dato = 5;\n    referencia = &dato;\n}",
+                "// referencia ya no es válida aquí",
+            ]
+        } else if titulo == "Lifetime en Functions" {
+            &[
+                "fn mas_largo<'a>(x: &'a str, y: &'a str) -> &'a str {\n    x\n}",
+                "fn mas_largo<'a>(x: &'a str, y: &'a str)",
+                "-> &'a str",
+            ]
+        } else if titulo == "Lifetime Elision" {
+            &[
+                "fn primera_palabra<'a>(texto: &'a str) -> &'a str {\n    texto\n}",
+                "fn primera_palabra(texto: &str) -> &str",
+                "// Rust aplica Lifetime Elision",
+            ]
+        } else if titulo == "Lifetimes en Structs" {
+            &[
+                "struct Extracto<'a> {\n    texto: &'a str,\n}",
+                "impl<'a> Extracto<'a> {\n    fn obtener(&self) -> &str {\n        self.texto\n    }\n}",
+                "let texto = String::from(\"Rust\");\nlet extracto = Extracto { texto: &texto };",
+            ]
+        } else if titulo == "Lifetime 'static" {
+            &[
+                "let mensaje: &'static str = \"Rust\";",
+                "// válido durante toda la ejecución",
+                "let local = String::from(\"texto\");\nlet vista: &str = &local;",
+            ]
+        } else if titulo == "Unit Tests" {
+            &[
+                "pub fn sumar(a: i32, b: i32) -> i32 {\n    a + b\n}",
+                "#[cfg(test)]\nmod tests {\n    use super::*;\n}",
+                "#[test]\nfn suma_dos_valores() {\n    assert_eq!(sumar(2, 3), 5);\n}",
+            ]
+        } else if titulo == "Assertions" {
+            &[
+                "assert!(10 > 2);",
+                "assert_eq!(2 + 2, 4);",
+                "assert_ne!(2 + 2, 5);",
+            ]
+        } else if titulo == "Integration Tests" {
+            &[
+                "tests/suma.rs",
+                "use mi_crate::sumar;",
+                "#[test]\nfn prueba_api() {\n    assert_eq!(sumar(1, 2), 3);\n}",
+            ]
+        } else if titulo == "Doc-Tests" {
+            &[
+                "/// Suma dos valores.",
+                "/// ```\n/// assert_eq!(mi_crate::sumar(2, 2), 4);\n/// ```",
+                "cargo test",
+            ]
+        } else if titulo == "Test Commands" {
+            &[
+                "cargo test",
+                "cargo test nombre_del_test",
+                "cargo test -- --nocapture\ncargo test -- --ignored",
+            ]
+        } else if titulo == "Package Structure" {
+            &[
+                "mi_proyecto/\n├── Cargo.toml\n└── src/",
+                "src/lib.rs\nsrc/main.rs",
+                "src/bin/cli.rs\ncargo run --bin cli",
+            ]
+        } else if titulo == "Features" {
+            &[
+                "[features]\njson = []",
+                "#[cfg(feature = \"json\")]\nfn habilitar_json() {}",
+                "cargo build --features json",
+            ]
+        } else if titulo == "Workspace Members" {
+            &[
+                "[workspace]",
+                "members = [\"crates/dominio\", \"crates/api\"]",
+                "# target/ y Cargo.lock compartidos",
+            ]
+        } else if titulo == "Local Dependencies" {
+            &[
+                "[dependencies]",
+                "dominio = { path = \"../dominio\" }",
+                "use dominio::Entidad;",
+            ]
+        } else if titulo == "Box<T>" {
+            &[
+                "let numero = Box::new(42);",
+                "let valor = *numero;",
+                "enum Lista {\n    Cons(i32, Box<Lista>),\n    Nil,\n}",
+            ]
+        } else if titulo == "Rc<T> y Arc<T>" {
+            &[
+                "let dato = Rc::new(String::from(\"Rust\"));",
+                "let copia = Rc::clone(&dato);",
+                "let total = Rc::strong_count(&dato);",
+            ]
+        } else if titulo == "RefCell<T>" {
+            &[
+                "let contador = RefCell::new(10);",
+                "let mut valor = contador.borrow_mut();",
+                "let lectura = contador.borrow();",
+            ]
+        } else if titulo == "Rc<RefCell<T>>" {
+            &[
+                "let estado = Rc::new(RefCell::new(0));",
+                "let copia = Rc::clone(&estado);",
+                "*copia.borrow_mut() += 1;",
+            ]
+        } else if titulo == "Deref y Drop" {
+            &[
+                "let dato = Box::new(String::from(\"Rust\"));",
+                "let referencia: &String = &dato;",
+                "// dato se libera al terminar su Scope",
+            ]
+        } else if titulo == "Threads" {
+            &[
+                "let handle = thread::spawn(|| 42);",
+                "let handle = thread::spawn(move || dato);",
+                "let resultado = handle.join().unwrap();",
+            ]
+        } else if titulo == "Message Passing" {
+            &[
+                "let (tx, rx) = mpsc::channel();",
+                "tx.send(\"mensaje\").unwrap();",
+                "let recibido = rx.recv().unwrap();",
+            ]
+        } else if titulo == "Shared State" {
+            &[
+                "let contador = Arc::new(Mutex::new(0));",
+                "let copia = Arc::clone(&contador);",
+                "let mut valor = copia.lock().unwrap();",
+            ]
+        } else if titulo == "Send y Sync" {
+            &[
+                "let mensaje = String::from(\"Rust\");",
+                "thread::spawn(move || {\n    let _ = mensaje;\n});",
+                "// Send permite transferir Ownership",
+            ]
+        } else if titulo == "Data Race y bloqueo" {
+            &[
+                "let guard = recurso.lock().unwrap();",
+                "// Mantén el guard durante poco tiempo",
+                "drop(guard);",
+            ]
+        } else if titulo == "async fn y .await" {
+            &[
+                "async fn obtener() -> String {\n    String::from(\"Rust\")\n}",
+                "let futuro = obtener();",
+                "let resultado = futuro.await;",
+            ]
+        } else if titulo == "Future perezoso" {
+            &[
+                "let futuro = obtener_datos();",
+                "// todavía está pendiente",
+                "let datos = futuro.await;",
+            ]
+        } else if titulo == "Tokio Runtime" {
+            &[
+                "#[tokio::main]\nasync fn main() {}",
+                "let tarea = tokio::spawn(async { 42 });",
+                "let resultado = tarea.await.unwrap();",
+            ]
+        } else if titulo == "join! y select!" {
+            &[
+                "let ambos = tokio::join!(tarea_a(), tarea_b());",
+                "tokio::select! {\n    valor = tarea_a() => { let _ = valor; }\n}",
+                "_ = tokio::time::sleep(duracion) => { }",
+            ]
+        } else if titulo == "Async y Blocking" {
+            &[
+                "let respuesta = cliente.get(url).send().await?;",
+                "// calcular() bloquea el hilo",
+                "tokio::task::spawn_blocking(|| calcular());",
             ]
         } else {
             &[

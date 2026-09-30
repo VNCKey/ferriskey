@@ -6,6 +6,7 @@ pub mod callout;
 pub mod card;
 pub mod code;
 pub mod modal;
+pub mod assessment;
 pub mod section;
 pub mod table;
 pub mod theme;
@@ -28,6 +29,8 @@ pub use code::{
 };
 #[allow(unused_imports)]
 pub use modal::{mostrar_modal_diagrama, parse_svg_dimensions};
+#[allow(unused_imports)]
+pub use assessment::{mostrar_evaluacion, SessionQuestion};
 #[allow(unused_imports)]
 pub use section::{codelab_cta_banner, codelab_notice, divider, section_heading, session_intro, session_title};
 #[allow(unused_imports)]

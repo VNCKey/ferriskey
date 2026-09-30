@@ -17,28 +17,32 @@ use crate::components::modals::{
 use crate::infrastructure::persistence::{SessionSnapshot, load_session, save_session};
 use crate::routes::AppRoute;
 use crate::state::{
-    DashboardState, EditorState, LessonsState, ProjectState, TerminalState, UiState,
+    EditorState, LessonsState, ProjectState, TerminalState, UiState,
 };
 use crate::views::conceptos::{ejecutar_cargo_run_proyecto, mostrar_comenzando};
 use crate::views::control_flujo::mostrar_tutorial_control_flujo;
-use crate::views::dashboard::mostrar_graficos;
+use crate::views::asincronia::mostrar_tutorial_asincronia;
+use crate::views::cargo_workspaces::mostrar_tutorial_cargo_workspaces;
+use crate::views::concurrencia::mostrar_tutorial_concurrencia;
 use crate::views::enums::mostrar_tutorial_enums;
 use crate::views::errores::mostrar_tutorial_errores;
 use crate::views::funciones::mostrar_tutorial_funciones;
 use crate::views::genericos::mostrar_tutorial_genericos;
 use crate::views::iteradores::mostrar_tutorial_iteradores;
 use crate::views::landing::mostrar_landing_page;
-use crate::views::lib::mostrar_referencia_tipos;
+use crate::views::lifetimes::mostrar_tutorial_lifetimes;
 use crate::views::memoria::mostrar_tutorial_strings_ownership;
 use crate::views::pilares::mostrar_tutorial_cargo;
 use crate::views::playground::{mostrar_editor, mostrar_editor_nube};
+use crate::views::proximamente::mostrar_proximamente;
+use crate::views::smart_pointers::mostrar_tutorial_smart_pointers;
 use crate::views::structs::mostrar_tutorial_structs;
+use crate::views::testing::mostrar_tutorial_testing;
 use crate::views::traits::mostrar_tutorial_traits;
 
 #[derive(Default)]
 pub struct AppState {
     pub ui: UiState,
-    pub dashboard: DashboardState,
     pub project: ProjectState,
     pub editor: EditorState,
     pub terminal: TerminalState,
@@ -478,6 +482,18 @@ impl eframe::App for AppState {
             AppRoute::TutorialEnums => crate::views::enums::mostrar_nav_superior(ui, self),
             AppRoute::TutorialGenericos => crate::views::genericos::mostrar_nav_superior(ui, self),
             AppRoute::TutorialTraits => crate::views::traits::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialLifetimes => crate::views::lifetimes::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialTesting => crate::views::testing::mostrar_nav_superior(ui, self),
+            AppRoute::TutorialCargoWorkspaces => {
+                crate::views::cargo_workspaces::mostrar_nav_superior(ui, self)
+            }
+            AppRoute::TutorialSmartPointers => {
+                crate::views::smart_pointers::mostrar_nav_superior(ui, self)
+            }
+            AppRoute::TutorialConcurrencia => {
+                crate::views::concurrencia::mostrar_nav_superior(ui, self)
+            }
+            AppRoute::TutorialAsync => crate::views::asincronia::mostrar_nav_superior(ui, self),
             _ => {}
         }
 
@@ -500,6 +516,12 @@ impl eframe::App for AppState {
             AppRoute::TutorialEnums => self.lessons.enums_tab == 4,
             AppRoute::TutorialGenericos => self.lessons.genericos_tab == 5,
             AppRoute::TutorialTraits => self.lessons.traits_tab == 3,
+            AppRoute::TutorialLifetimes => self.lessons.lifetimes_tab == 5,
+            AppRoute::TutorialTesting => self.lessons.testing_tab == 5,
+            AppRoute::TutorialCargoWorkspaces => self.lessons.cargo_workspaces_tab == 5,
+            AppRoute::TutorialSmartPointers => self.lessons.smart_pointers_tab == 5,
+            AppRoute::TutorialConcurrencia => self.lessons.concurrencia_tab == 5,
+            AppRoute::TutorialAsync => self.lessons.asincronia_tab == 5,
             _ => false,
         };
 
@@ -529,7 +551,6 @@ impl eframe::App for AppState {
             AppRoute::Comenzando => {
                 mostrar_comenzando(ui, self);
             }
-            AppRoute::LibTiposDatos => mostrar_referencia_tipos(ui, self),
             AppRoute::TutorialCompilacion => {
                 crate::views::pilares::pipeline::mostrar_tutorial_compilacion(ui, self)
             }
@@ -549,9 +570,15 @@ impl eframe::App for AppState {
                 crate::views::tipos_compuestos::mostrar_tutorial_tipos_compuestos(ui, self)
             }
             AppRoute::TutorialErrores => mostrar_tutorial_errores(ui, self),
-            AppRoute::TutorialTraits => mostrar_tutorial_traits(ui, self),
             AppRoute::TutorialGenericos => mostrar_tutorial_genericos(ui, self),
-            AppRoute::DashboardGraficos => mostrar_graficos(ui, self),
+            AppRoute::TutorialTraits => mostrar_tutorial_traits(ui, self),
+            AppRoute::TutorialLifetimes => mostrar_tutorial_lifetimes(ui, self),
+            AppRoute::TutorialTesting => mostrar_tutorial_testing(ui, self),
+            AppRoute::TutorialCargoWorkspaces => mostrar_tutorial_cargo_workspaces(ui, self),
+            AppRoute::TutorialSmartPointers => mostrar_tutorial_smart_pointers(ui, self),
+            AppRoute::TutorialConcurrencia => mostrar_tutorial_concurrencia(ui, self),
+            AppRoute::TutorialAsync => mostrar_tutorial_asincronia(ui, self),
+            AppRoute::Proximamente => mostrar_proximamente(ui, self),
             AppRoute::Playground => mostrar_editor(ui, self),
             AppRoute::PlaygroundNube => mostrar_editor_nube(ui, self),
         });

@@ -4,7 +4,7 @@ Bienvenido a la carpeta contenedora de sesiones de **FerrisKey**. Este índice c
 
 ---
 
-## 🧭 CURSO RUST COMPLETO (12 Sesiones Principales)
+## 🧭 CURSO RUST COMPLETO (18 Sesiones Integrales)
 
 | # | Menú en App | Nombre de Carpeta | Documentos |
 |---|-------------|-------------------|------------|
@@ -20,12 +20,9 @@ Bienvenido a la carpeta contenedora de sesiones de **FerrisKey**. Este índice c
 | **10** | `Error Handling` | [**10_error_handling**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/10_error_handling/CODE_LAB.md) |
 | **11** | `Generics` | [**11_generics**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/11_generics/CODE_LAB.md) |
 | **12** | `Traits` | [**12_traits**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/12_traits/CODE_LAB.md) |
-
----
-
-## 📚 LIB & PROYECTOS TÉCNICOS
-
-| # | Menú en App | Nombre de Carpeta | Documentos |
-|---|-------------|-------------------|------------|
-| **13** | `Tipos y métodos` | [**13_lib_tipos_metodos**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lib_tipos_metodos/CODE_LAB.md) |
-| **14** | `Visualización de Datos` | [**14_dashboard_proyectos**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_dashboard_proyectos/CODE_LAB.md) |
+| **13** | `Lifetimes` | [**13_lifetimes**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lifetimes/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lifetimes/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lifetimes/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/13_lifetimes/CODE_LAB.md) |
+| **14** | `Testing` | [**14_testing**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_testing/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_testing/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_testing/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/14_testing/CODE_LAB.md) |
+| **15** | `Cargo & Workspaces` | [**15_cargo_workspaces**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/15_cargo_workspaces/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/15_cargo_workspaces/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/15_cargo_workspaces/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/15_cargo_workspaces/CODE_LAB.md) |
+| **16** | `Smart Pointers` | [**16_smart_pointers**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/16_smart_pointers/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/16_smart_pointers/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/16_smart_pointers/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/16_smart_pointers/CODE_LAB.md) |
+| **17** | `Concurrency` | [**17_concurrency**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/17_concurrency/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/17_concurrency/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/17_concurrency/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/17_concurrency/CODE_LAB.md) |
+| **18** | `Async / Await` | [**18_async**](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/18_async/ROADMAP.md) | [Roadmap](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/18_async/ROADMAP.md) • [Teoría](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/18_async/TEORIA.md) • [Code Lab](file:///home/alek/VNC/repos/egui_vnc/docs/sesiones/18_async/CODE_LAB.md) |
